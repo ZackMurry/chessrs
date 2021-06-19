@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS users (
+    username VARCHAR(20) NOT NULL,
+    provider VARCHAR(32) NOT NULL
+);
