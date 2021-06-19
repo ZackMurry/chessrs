@@ -30,7 +30,7 @@ class OAuth2UserService(private val userDao: UserDao) : DefaultOAuth2UserService
         if (userRequest == null) {
             throw OAuth2AuthenticationProcessingException("User request is not found")
         }
-//        oAuth2User.attributes.keys.forEach { key -> println("$key: ${oAuth2User.attributes[key]}") }
+//        oAuth2User.attributes.keys.forEach { println("$it: ${oAuth2User.attributes[it]}") }
         val oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(userRequest.clientRegistration.registrationId, oAuth2User.attributes)
         val username = oAuth2UserInfo.getUsername()
         if (username == null || username.isBlank()) {
