@@ -1,8 +1,30 @@
 import { ChessInstance, Move, PieceType, Square } from 'chess.js'
-import { FC, useMemo } from 'react'
+import { FC, useEffect, useMemo, useState } from 'react'
 import { useDrop } from 'react-dnd'
+import { SelectedPiece } from './Chessboard'
 import ChessPiece from './ChessPiece'
 import squareIndexToCoordinates from './squareIndexToCoordinates'
+
+const isMoveMatching = (move: Move, position: string, pieceType: PieceType, origin: string) => {
+  if (move.from === origin && move.piece === pieceType && move.to === position) {
+    return true
+  }
+  // Check using startsWith() because it could be O-O-O# or something
+  if (move.san.startsWith('O-O-O')) {
+    if (move.color === 'w' && position === 'c1') {
+      return true
+    } else if (move.color === 'b' && position === 'c8') {
+      return true
+    }
+  } else if (move.san.startsWith('O-O')) {
+    if (move.color === 'w' && position === 'g1') {
+      return true
+    } else if (move.color === 'b' && position === 'g8') {
+      return true
+    }
+  }
+  return false
+}
 
 interface Props {
   x: number
@@ -11,6 +33,9 @@ interface Props {
   pieceColor?: 'w' | 'b'
   game: ChessInstance
   onMovedTo: () => void
+  onClick: (position: string) => void
+  selectedPiece: SelectedPiece
+  onPieceDrag: () => void
 }
 
 interface PlacedPiece {
@@ -19,32 +44,14 @@ interface PlacedPiece {
   color: 'w' | 'b'
 }
 
-const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo }) => {
+const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo, onClick, selectedPiece, onPieceDrag }) => {
+  const [canSelectedPieceMove, setCanSelectedPieceMove] = useState(false)
   const [{ canDrop }, drop] = useDrop(
     () => ({
       accept: ['k', 'q', 'r', 'n', 'b', 'p', 'K', 'Q', 'R', 'N', 'B', 'P'],
       canDrop: (item: PlacedPiece) => {
-        const isMoveMatching = (move: Move) => {
-          if (move.from === item.position && move.piece === item.type && move.color === item.color && move.to === position) {
-            return true
-          }
-          // Check using startsWith() because it could be O-O-O# or something
-          if (move.san.startsWith('O-O-O')) {
-            if (move.color === 'w' && position === 'c1') {
-              return true
-            } else if (move.color === 'b' && position === 'c8') {
-              return true
-            }
-          } else if (move.san.startsWith('O-O')) {
-            if (move.color === 'w' && position === 'g1') {
-              return true
-            } else if (move.color === 'b' && position === 'g8') {
-              return true
-            }
-          }
-          return false
-        }
-        const canDrop = game.moves({ verbose: true }).filter(isMoveMatching).length !== 0
+        const canDrop =
+          game.moves({ verbose: true }).filter(move => isMoveMatching(move, position, item.type, item.position)).length !== 0
         return canDrop
       },
       drop: (item: PlacedPiece) => {
@@ -62,29 +69,63 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo }) =>
   )
   const position = useMemo(() => squareIndexToCoordinates(x, y), [x, y])
   const squareColor = (x + y) % 2 === 1 ? '#f0d9b5' : '#b58863'
+  const handleClick = () => {
+    onClick(position)
+  }
+
+  useEffect(() => {
+    if (selectedPiece) {
+      setCanSelectedPieceMove(
+        game
+          .moves({ verbose: true })
+          .filter(move => isMoveMatching(move, position, selectedPiece.type, selectedPiece.position)).length !== 0
+      )
+    } else {
+      setCanSelectedPieceMove(false)
+    }
+  }, [selectedPiece, game, position])
+
+  const showValidMoveIndicator = canDrop || canSelectedPieceMove
+
   return (
     <div
       style={{
         backgroundColor: squareColor,
         width: 100,
-        height: 100,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
+        height: 100
       }}
       ref={drop}
+      onClick={handleClick}
     >
-      {canDrop && (
+      {showValidMoveIndicator && (
         <div
           style={{
-            background: 'radial-gradient(rgba(20,85,30,0.5) 19%, rgba(0,0,0,0) 20%)',
-            width: '100%',
-            height: '100%',
-            borderRadius: '50%'
+            background: piece
+              ? 'radial-gradient(transparent 0%, transparent 79%, rgba(20,85,0,0.3) 80%)'
+              : 'radial-gradient(rgba(20,85,30,0.5) 19%, rgba(0,0,0,0) 20%)',
+            width: 100,
+            height: 100,
+            borderRadius: piece ? undefined : '50%',
+            position: 'static',
+            left: 0,
+            top: 0,
+            // transform: 'translate(-50%, -50%)',
+            zIndex: 0
           }}
         />
       )}
-      {piece && pieceColor && <ChessPiece type={piece} color={pieceColor} size='90px' position={position} game={game} />}
+      {piece && pieceColor && (
+        <div style={{ marginTop: showValidMoveIndicator ? '-100%' : undefined }}>
+          <ChessPiece
+            type={piece}
+            color={pieceColor}
+            size='90px'
+            position={position}
+            game={game}
+            onDragStart={onPieceDrag}
+          />
+        </div>
+      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { ChessInstance, PieceType } from 'chess.js'
-import { FC } from 'react'
+import { FC, useEffect, useMemo } from 'react'
 import { useDrag } from 'react-dnd'
-import ChessPieceImage from './ChessPieceImage'
+import getImageByPiece from './getImageByPiece'
 
 interface Props {
   type: PieceType
@@ -9,10 +9,12 @@ interface Props {
   size: string
   position: string
   game: ChessInstance
+  onDragStart: () => void
 }
 
-const ChessPiece: FC<Props> = ({ type, color, size, position, game }) => {
-  const [, drag] = useDrag(
+const ChessPiece: FC<Props> = ({ type, color, size, position, game, onDragStart }) => {
+  const imageUrl = useMemo(() => getImageByPiece(type, color), [type, color])
+  const [{ isDragging }, drag] = useDrag(
     () => ({
       type: color === 'w' ? type.toUpperCase() : type,
       collect: monitor => ({
@@ -31,8 +33,18 @@ const ChessPiece: FC<Props> = ({ type, color, size, position, game }) => {
   )
 
   return (
-    <div ref={drag} style={{ cursor: 'pointer', userSelect: 'none' }}>
-      <ChessPieceImage color={color} type={type} size={size} />
+    <div
+      ref={drag}
+      style={{
+        cursor: 'pointer',
+        userSelect: 'none',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
+      onDragStart={onDragStart}
+    >
+      <div style={{ backgroundImage: `url(${imageUrl})`, backgroundSize: size, width: size, height: size }} />
     </div>
   )
 }
