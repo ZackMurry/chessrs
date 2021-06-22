@@ -1328,6 +1328,14 @@
   dependencies:
     "@chakra-ui/utils" "1.8.0"
 
+"@chakra-ui/icons@^1.0.13":
+  "integrity" "sha512-twDpFz2uPVboMTEI4QA2y3EJND3G4+/9AVs730fgnnfhTw4EOJt0Lhfm4Spq1qi1LgHF16x4/Lao1E2imB5lWw=="
+  "resolved" "https://registry.npmjs.org/@chakra-ui/icons/-/icons-1.0.13.tgz"
+  "version" "1.0.13"
+  dependencies:
+    "@chakra-ui/icon" "1.1.9"
+    "@types/react" "^17.0.0"
+
 "@chakra-ui/image@1.0.16":
   "integrity" "sha512-CrmT9HhnIawiQ4XiSz9O3tH1b0Hma2QQQzGyOQNrfiERxrG+m6pFaA1voCiK6e9RoDiRwcLeEPCg1tVus+AT2g=="
   "resolved" "https://registry.npmjs.org/@chakra-ui/image/-/image-1.0.16.tgz"

@@ -15,22 +15,20 @@ interface Props {
 
 const ChessPiece: FC<Props> = ({ type, color, size, position, game, onDragStart, minSize }) => {
   const imageUrl = useMemo(() => getImageByPiece(type, color), [type, color])
-  const [{ isDragging }, drag] = useDrag(
+  const [, drag] = useDrag(
     () => ({
       type: color === 'w' ? type.toUpperCase() : type,
-      collect: monitor => ({
-        isDragging: !!monitor.isDragging()
-      }),
       item: {
         position,
         color,
         type
       },
       canDrag: () => {
+        console.log('can drag called')
         return (color === 'w') !== (game.turn() === 'b')
       }
     }),
-    []
+    [game]
   )
 
   return (

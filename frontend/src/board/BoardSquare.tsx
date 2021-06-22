@@ -50,30 +50,29 @@ interface PlacedPiece {
 const MIN_SQUARE_LENGTH = 20
 
 const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo, onClick, selectedPiece, onPieceDrag, size }) => {
+  const position = useMemo(() => squareIndexToCoordinates(x, y), [x, y])
   const [canSelectedPieceMove, setCanSelectedPieceMove] = useState(false)
   const [{ canDrop }, drop] = useDrop(
     () => ({
       accept: ['k', 'q', 'r', 'n', 'b', 'p', 'K', 'Q', 'R', 'N', 'B', 'P'],
       canDrop: (item: PlacedPiece) => {
-        const canDrop =
+        return (
           game.moves({ verbose: true }).filter(move => isMoveMatching(move, position, item.type, item.position)).length !== 0
-        return canDrop
+        )
       },
       drop: (item: PlacedPiece) => {
         const move = {
           from: item.position as Square,
           to: position as Square
         }
-        game.move(move)
         onMovedTo(move)
       },
       collect: monitor => ({
         canDrop: monitor.canDrop()
       })
     }),
-    []
+    [game]
   )
-  const position = useMemo(() => squareIndexToCoordinates(x, y), [x, y])
   const squareColor = (x + y) % 2 === 1 ? '#f0d9b5' : '#b58863'
   const handleClick = () => {
     onClick(position)
