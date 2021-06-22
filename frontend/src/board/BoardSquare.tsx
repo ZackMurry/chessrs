@@ -1,6 +1,7 @@
 import { ChessInstance, Move, PieceType, Square } from 'chess.js'
 import { FC, useEffect, useMemo, useState } from 'react'
 import { useDrop } from 'react-dnd'
+import { ShortMove } from 'chess.js'
 import { SelectedPiece } from './Chessboard'
 import ChessPiece from './ChessPiece'
 import squareIndexToCoordinates from './squareIndexToCoordinates'
@@ -32,10 +33,11 @@ interface Props {
   piece?: PieceType
   pieceColor?: 'w' | 'b'
   game: ChessInstance
-  onMovedTo: () => void
+  onMovedTo: (move: ShortMove) => void
   onClick: (position: string) => void
   selectedPiece: SelectedPiece
   onPieceDrag: () => void
+  size: number
 }
 
 interface PlacedPiece {
@@ -44,7 +46,10 @@ interface PlacedPiece {
   color: 'w' | 'b'
 }
 
-const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo, onClick, selectedPiece, onPieceDrag }) => {
+// const squareLength = 5
+const MIN_SQUARE_LENGTH = 20
+
+const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo, onClick, selectedPiece, onPieceDrag, size }) => {
   const [canSelectedPieceMove, setCanSelectedPieceMove] = useState(false)
   const [{ canDrop }, drop] = useDrop(
     () => ({
@@ -55,11 +60,12 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo, onCl
         return canDrop
       },
       drop: (item: PlacedPiece) => {
-        game.move({
+        const move = {
           from: item.position as Square,
           to: position as Square
-        })
-        onMovedTo()
+        }
+        game.move(move)
+        onMovedTo(move)
       },
       collect: monitor => ({
         canDrop: monitor.canDrop()
@@ -91,8 +97,8 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo, onCl
     <div
       style={{
         backgroundColor: squareColor,
-        width: 100,
-        height: 100
+        width: `${size}vw`,
+        height: `${size}vw`
       }}
       ref={drop}
       onClick={handleClick}
@@ -103,8 +109,10 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo, onCl
             background: piece
               ? 'radial-gradient(transparent 0%, transparent 79%, rgba(20,85,0,0.3) 80%)'
               : 'radial-gradient(rgba(20,85,30,0.5) 19%, rgba(0,0,0,0) 20%)',
-            width: 100,
-            height: 100,
+            width: `${size}vw`,
+            height: `${size}vw`,
+            minWidth: MIN_SQUARE_LENGTH,
+            minHeight: MIN_SQUARE_LENGTH,
             borderRadius: piece ? undefined : '50%',
             position: 'static',
             left: 0,
@@ -119,7 +127,8 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo, onCl
           <ChessPiece
             type={piece}
             color={pieceColor}
-            size='90px'
+            size={`${(9 * size) / 10}vw`}
+            minSize={`${(9 * MIN_SQUARE_LENGTH) / 10}px`}
             position={position}
             game={game}
             onDragStart={onPieceDrag}

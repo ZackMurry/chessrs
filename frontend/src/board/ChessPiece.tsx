@@ -10,9 +10,10 @@ interface Props {
   position: string
   game: ChessInstance
   onDragStart: () => void
+  minSize: string
 }
 
-const ChessPiece: FC<Props> = ({ type, color, size, position, game, onDragStart }) => {
+const ChessPiece: FC<Props> = ({ type, color, size, position, game, onDragStart, minSize }) => {
   const imageUrl = useMemo(() => getImageByPiece(type, color), [type, color])
   const [{ isDragging }, drag] = useDrag(
     () => ({
@@ -44,7 +45,16 @@ const ChessPiece: FC<Props> = ({ type, color, size, position, game, onDragStart 
       }}
       onDragStart={onDragStart}
     >
-      <div style={{ backgroundImage: `url(${imageUrl})`, backgroundSize: size, width: size, height: size }} />
+      <div
+        style={{
+          backgroundImage: `url(${imageUrl})`,
+          backgroundSize: size,
+          width: size,
+          height: size,
+          minWidth: minSize,
+          minHeight: minSize
+        }}
+      />
     </div>
   )
 }
