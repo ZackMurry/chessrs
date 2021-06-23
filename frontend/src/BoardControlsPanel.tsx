@@ -7,9 +7,11 @@ interface Props {
   pgn: string
   onBack: () => void
   onForward: () => void
+  canGoBack: boolean
+  canGoForward: boolean
 }
 
-const BoardControlsPanel: FC<Props> = ({ pgn, onBack, onForward }) => (
+const BoardControlsPanel: FC<Props> = ({ pgn, onBack, onForward, canGoBack, canGoForward }) => (
   <Flex
     flexDir='column'
     justifyContent='space-between'
@@ -24,8 +26,8 @@ const BoardControlsPanel: FC<Props> = ({ pgn, onBack, onForward }) => (
       <Text fontSize='lg'>{pgn}</Text>
     </Box>
     <Flex>
-      <IconButton icon={<ChevronLeftIcon />} aria-label='Back' onClick={onBack} />
-      <IconButton icon={<ChevronRightIcon />} aria-label='Advance forward' onClick={onForward} />
+      <IconButton icon={<ChevronLeftIcon />} aria-label='Back' onClick={onBack} disabled={!canGoBack} />
+      <IconButton icon={<ChevronRightIcon />} aria-label='Advance forward' onClick={onForward} disabled={!canGoForward} />
     </Flex>
   </Flex>
 )

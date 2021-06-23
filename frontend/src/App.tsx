@@ -7,6 +7,7 @@ import { Box, ChakraProvider, Grid, GridItem, Stack } from '@chakra-ui/react'
 import theme from './theme'
 import BoardControlsPanel from './BoardControlsPanel'
 import ChessJS, { ShortMove } from 'chess.js'
+import { PGN } from './pgnParser'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
@@ -14,18 +15,41 @@ const chess = new Chess()
 
 function App() {
   const [pgn, setPgn] = useState('')
+  const [moves, setMoves] = useState<string[]>([])
   const [currentFen, setCurrentFen] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+  const [currentHalfMove, setCurrentHalfMove] = useState(0) // Keeps track of half-moves played
 
   const handleMove = (move: ShortMove) => {
     chess.move(move)
-    setPgn(chess.pgn())
+    const newPgn = chess.pgn()
+    const parsedPgn = new PGN(newPgn)
+    setPgn(newPgn)
     setCurrentFen(chess.fen())
+    setCurrentHalfMove(currentHalfMove + 1)
+    setMoves(parsedPgn.get().moves)
   }
 
   const handleBack = () => {
+    if (currentHalfMove <= 0) {
+      return
+    }
     chess.undo()
     setCurrentFen(chess.fen())
+    setCurrentHalfMove(currentHalfMove - 1)
   }
+
+  const handleForward = () => {
+    if (moves.length <= currentHalfMove) {
+      return
+    }
+    console.log('making move', moves[currentHalfMove])
+    chess.move(moves[currentHalfMove])
+    setCurrentHalfMove(currentHalfMove + 1)
+    setCurrentFen(chess.fen())
+    console.log(chess.fen())
+  }
+
+  console.log(moves.length > currentHalfMove)
 
   return (
     <ChakraProvider theme={theme}>
@@ -51,7 +75,13 @@ function App() {
             padding={{ base: '1%', lg: '10%' }}
           >
             {/* todo: implement moving forward through the game */}
-            <BoardControlsPanel pgn={pgn} onForward={() => console.log('forward')} onBack={handleBack} />
+            <BoardControlsPanel
+              pgn={pgn}
+              onForward={handleForward}
+              onBack={handleBack}
+              canGoBack={currentHalfMove > 0}
+              canGoForward={moves.length > currentHalfMove}
+            />
           </GridItem>
         </Grid>
       </DndProvider>

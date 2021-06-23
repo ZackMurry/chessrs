@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react'
-import ChessJS, { ChessInstance, PieceType, Square } from 'chess.js'
+import ChessJS, { PieceType, Square } from 'chess.js'
 import BoardSquare from './BoardSquare'
 import { Flex } from '@chakra-ui/layout'
 import { useBreakpointValue } from '@chakra-ui/media-query'
@@ -16,9 +16,7 @@ interface Props {
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
-// let chess = new Chess()
-
-// todo indicator to show where the last move was from/to. this also removes the need for the fen state
+// todo indicator to show where the last move was from/to
 const Chessboard: FC<Props> = ({ onMove, fen }) => {
   const squareLength = useBreakpointValue({ base: 12, md: 9, xl: 4 })
   const [selectedPiece, setSelectedPiece] = useState<SelectedPiece | null>(null)
@@ -26,8 +24,6 @@ const Chessboard: FC<Props> = ({ onMove, fen }) => {
 
   useEffect(() => {
     setChess(new Chess(fen))
-    const newChess = new Chess(fen)
-    console.log(fen, 'turn: ', newChess.turn())
   }, [fen])
 
   const handleSquareClick = (position: string, type?: PieceType, color?: 'b' | 'w') => {
