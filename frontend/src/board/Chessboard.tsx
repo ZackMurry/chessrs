@@ -3,52 +3,22 @@ import ChessJS, { PieceType, Square } from 'chess.js'
 import BoardSquare from './BoardSquare'
 import { Flex } from '@chakra-ui/layout'
 import { useBreakpointValue } from '@chakra-ui/media-query'
+import { useAppDispatch, useAppSelector } from '../hooks'
+import { makeMove } from './boardSlice'
 
-export interface SelectedPiece {
-  position: string
-  type: PieceType
-}
-
-interface Props {
-  onMove: (move: ChessJS.ShortMove) => void
-  fen: string
-}
+interface Props {}
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 // todo indicator to show where the last move was from/to
-const Chessboard: FC<Props> = ({ onMove, fen }) => {
+const Chessboard: FC<Props> = () => {
   const squareLength = useBreakpointValue({ base: 12, md: 9, xl: 4 })
-  const [selectedPiece, setSelectedPiece] = useState<SelectedPiece | null>(null)
   const [chess, setChess] = useState(() => new Chess())
+  const position = useAppSelector(state => state.board.fen)
 
   useEffect(() => {
-    setChess(new Chess(fen))
-  }, [fen])
-
-  const handleSquareClick = (position: string, type?: PieceType, color?: 'b' | 'w') => {
-    if (selectedPiece) {
-      const move = {
-        from: selectedPiece.position as Square,
-        to: position as Square
-      }
-      onMove(move)
-      setSelectedPiece(null)
-    } else if (type) {
-      setSelectedPiece({
-        type,
-        position
-      })
-    } else {
-      setSelectedPiece(null)
-    }
-  }
-
-  const handleDragMove = (move: ChessJS.ShortMove) => {
-    console.log('drag move')
-    // setTimeout(() => onMove(move), 0)
-    onMove(move)
-  }
+    setChess(new Chess(position))
+  }, [position])
 
   return (
     <Flex w='100%' h='100%' justifyContent='center' alignItems='center' flexDir='column'>
@@ -62,10 +32,6 @@ const Chessboard: FC<Props> = ({ onMove, fen }) => {
               pieceColor={square?.color}
               key={`square@(${j},${7 - i})`}
               game={chess}
-              onMovedTo={handleDragMove}
-              onClick={position => handleSquareClick(position, square?.type, square?.color)}
-              selectedPiece={selectedPiece}
-              onPieceDrag={() => setSelectedPiece(null)}
               size={squareLength}
             />
           ))}

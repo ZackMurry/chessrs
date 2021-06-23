@@ -1,10 +1,11 @@
-import { ChessInstance, Move, PieceType, Square } from 'chess.js'
+import { ChessInstance, Move, PieceType } from 'chess.js'
 import { FC, useEffect, useMemo, useState } from 'react'
 import { useDrop } from 'react-dnd'
 import { ShortMove } from 'chess.js'
-import { SelectedPiece } from './Chessboard'
 import ChessPiece from './ChessPiece'
 import squareIndexToCoordinates from './squareIndexToCoordinates'
+import { useAppDispatch, useAppSelector } from '../hooks'
+import { makeMove, selectPiece, unselectPiece } from './boardSlice'
 
 const isMoveMatching = (move: Move, position: string, pieceType: PieceType, origin: string) => {
   if (move.from === origin && move.piece === pieceType && move.to === position) {
@@ -33,10 +34,6 @@ interface Props {
   piece?: PieceType
   pieceColor?: 'w' | 'b'
   game: ChessInstance
-  onMovedTo: (move: ShortMove) => void
-  onClick: (position: string) => void
-  selectedPiece: SelectedPiece
-  onPieceDrag: () => void
   size: number
 }
 
@@ -49,23 +46,23 @@ interface PlacedPiece {
 // const squareLength = 5
 const MIN_SQUARE_LENGTH = 20
 
-const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo, onClick, selectedPiece, onPieceDrag, size }) => {
-  const position = useMemo(() => squareIndexToCoordinates(x, y), [x, y])
+const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
+  const dispatch = useAppDispatch()
+  const squarePosition = useMemo(() => squareIndexToCoordinates(x, y), [x, y])
+  const selectedPiece = useAppSelector(state => state.board.selectedPiece)
   const [canSelectedPieceMove, setCanSelectedPieceMove] = useState(false)
   const [{ canDrop }, drop] = useDrop(
     () => ({
       accept: ['k', 'q', 'r', 'n', 'b', 'p', 'K', 'Q', 'R', 'N', 'B', 'P'],
       canDrop: (item: PlacedPiece) => {
         return (
-          game.moves({ verbose: true }).filter(move => isMoveMatching(move, position, item.type, item.position)).length !== 0
+          game.moves({ verbose: true }).filter(move => isMoveMatching(move, squarePosition, item.type, item.position))
+            .length !== 0
         )
       },
       drop: (item: PlacedPiece) => {
-        const move = {
-          from: item.position as Square,
-          to: position as Square
-        }
-        onMovedTo(move)
+        const strMove = `${item.position}-${squarePosition}`
+        dispatch(makeMove(strMove))
       },
       collect: monitor => ({
         canDrop: monitor.canDrop()
@@ -75,20 +72,28 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo, onCl
   )
   const squareColor = (x + y) % 2 === 1 ? '#f0d9b5' : '#b58863'
   const handleClick = () => {
-    onClick(position)
+    if (selectedPiece !== null) {
+      const move = `${selectedPiece.position}-${squarePosition}`
+      dispatch(makeMove(move))
+      dispatch(unselectPiece())
+    } else if (piece) {
+      dispatch(selectPiece({ position: squarePosition, type: piece }))
+    } else {
+      dispatch(unselectPiece())
+    }
   }
 
   useEffect(() => {
-    if (selectedPiece) {
+    if (selectedPiece !== null) {
       setCanSelectedPieceMove(
         game
           .moves({ verbose: true })
-          .filter(move => isMoveMatching(move, position, selectedPiece.type, selectedPiece.position)).length !== 0
+          .filter(move => isMoveMatching(move, squarePosition, selectedPiece.type, selectedPiece.position)).length !== 0
       )
     } else {
       setCanSelectedPieceMove(false)
     }
-  }, [selectedPiece, game, position])
+  }, [selectedPiece, game, squarePosition])
 
   const showValidMoveIndicator = canDrop || canSelectedPieceMove
 
@@ -128,9 +133,9 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, onMovedTo, onCl
             color={pieceColor}
             size={`${(9 * size) / 10}vw`}
             minSize={`${(9 * MIN_SQUARE_LENGTH) / 10}px`}
-            position={position}
+            position={squarePosition}
             game={game}
-            onDragStart={onPieceDrag}
+            onDragStart={() => dispatch(unselectPiece())}
           />
         </div>
       )}
