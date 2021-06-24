@@ -1,3 +1,4 @@
+// todo unit tests
 const getFirstMovesOfPgn = (currentPgn: string, numHalfMoves: number) => {
   let numCharsInSubstring = 0
   for (let i = 0; i < numHalfMoves; i++) {

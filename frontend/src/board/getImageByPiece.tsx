@@ -11,7 +11,6 @@ import blackRookSvg from './blackRook.svg'
 import blackKnightSvg from './blackKnight.svg'
 import blackBishopSvg from './blackBishop.svg'
 import blackPawnSvg from './blackPawn.svg'
-import whitePawnPng from './whitePawn.png'
 
 const getImageByPiece = (type: PieceType, color: 'w' | 'b') => {
   if (color === 'w') {
