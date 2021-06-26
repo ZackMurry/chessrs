@@ -7,6 +7,7 @@ import theme from './theme'
 import BoardControlsPanel from './BoardControlsPanel'
 import { Provider } from 'react-redux'
 import store from './store'
+import AnalysisPanel from './analysis/AnalysisPanel'
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
             gap={{ base: 0, md: 4 }}
           >
             <GridItem colSpan={{ base: 12, xl: 4 }} rowSpan={1} padding={{ base: '1%', xl: '10%' }}>
-              <Box bg='gray.700' w='100%' h='100%' />
+              <AnalysisPanel />
             </GridItem>
             <GridItem colSpan={{ base: 12, md: 9, xl: 4 }} rowSpan={{ base: 3, md: 4, xl: 1 }}>
               <Chessboard />

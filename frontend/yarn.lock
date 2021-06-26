@@ -2077,6 +2077,11 @@
     "@types/yargs" "^15.0.0"
     "chalk" "^4.0.0"
 
+"@lubert/node-uci-engine@^1.8.0":
+  "integrity" "sha512-wqnFKPNkNEAWxFEKO3Mwm89q+TiYNBLZZFC8tscQ5s1f22pOHS02WSc7erY/7c8Oi4aJeyb7qwlvlUq60KxL1A=="
+  "resolved" "https://registry.npmjs.org/@lubert/node-uci-engine/-/node-uci-engine-1.8.0.tgz"
+  "version" "1.8.0"
+
 "@nodelib/fs.scandir@2.1.4":
   "integrity" "sha512-33g3pMJk3bg5nXbL/+CY6I2eJDzZAni49PfJnL5fghPTggPvBd/pFNSgJsdAgWptuFu7qq/ERvOYFlhvsLTCKA=="
   "resolved" "https://registry.npmjs.org/@nodelib/fs.scandir/-/fs.scandir-2.1.4.tgz"

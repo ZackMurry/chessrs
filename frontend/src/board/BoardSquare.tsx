@@ -61,7 +61,7 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
         )
       },
       drop: (item: PlacedPiece) => {
-        const strMove = `${item.position}-${squarePosition}`
+        const strMove = `${item.position}${squarePosition}`
         dispatch(makeMove(strMove))
       },
       collect: monitor => ({
@@ -73,7 +73,7 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
   const squareColor = (x + y) % 2 === 1 ? '#f0d9b5' : '#b58863'
   const handleClick = () => {
     if (selectedPiece !== null) {
-      const move = `${selectedPiece.position}-${squarePosition}`
+      const move = `${selectedPiece.position}${squarePosition}`
       dispatch(makeMove(move))
       dispatch(unselectPiece())
     } else if (piece) {

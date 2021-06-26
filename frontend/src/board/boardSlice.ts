@@ -2,7 +2,6 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import ChessJS, { PieceType } from 'chess.js'
 import appendMoveToPgn from '../appendMoveToPgn'
 import getFirstMovesOfPgn from '../getFirstMovesOfPgn'
-import { PGN } from '../pgnParser'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
@@ -16,6 +15,7 @@ interface BoardState {
   pgn: string
   halfMoveCount: number
   history: string[]
+  moveHistory: string[]
   selectedPiece: SelectedPiece | null
 }
 
@@ -26,7 +26,8 @@ const initialState = {
   pgn: '',
   halfMoveCount: 0,
   history: [STARTING_FEN], // History of FENs
-  selectedPiece: null
+  selectedPiece: null,
+  moveHistory: []
 } as BoardState
 
 export const boardSlice = createSlice({
@@ -43,20 +44,25 @@ export const boardSlice = createSlice({
       const fen = game.fen()
       let newHistory = [...state.history]
       let newPgn: string
+      let newMoveHistory = [...state.moveHistory]
       // If history is being overwritten
       if (state.history.length - 1 > state.halfMoveCount) {
         newHistory = newHistory.slice(0, state.halfMoveCount + 1)
         const subPgn = getFirstMovesOfPgn(state.pgn, state.halfMoveCount)
         newPgn = appendMoveToPgn(subPgn, move.san, state.halfMoveCount)
+        newMoveHistory = newMoveHistory.slice(0, state.halfMoveCount + 1)
       } else {
         newPgn = appendMoveToPgn(state.pgn, move.san, state.halfMoveCount)
+        newMoveHistory.push(action.payload)
       }
+      console.log('new: ', newMoveHistory)
       return {
         ...state,
         fen,
         pgn: newPgn,
         halfMoveCount: state.halfMoveCount + 1,
-        history: [...newHistory, fen]
+        history: [...newHistory, fen],
+        moveHistory: newMoveHistory
       }
     },
     selectPiece: (state, action: PayloadAction<SelectedPiece>) => {
