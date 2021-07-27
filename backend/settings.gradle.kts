@@ -1,1 +1,1 @@
-rootProject.name = "oneline"
+rootProject.name = "chessrs"

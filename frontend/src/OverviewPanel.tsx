@@ -1,6 +1,6 @@
-import { Flex, Text } from '@chakra-ui/layout'
+import { Text } from '@chakra-ui/layout'
 import { Box, Button } from '@chakra-ui/react'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { updateLichessGames, updateOpening } from './board/boardSlice'
 import { useAppSelector } from './hooks'
@@ -49,24 +49,24 @@ const OverviewPanel: FC = () => {
         Add {lastMove || 'Move'} (A)
       </Button>
       {opening && (
-        <Text fontSize='18px' fontWeight='bold' mt='20px'>
+        <Text fontSize='18px' fontWeight='bold' mt='20px' color='whiteText'>
           {opening.name} <span style={{ fontWeight: 'normal' }}>{opening.eco}</span>
         </Text>
       )}
-      <Text fontSize='18px' fontWeight='bold' mb='5px' mt='25px'>
-        Times Reached:
+      <Text fontSize='18px' fontWeight='bold' mb='5px' mt='25px' color='whiteText'>
+        Times Reached
       </Text>
-      <Text fontSize='16px' mb='3px'>
+      <Text fontSize='16px' mb='3px' color='whiteText'>
         Lichess games: {lichessGamesInPosition}
       </Text>
       {commonMoves.length > 0 && (
         <>
-          <Text fontSize='18px' fontWeight='bold' mb='5px' mt='20px'>
-            Most Common Moves:
+          <Text fontSize='18px' fontWeight='bold' mb='5px' mt='20px' color='whiteText'>
+            Most Common Moves
           </Text>
           {/* todo: show some stats about the moves */}
           {commonMoves.map(m => (
-            <Text fontSize='16px' mb='1px' key={m}>
+            <Text fontSize='16px' mb='1px' key={m} color='whiteText'>
               {m}
             </Text>
           ))}

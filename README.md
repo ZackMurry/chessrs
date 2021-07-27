@@ -1,2 +1,3 @@
-# oneline
-Why learn multiple chess lines?
+# ChesSRS
+Learn chess openings using spaced repetition
+

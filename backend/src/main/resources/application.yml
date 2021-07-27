@@ -1,6 +1,6 @@
 app:
   datasource:
-    jdbc-url: jdbc:postgresql://localhost:5432/oneline
+    jdbc-url: jdbc:postgresql://localhost:5432/chessrs
     username: ${POSTGRES_USERNAME} # PostgreSQL username
     password: ${POSTGRES_PASSWORD} # PostgreSQL password
     pool-size: 30
@@ -14,8 +14,8 @@ spring:
       client:
         registration:
           lichess:
-            client-id: ${ONELINE_LICHESS_CLIENT_ID}
-            client-secret: ${ONELINE_LICHESS_CLIENT_SECRET}
+            client-id: ${CHESSRS_LICHESS_CLIENT_ID}
+            client-secret: ${CHESSRS_LICHESS_CLIENT_SECRET}
             redirect-uri: http://localhost/api/v1/oauth2/callback/lichess
             authorization-grant-type: authorization_code
         provider:
