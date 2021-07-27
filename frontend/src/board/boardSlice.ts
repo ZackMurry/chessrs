@@ -10,6 +10,27 @@ export interface SelectedPiece {
   type: PieceType
 }
 
+interface Opening {
+  eco: string
+  name: string
+}
+
+interface LichessAPIMove {
+  uci: string
+  san: string
+  white: number
+  draws: number
+  black: number
+  averageRating: number
+}
+
+interface LichessGames {
+  white: number
+  draws: number
+  black: number
+  moves: LichessAPIMove[]
+}
+
 interface BoardState {
   fen: string
   pgn: string
@@ -17,6 +38,10 @@ interface BoardState {
   history: string[]
   moveHistory: string[]
   selectedPiece: SelectedPiece | null
+  opening?: Opening
+  games: {
+    lichess: LichessGames
+  }
 }
 
 const STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -27,7 +52,16 @@ const initialState = {
   halfMoveCount: 0,
   history: [STARTING_FEN], // History of FENs
   selectedPiece: null,
-  moveHistory: []
+  moveHistory: [],
+  games: {
+    lichess: {
+      // todo: probably want to have a caching system for at least some of the data
+      white: 19598901,
+      draws: 1843985,
+      black: 18101922,
+      moves: []
+    }
+  }
 } as BoardState
 
 export const boardSlice = createSlice({
@@ -88,10 +122,20 @@ export const boardSlice = createSlice({
         halfMoveCount: state.halfMoveCount + 1,
         fen: state.history[state.halfMoveCount + 1]
       }
+    },
+    updateLichessGames: (state, action: PayloadAction<LichessGames>) => {
+      return {
+        ...state,
+        games: {
+          ...state.games,
+          lichess: action.payload
+        }
+      }
     }
   }
 })
 
-export const { makeMove, selectPiece, unselectPiece, traverseBackwards, traverseForwards } = boardSlice.actions
+export const { makeMove, selectPiece, unselectPiece, traverseBackwards, traverseForwards, updateLichessGames } =
+  boardSlice.actions
 
 export default boardSlice.reducer

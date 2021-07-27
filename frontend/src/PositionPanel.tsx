@@ -61,6 +61,7 @@ const PositionPanel: FC = () => {
   const dispatch = useAppDispatch()
 
   const whitePerspectiveEvaluation = evaluation * (moveHistory.length % 2 === 0 ? 1 : -1)
+
   return (
     <Flex
       flexDir='column'

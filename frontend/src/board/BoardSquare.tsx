@@ -5,7 +5,7 @@ import { ShortMove } from 'chess.js'
 import ChessPiece from './ChessPiece'
 import squareIndexToCoordinates from './squareIndexToCoordinates'
 import { useAppDispatch, useAppSelector } from '../hooks'
-import { makeMove, selectPiece, unselectPiece } from './boardSlice'
+import { makeMove, selectPiece, unselectPiece, updateLichessGames } from './boardSlice'
 
 const isMoveMatching = (move: Move, position: string, pieceType: PieceType, origin: string) => {
   if (move.from === origin && move.piece === pieceType && move.to === position) {
@@ -51,6 +51,8 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
   const squarePosition = useMemo(() => squareIndexToCoordinates(x, y), [x, y])
   const selectedPiece = useAppSelector(state => state.board.selectedPiece)
   const [canSelectedPieceMove, setCanSelectedPieceMove] = useState(false)
+  const fen = useAppSelector(state => state.board.fen)
+
   const [{ canDrop }, drop] = useDrop(
     () => ({
       accept: ['k', 'q', 'r', 'n', 'b', 'p', 'K', 'Q', 'R', 'N', 'B', 'P'],
