@@ -131,11 +131,27 @@ export const boardSlice = createSlice({
           lichess: action.payload
         }
       }
+    },
+    updateOpening: (state, action: PayloadAction<Opening>) => {
+      if (!action.payload) {
+        return state
+      }
+      return {
+        ...state,
+        opening: action.payload
+      }
     }
   }
 })
 
-export const { makeMove, selectPiece, unselectPiece, traverseBackwards, traverseForwards, updateLichessGames } =
-  boardSlice.actions
+export const {
+  makeMove,
+  selectPiece,
+  unselectPiece,
+  traverseBackwards,
+  traverseForwards,
+  updateLichessGames,
+  updateOpening
+} = boardSlice.actions
 
 export default boardSlice.reducer
