@@ -1,18 +1,18 @@
 import { FC, useEffect, useState } from 'react'
-import ChessJS, { PieceType, Square } from 'chess.js'
+import ChessJS from 'chess.js'
 import BoardSquare from './BoardSquare'
 import { Flex } from '@chakra-ui/layout'
 import { useBreakpointValue } from '@chakra-ui/media-query'
-import { useAppDispatch, useAppSelector } from '../hooks'
-import { makeMove } from './boardSlice'
+import { useAppSelector } from '../hooks'
 
 interface Props {}
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 // todo indicator to show where the last move was from/to
+// todo: clicking off board should unselect the currently selected piece
 const Chessboard: FC<Props> = () => {
-  const squareLength = useBreakpointValue({ base: 12, md: 9, xl: 4 })
+  const squareLength = useBreakpointValue({ base: 12, md: 9, xl: 5.2 })
   const [chess, setChess] = useState(() => new Chess())
   const position = useAppSelector(state => state.board.fen)
 

@@ -1,9 +1,24 @@
 import { extendTheme } from '@chakra-ui/react'
 
 const theme = extendTheme({
+  colors: {
+    bg: '#181a1b',
+    surface: '#202424',
+    surfaceBorder: '#323638',
+    whiteText: '#e8e6e3',
+    btnBg: '#242728',
+    btnBorder: '#454442'
+  },
+  styles: {
+    global: {
+      'html, body': {
+        backgroundColor: '#181a1b'
+      }
+    }
+  },
   fonts: {
-    heading: 'Inter, sans-serif',
-    body: 'Inter, sans-serif'
+    heading: "'Noto Sans', Sans-Serif",
+    body: "'Noto Sans', Sans-Serif"
   },
   config: {
     initialColorMode: 'dark',

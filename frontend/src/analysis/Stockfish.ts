@@ -21,14 +21,20 @@ export interface InfoObject {
 
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1
 
+// todo: currently, messages from old positions are still sent and registered for a bit after the position has changed
 export default class Stockfish {
   worker: Worker
   counter = 0
   interval: NodeJS.Timeout
   isReady = false
   fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+  depth = 5
 
-  constructor(public onAnalysis: (analysis: Analysis) => void, onReady: () => void) {
+  constructor(
+    public onAnalysis: (sf: Stockfish, bestMove: string, depth: number) => void,
+    onReady: () => void,
+    public onEvaluation: (cp: number) => void
+  ) {
     this.worker = new Worker('stockfish.js')
     this.worker.postMessage('isready')
     this.worker.onmessage = event => {
@@ -38,23 +44,16 @@ export default class Stockfish {
         return
       }
       const msg = data as string
-      console.log(msg)
       if (msg.startsWith('info')) {
         const hasBound = msg.includes('bound')
-        const { depth, cp, pv } = parseUCIStringToObject(
-          msg.substring('info '.length),
-          18 + (hasBound ? 1 : 0)
-        ) as InfoObject
-        this.onAnalysis({
-          depth,
-          bestMove: pv,
-          score: cp
-        })
+        const { depth, cp } = parseUCIStringToObject(msg.substring('info '.length), 18 + (hasBound ? 1 : 0)) as InfoObject
+        if (this.depth === depth) {
+          this.onEvaluation(cp)
+        }
       } else if (msg.startsWith('bestmove')) {
-        const bestMove = msg.substring('bestmove '.length)
-        this.onAnalysis({
-          bestMove
-        })
+        console.log(msg)
+        const bestMove = msg.substring('bestmove '.length).substr(0, 4)
+        this.onAnalysis(this, bestMove, this.depth)
         // this.stop()
       } else if (msg.startsWith('readyok')) {
         this.isReady = true
@@ -67,22 +66,26 @@ export default class Stockfish {
     this.worker.postMessage('ucinewgame')
   }
 
-  analyzePosition(moves: string[]): void {
+  analyzePosition(moves: string[], depth: number): void {
+    // Depth > 22 takes too long to finish, so moves aren't analyzed immediately. Lichess also caps at 22
+    if (depth > 22) {
+      return
+    }
     if (!this.isReady) {
       console.log('not ready')
       return
     }
     this.counter++
-    console.log(`analyzing ${moves.join(' ')}`)
+    this.depth = depth
+    console.log(`analyzing ${moves.join(' ')} at depth ${depth}`)
     // this.worker.postMessage('eval')
     this.worker.postMessage(`position startpos moves ${moves.join(' ')}`)
-    this.worker.postMessage(`go infinite`)
+    this.worker.postMessage(`go depth ${depth}`)
   }
 
   stop(): void {
     this.worker.postMessage('stop')
     this.counter--
-    // clearInterval(this.interval)
   }
 
   quit(): void {

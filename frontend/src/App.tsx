@@ -4,10 +4,10 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import Chessboard from './board/Chessboard'
 import { Box, ChakraProvider, Grid, GridItem } from '@chakra-ui/react'
 import theme from './theme'
-import BoardControlsPanel from './BoardControlsPanel'
+import PositionPanel from './PositionPanel'
 import { Provider } from 'react-redux'
 import store from './store'
-import AnalysisPanel from './analysis/AnalysisPanel'
+import OverviewPanel from './OverviewPanel'
 
 function App() {
   return (
@@ -23,19 +23,19 @@ function App() {
             minH='95vh'
             gap={{ base: 0, md: 4 }}
           >
-            <GridItem colSpan={{ base: 12, xl: 4 }} rowSpan={1} padding={{ base: '1%', xl: '10%' }}>
-              <AnalysisPanel />
+            <GridItem colSpan={{ base: 12, xl: 3 }} rowSpan={1} padding={{ base: '1%', xl: '10%' }}>
+              <OverviewPanel />
             </GridItem>
-            <GridItem colSpan={{ base: 12, md: 9, xl: 4 }} rowSpan={{ base: 3, md: 4, xl: 1 }}>
+            <GridItem colSpan={{ base: 12, md: 9, xl: 6 }} rowSpan={{ base: 3, md: 4, xl: 1 }}>
               <Chessboard />
             </GridItem>
             <GridItem
-              colSpan={{ base: 12, md: 3, xl: 4 }}
+              colSpan={{ base: 12, md: 3, xl: 3 }}
               rowSpan={{ base: 1, md: 4, xl: 1 }}
               padding={{ base: '1%', lg: '10%' }}
             >
               {/* todo: implement moving forward through the game */}
-              <BoardControlsPanel />
+              <PositionPanel />
             </GridItem>
           </Grid>
         </DndProvider>

@@ -1,6 +1,7 @@
 import parseUCIStringToObject from './parseUCIStringToObject'
 import { InfoObject } from './Stockfish'
 
+// todo ponder
 test('parses analysis info without bound', () => {
   const result = parseUCIStringToObject(
     'depth 31 seldepth 41 multipv 1 score cp 73 nodes 168986600 nps 1025254 hashfull 999 time 164824 pv e2e4 e7e6 d2d4 d7d5 b1d2 c7c5 g1f3 g8f6 e4e5 f6d7 c2c3 d8b6 f1d3 b8c6 e1g1 c5d4 c3d4 c6d4 f3d4 b6d4 d2f3 d4b6 d1c2 b6c6 c2b1 c6b6 d3h7 b6c7 c1f4 c7b6 f1d1 f8c5 f4g3 c5e7 bmc 0.226817',
