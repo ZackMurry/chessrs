@@ -1,11 +1,12 @@
 import { IconButton } from '@chakra-ui/button'
-import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons'
+import { ChevronLeftIcon, ChevronRightIcon, RepeatIcon } from '@chakra-ui/icons'
 import { Box, Flex, Text } from '@chakra-ui/layout'
 import { FC, useEffect, useMemo, useState } from 'react'
 import ChessJS from 'chess.js'
 import { useAppDispatch, useAppSelector } from './hooks'
-import { traverseBackwards, traverseForwards } from './board/boardSlice'
+import { flipBoard, traverseBackwards, traverseForwards } from './board/boardSlice'
 import Stockfish from './analysis/Stockfish'
+import DarkTooltip from './ui/DarkTooltip'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
@@ -87,18 +88,25 @@ const PositionPanel: FC = () => {
           {pgn}
         </Text>
         <Flex>
-          <IconButton
-            icon={<ChevronLeftIcon />}
-            aria-label='Back'
-            onClick={() => dispatch(traverseBackwards())}
-            disabled={halfMoveCount <= 0}
-          />
-          <IconButton
-            icon={<ChevronRightIcon />}
-            aria-label='Advance forward'
-            onClick={() => dispatch(traverseForwards())}
-            disabled={halfMoveCount >= historySize - 1}
-          />
+          <DarkTooltip label='Back'>
+            <IconButton
+              icon={<ChevronLeftIcon />}
+              aria-label='Back'
+              onClick={() => dispatch(traverseBackwards())}
+              disabled={halfMoveCount <= 0}
+            />
+          </DarkTooltip>
+          <DarkTooltip label='Forward'>
+            <IconButton
+              icon={<ChevronRightIcon />}
+              aria-label='Forward'
+              onClick={() => dispatch(traverseForwards())}
+              disabled={halfMoveCount >= historySize - 1}
+            />
+          </DarkTooltip>
+          <DarkTooltip label='Flip board'>
+            <IconButton icon={<RepeatIcon />} aria-label='Flip board' onClick={() => dispatch(flipBoard())} ml='20px' />
+          </DarkTooltip>
         </Flex>
       </Box>
       <Box>

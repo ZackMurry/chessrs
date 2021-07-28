@@ -47,6 +47,7 @@ interface BoardState {
   games: {
     lichess: LichessGames
   }
+  perspective: 'white' | 'black'
 }
 
 const STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -66,7 +67,8 @@ const initialState = {
       black: 18101922,
       moves: []
     }
-  }
+  },
+  perspective: 'white'
 } as BoardState
 
 export const boardSlice = createSlice({
@@ -147,6 +149,12 @@ export const boardSlice = createSlice({
         ...state,
         opening: action.payload
       }
+    },
+    flipBoard: state => {
+      return {
+        ...state,
+        perspective: state.perspective === 'white' ? 'black' : 'white'
+      }
     }
   }
 })
@@ -158,7 +166,8 @@ export const {
   traverseBackwards,
   traverseForwards,
   updateLichessGames,
-  updateOpening
+  updateOpening,
+  flipBoard
 } = boardSlice.actions
 
 export default boardSlice.reducer

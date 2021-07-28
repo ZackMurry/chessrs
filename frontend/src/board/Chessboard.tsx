@@ -14,16 +14,22 @@ const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 const Chessboard: FC<Props> = () => {
   const squareLength = useBreakpointValue({ base: 12, md: 9, xl: 5.2 })
   const [chess, setChess] = useState(() => new Chess())
-  const position = useAppSelector(state => state.board.fen)
+  const { fen, perspective } = useAppSelector(state => ({ fen: state.board.fen, perspective: state.board.perspective }))
 
   useEffect(() => {
-    setChess(new Chess(position))
-  }, [position])
+    setChess(new Chess(fen))
+  }, [fen])
 
   return (
-    <Flex w='100%' h='100%' justifyContent='center' alignItems='center' flexDir='column'>
+    <Flex
+      w='100%'
+      h='100%'
+      justifyContent='center'
+      alignItems='center'
+      flexDir={`column${perspective === 'black' ? '-reverse' : ''}`}
+    >
       {chess.board().map((row, i) => (
-        <div style={{ display: 'flex' }} key={`board-row-${i}`}>
+        <Flex flexDir={perspective === 'white' ? 'row' : 'row-reverse'} key={`board-row-${i}`}>
           {row.map((square, j) => (
             <BoardSquare
               x={j}
@@ -35,7 +41,7 @@ const Chessboard: FC<Props> = () => {
               size={squareLength}
             />
           ))}
-        </div>
+        </Flex>
       ))}
     </Flex>
   )
