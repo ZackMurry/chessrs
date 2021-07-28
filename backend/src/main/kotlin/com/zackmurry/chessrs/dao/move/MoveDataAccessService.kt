@@ -6,6 +6,7 @@ import com.zackmurry.chessrs.model.MoveEntity
 import org.flywaydb.core.internal.jdbc.JdbcTemplate
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
+import java.sql.ResultSet
 import java.sql.SQLException
 import java.util.*
 import javax.sql.DataSource
@@ -38,6 +39,23 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
         }
     }
 
+    private fun extractMoveEntity(rs: ResultSet): MoveEntity {
+        rs.run {
+            return MoveEntity(
+                getString("fen_before"),
+                getString("san"),
+                getString("uci"),
+                getString("fen_after"),
+                getBoolean("is_white"),
+                UUID.fromString(getString("id")),
+                UUID.fromString(getString("user_id")),
+                getLong("last_reviewed"),
+                getLong("time_created"),
+                getInt("num_reviews")
+            )
+        }
+    }
+
     override fun getMovesOrderedByLastReviewAsc(userId: UUID, limit: Int): List<MoveEntity> {
         val sql = "SELECT * FROM moves WHERE user_id = ? ORDER BY last_reviewed LIMIT ?"
         try {
@@ -47,20 +65,7 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
                 executeQuery().run {
                     val list = ArrayList<MoveEntity>()
                     while (resultSet.next()) {
-                        list.add(
-                            MoveEntity(
-                                getString("fen_before"),
-                                getString("san"),
-                                getString("uci"),
-                                getString("fen_after"),
-                                getBoolean("is_white"),
-                                UUID.fromString(getString("id")),
-                                UUID.fromString(getString("user_id")),
-                                getLong("last_reviewed"),
-                                getLong("time_created"),
-                                getInt("num_reviews")
-                            )
-                        )
+                        list.add(extractMoveEntity(this))
                     }
                     return list
                 }
@@ -70,4 +75,45 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
             throw InternalServerException()
         }
     }
+
+    override fun getRandomMoves(userId: UUID, limit: Int): List<MoveEntity> {
+        val sql = "SELECT * FROM moves WHERE user_id = ? ORDER BY random() LIMIT ?"
+        try {
+            jdbcTemplate.connection.prepareStatement(sql).run {
+                setObject(1, userId)
+                setInt(2, limit)
+                executeQuery().run {
+                    val list = ArrayList<MoveEntity>()
+                    while (resultSet.next()) {
+                        list.add(extractMoveEntity(this))
+                    }
+                    return list
+                }
+            }
+        } catch (e: SQLException) {
+            e.printStackTrace()
+            throw InternalServerException()
+        }
+
+    }
+
+    override fun getMoveById(id: UUID): MoveEntity? {
+        val sql = "SELECT * FROM moves WHERE id = ?"
+        try {
+            jdbcTemplate.connection.prepareStatement(sql).run {
+                setObject(1, id)
+                executeQuery().run {
+                    return if (next()) {
+                        extractMoveEntity(this)
+                    } else {
+                        null
+                    }
+                }
+            }
+        } catch (e: SQLException) {
+            e.printStackTrace()
+            throw InternalServerException()
+        }
+    }
+
 }

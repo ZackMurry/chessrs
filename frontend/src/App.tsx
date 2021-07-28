@@ -8,6 +8,7 @@ import { Provider } from 'react-redux'
 import store from 'store/store'
 import CreateMovesPage from 'pages/create/CreateMovesPage'
 import StudyPage from 'pages/study/StudyPage'
+import PracticePage from 'pages/practice/PracticePage'
 
 function App() {
   return (
@@ -29,6 +30,11 @@ function App() {
                   Study
                 </Heading>
               </Link>
+              <Link to='/practice'>
+                <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
+                  Practice
+                </Heading>
+              </Link>
               <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
                 <a href='/api/v1/oauth2/code/lichess' rel='noreferrer noopener'>
                   Login
@@ -41,6 +47,9 @@ function App() {
               </Route>
               <Route path='/study' exact>
                 <StudyPage />
+              </Route>
+              <Route path='/practice' exact>
+                <PracticePage />
               </Route>
             </Switch>
           </Router>

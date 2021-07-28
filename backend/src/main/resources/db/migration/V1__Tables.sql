@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS moves (
     san VARCHAR(5) NOT NULL, -- Standard Algebraic Notation of the move
     uci CHAR(4) NOT NULL, -- UCI Notation of the move
     fen_after VARCHAR(90) NOT NULL, -- fen after move is played
-    last_reviewed BIGINT NOT NULL,
+    last_reviewed BIGINT NOT NULL, -- last reviewed using SRS
     time_created BIGINT NOT NULL,
     num_reviews INT NOT NULL DEFAULT 0,
     is_white BOOLEAN NOT NULL DEFAULT TRUE

@@ -10,4 +10,8 @@ interface MoveDao {
 
     fun getMovesOrderedByLastReviewAsc(userId: UUID, limit: Int): List<MoveEntity>
 
+    fun getMoveById(id: UUID): MoveEntity?
+
+    fun getRandomMoves(userId: UUID, limit: Int): List<MoveEntity>
+
 }

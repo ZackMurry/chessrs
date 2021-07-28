@@ -1,12 +1,12 @@
 import { Flex, Text } from '@chakra-ui/layout'
-import { FC, useEffect } from 'react'
+import { FC, useCallback, useEffect } from 'react'
 import { useAppSelector } from 'utils/hooks'
 import { useDispatch } from 'react-redux'
-import { loadPosition, makeMove, resetHalfMoveCount, wrongMove, wrongMoveReset } from 'store/boardSlice'
+import { disableBoard, loadPosition, makeMove, resetHalfMoveCount, wrongMove, wrongMoveReset } from 'store/boardSlice'
 import { useState } from 'react'
 import { MoveEntity } from 'types'
 
-const StudyMainPanel: FC = () => {
+const PracticeMainPanel: FC = () => {
   const { halfMoveCount, moveSAN } = useAppSelector(state => ({
     halfMoveCount: state.board.halfMoveCount,
     moveSAN: state.board.moveHistory.length ? state.board.moveHistory[0].san : ''
@@ -16,28 +16,29 @@ const StudyMainPanel: FC = () => {
   const [moveWrong, setMoveWrong] = useState(false)
   const [resetTimeout, setResetTimeout] = useState<NodeJS.Timeout>(null)
 
-  const fetchMoves = async (): Promise<MoveEntity[]> => {
-    const response = await fetch('/api/v1/moves/need-review')
+  const fetchMoves = useCallback(async (): Promise<MoveEntity[]> => {
+    const response = await fetch('/api/v1/moves/need-practice')
     if (!response.ok) {
       console.error('Error fetching moves. Status: ', response.status)
+      dispatch(disableBoard())
       return
     }
     const moves = await response.json()
     setMovesInQueue(moves)
     return moves
-  }
+  }, [setMovesInQueue, dispatch])
 
   // For the first load
   useEffect(() => {
-    console.log('first load')
     fetchMoves().then(moves => {
       if (moves.length === 0) {
         console.log('no moves')
+        dispatch(disableBoard())
         return
       }
       dispatch(loadPosition({ fen: moves[0].fenBefore, perspective: moves[0].isWhite ? 'white' : 'black' }))
     })
-  }, [dispatch])
+  }, [dispatch, fetchMoves])
 
   useEffect(() => {
     if (halfMoveCount === 0 || moveWrong || movesInQueue.length === 0) {
@@ -96,7 +97,8 @@ const StudyMainPanel: FC = () => {
     moveWrong,
     moveSAN,
     resetTimeout,
-    setResetTimeout
+    setResetTimeout,
+    fetchMoves
   ])
 
   // todo: delete move button
@@ -113,19 +115,16 @@ const StudyMainPanel: FC = () => {
       p='5%'
     >
       <Text fontSize='16px' mb='5px' mt='15px' color='whiteText'>
-        Studying in ChesSRS reviews the moves that you've added for positions. This uses a Spaced Repetition algorithm (SM-2)
-        that spaces out your reviews automatically, giving you new reviews each day.
+        Practicing is like studying, except it doesn't rely on an Spaced Repetition algorithm. Instead, you are given a
+        random move. Because of this, you can do as many practices you'd like at any time. Practice is independent from your
+        studying.
       </Text>
       <Text fontSize='16px' mb='5px' mt='15px' color='whiteText'>
         All you have to do is make the move that you added on the board. When you make an incorrect move, the correct move
         will be shown and highlighted.
       </Text>
-      <Text fontSize='18px' fontWeight='bold' mb='5px' mt='15px' color='whiteText'>
-        {/* todo: left to study counter */}
-        24 left to study
-      </Text>
     </Flex>
   )
 }
 
-export default StudyMainPanel
+export default PracticeMainPanel

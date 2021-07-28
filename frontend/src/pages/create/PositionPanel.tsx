@@ -26,6 +26,7 @@ const PositionPanel: FC = () => {
   const uciMoves = useMemo(() => moveHistory.map(m => m.uci).join(' '), [moveHistory])
   const onAnalysis = (sf: Stockfish, bestMove: string, d: number) => {
     if (!sf.isReady) {
+      console.log('not ready')
       return
     }
     console.log('onAnalysis')
@@ -58,15 +59,20 @@ const PositionPanel: FC = () => {
   const [stockfish] = useState(() => new Stockfish(onAnalysis, onReady, onEvaluation))
   stockfish.onAnalysis = onAnalysis
 
+  useEffect(
+    () => () => {
+      console.log('unload: ', new Date().getTime())
+      stockfish.onAnalysis = null
+      stockfish.onEvaluation = null
+      stockfish.onReady = null
+      stockfish.terminate()
+    },
+    [stockfish]
+  )
+
   useEffect(() => {
     if (!stockfish.isReady) {
-      return () => {
-        console.log('unload: ', new Date().getTime())
-        stockfish.onAnalysis = null
-        stockfish.onEvaluation = null
-        stockfish.onReady = null
-        stockfish.terminate()
-      }
+      return
     }
     console.log('analyzing...')
     stockfish.quit()
@@ -75,13 +81,7 @@ const PositionPanel: FC = () => {
     setDepth(0)
     setLoading(true)
     stockfish.analyzePosition(uciMoves, 5)
-    return () => {
-      console.log('unload: ', new Date().getTime())
-      stockfish.onAnalysis = null
-      stockfish.onEvaluation = null
-      stockfish.onReady = null
-      stockfish.terminate()
-    }
+    return
   }, [stockfish, uciMoves])
   const dispatch = useAppDispatch()
 

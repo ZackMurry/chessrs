@@ -214,6 +214,12 @@ export const boardSlice = createSlice({
         ...state,
         halfMoveCount: 0
       }
+    },
+    disableBoard: state => {
+      return {
+        ...state,
+        enabled: false
+      }
     }
   }
 })
@@ -231,7 +237,8 @@ export const {
   resetBoard,
   wrongMove,
   wrongMoveReset,
-  resetHalfMoveCount
+  resetHalfMoveCount,
+  disableBoard
 } = boardSlice.actions
 
 export default boardSlice.reducer
