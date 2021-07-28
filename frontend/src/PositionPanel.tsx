@@ -1,10 +1,13 @@
 import { IconButton } from '@chakra-ui/button'
 import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons'
 import { Box, Flex, Text } from '@chakra-ui/layout'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useMemo, useState } from 'react'
+import ChessJS from 'chess.js'
 import { useAppDispatch, useAppSelector } from './hooks'
 import { traverseBackwards, traverseForwards } from './board/boardSlice'
 import Stockfish from './analysis/Stockfish'
+
+const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 // todo: add lichess cloud eval when available for greater depth
 const PositionPanel: FC = () => {
@@ -19,25 +22,33 @@ const PositionPanel: FC = () => {
   const [bestMove, setBestMove] = useState('...')
   const [depth, setDepth] = useState(0)
   const [isLoading, setLoading] = useState(true)
+  const uciMoves = useMemo(() => moveHistory.map(m => m.uci).join(' '), [moveHistory])
   const onAnalysis = (sf: Stockfish, bestMove: string, d: number) => {
     if (isLoading && d !== 5) {
       return
     }
-    setLoading(false)
-    setDepth(d)
+    const from = bestMove.substr(0, 2)
+    const to = bestMove.substr(2, 2)
+    const matchingMoves = new Chess(fen).moves({ verbose: true }).filter(m => m.from === from && m.to === to)
+    if (!matchingMoves.length) {
+      // Invalid move (likely from a previous run)
+      return
+    }
     sf.stop()
     sf.quit()
-    sf.analyzePosition(moveHistory, d + 1)
-    setBestMove(bestMove)
+    sf.analyzePosition(uciMoves, d + 1)
+    setLoading(false)
+    setDepth(d)
+    setBestMove(matchingMoves[0].san)
   }
   const onEvaluation = (cp: number) => {
     setEvaluation(cp / 100)
   }
   const onReady = () => {
     stockfish.createNewGame()
-    stockfish.analyzePosition(moveHistory, 5)
+    stockfish.analyzePosition(uciMoves, 5)
   }
-  const [stockfish, setStockfish] = useState(() => new Stockfish(onAnalysis, onReady, onEvaluation))
+  const [stockfish] = useState(() => new Stockfish(onAnalysis, onReady, onEvaluation))
   stockfish.onAnalysis = onAnalysis
 
   useEffect(() => {
@@ -46,18 +57,14 @@ const PositionPanel: FC = () => {
     }
     ;(async function () {
       console.log('analyzing...')
-      // stockfish.stop()
-      // console.time('Ready')
-      // console.timeEnd('Ready')
-
       stockfish.quit()
       stockfish.createNewGame()
       setBestMove('...')
       setDepth(0)
       setLoading(true)
-      stockfish.analyzePosition(moveHistory, 5)
+      stockfish.analyzePosition(uciMoves, 5)
     })()
-  }, [stockfish, moveHistory])
+  }, [stockfish, uciMoves])
   const dispatch = useAppDispatch()
 
   const whitePerspectiveEvaluation = evaluation * (moveHistory.length % 2 === 0 ? 1 : -1)
@@ -106,6 +113,7 @@ const PositionPanel: FC = () => {
         </Text>
         <Text fontSize='16px' color='whiteText' mb='3px'>
           Depth: {depth}
+          {/* todo: allow user to increase depth */}
         </Text>
         <Text fontSize='16px' color='whiteText' mb='10px' wordBreak='break-all'>
           FEN: {fen}

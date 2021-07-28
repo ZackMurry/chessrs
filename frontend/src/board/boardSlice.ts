@@ -31,12 +31,17 @@ interface LichessGames {
   moves: LichessAPIMove[]
 }
 
+interface Move {
+  uci: string
+  san: string
+}
+
 interface BoardState {
   fen: string
   pgn: string
   halfMoveCount: number
   history: string[]
-  moveHistory: string[]
+  moveHistory: Move[]
   selectedPiece: SelectedPiece | null
   opening?: Opening
   games: {
@@ -80,15 +85,17 @@ export const boardSlice = createSlice({
       let newPgn: string
       let newMoveHistory = [...state.moveHistory]
       // If history is being overwritten
+      console.log('HERE: ', state.halfMoveCount, state.history.length)
       if (state.history.length - 1 > state.halfMoveCount) {
+        console.warn('overwriting')
         newHistory = newHistory.slice(0, state.halfMoveCount + 1)
         const subPgn = getFirstMovesOfPgn(state.pgn, state.halfMoveCount)
         newPgn = appendMoveToPgn(subPgn, move.san, state.halfMoveCount)
-        newMoveHistory = newMoveHistory.slice(0, state.halfMoveCount + 1)
+        newMoveHistory = newMoveHistory.slice(0, state.halfMoveCount)
       } else {
         newPgn = appendMoveToPgn(state.pgn, move.san, state.halfMoveCount)
-        newMoveHistory.push(action.payload)
       }
+      newMoveHistory.push({ san: move.san, uci: action.payload })
       console.log('new: ', newMoveHistory)
       return {
         ...state,

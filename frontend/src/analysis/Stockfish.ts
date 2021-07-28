@@ -66,7 +66,7 @@ export default class Stockfish {
     this.worker.postMessage('ucinewgame')
   }
 
-  analyzePosition(moves: string[], depth: number): void {
+  analyzePosition(moves: string, depth: number): void {
     // Depth > 22 takes too long to finish, so moves aren't analyzed immediately. Lichess also caps at 22
     if (depth > 22) {
       return
@@ -77,9 +77,9 @@ export default class Stockfish {
     }
     this.counter++
     this.depth = depth
-    console.log(`analyzing ${moves.join(' ')} at depth ${depth}`)
+    console.log(`analyzing ${moves} at depth ${depth}`)
     // this.worker.postMessage('eval')
-    this.worker.postMessage(`position startpos moves ${moves.join(' ')}`)
+    this.worker.postMessage(`position startpos moves ${moves}`)
     this.worker.postMessage(`go depth ${depth}`)
   }
 

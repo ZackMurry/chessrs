@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
+import java.util.*
 
 private val logger = LoggerFactory.getLogger(OAuth2UserService::class.java)
 
@@ -53,7 +54,7 @@ class OAuth2UserService(private val userDao: UserDao) : DefaultOAuth2UserService
 
     private fun registerNewUser(oAuth2UserRequest: OAuth2UserRequest, oAuth2UserInfo: OAuth2UserInfo): UserEntity {
         val username = oAuth2UserInfo.getUsername() ?: throw OAuth2AuthenticationProcessingException("Username not found from OAuth2 provider")
-        val user = UserEntity(username, oAuth2UserRequest.clientRegistration.registrationId.uppercase())
+        val user = UserEntity(username, UUID.randomUUID(), oAuth2UserRequest.clientRegistration.registrationId.uppercase())
         userDao.createUser(user)
         return user
     }

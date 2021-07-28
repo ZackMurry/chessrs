@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
@@ -24,6 +25,8 @@ class SecurityConfiguration(
 
     override fun configure(http: HttpSecurity?) {
         http
+            ?.csrf()?.disable()
+            ?.cors()?.and()
             ?.antMatcher("/**")
             ?.authorizeRequests()
             ?.antMatchers("/")
@@ -38,7 +41,7 @@ class SecurityConfiguration(
                 ?.userInfoEndpoint()?.userService(oAuth2UserService)
                 ?.and()?.authorizationEndpoint()?.authorizationRequestRepository(httpCookieOAuth2RequestRepository)
 
-        http?.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+//        http?.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
     }
 
     @Bean

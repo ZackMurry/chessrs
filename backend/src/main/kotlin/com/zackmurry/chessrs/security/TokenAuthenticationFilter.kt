@@ -1,5 +1,6 @@
 package com.zackmurry.chessrs.security
 
+import com.zackmurry.chessrs.exception.ForbiddenException
 import com.zackmurry.chessrs.service.UserService
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
@@ -19,19 +20,21 @@ class TokenAuthenticationFilter(private val tokenProvider: TokenProvider, privat
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        try {
-            val bearerToken = request.getHeader("Authorization")
-            if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-                val jwt = bearerToken.substring(7)
-                val username = tokenProvider.getUsernameFromToken(jwt)
-                val userDetails = userService.loadUserByUsername(username)
-                val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
-                authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
-                SecurityContextHolder.getContext().authentication = authentication
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+//        println("filter")
+//        try {
+//            val bearerToken = request.getHeader("Authorization")
+//            if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+//                val jwt = bearerToken.substring(7)
+//                val username = tokenProvider.getUsernameFromToken(jwt)
+//                val userDetails = userService.loadUserByUsername(username)
+//                val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
+//                authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
+//                SecurityContextHolder.getContext().authentication = authentication
+//                println("success")
+//            }
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
         filterChain.doFilter(request, response)
     }
 }

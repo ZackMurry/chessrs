@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletResponse
 
 private val logger = LoggerFactory.getLogger(OAuth2AuthenticationSuccessHandler::class.java)
 
+const val JWT_COOKIE_NAME = "jwt"
+
 @Component
 class OAuth2AuthenticationSuccessHandler(private val tokenProvider: TokenProvider, private val httpCookieOAuth2RequestRepository: HttpCookieOAuth2RequestRepository) : SimpleUrlAuthenticationSuccessHandler() {
 
@@ -40,7 +42,6 @@ class OAuth2AuthenticationSuccessHandler(private val tokenProvider: TokenProvide
             throw BadRequestException()
         }
         val token = tokenProvider.createToken(authentication)
-        // todo: handle token on frontend. might not need tokens at all, though
         return UriComponentsBuilder.fromUriString(targetUrl).queryParam("token", token).build().toString()
     }
 

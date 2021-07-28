@@ -25,7 +25,6 @@ class TokenProvider(private val applicationProperties: ApplicationProperties) {
             throw InternalServerException()
         }
         val now = Date()
-        println(applicationProperties.auth.tokenSecret)
         val expiryDate = Date(now.time + applicationProperties.auth.tokenExpirationMs)
         return Jwts.builder()
             .setSubject(userPrincipal.username)

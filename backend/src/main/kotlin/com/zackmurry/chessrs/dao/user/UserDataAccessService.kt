@@ -5,6 +5,7 @@ import com.zackmurry.chessrs.model.UserEntity
 import org.flywaydb.core.internal.jdbc.JdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.SQLException
+import java.util.*
 import javax.sql.DataSource
 
 @Repository
@@ -19,7 +20,7 @@ class UserDataAccessService(private val dataSource: DataSource) : UserDao {
             preparedStatement.setString(1, username)
             val resultSet = preparedStatement.executeQuery()
             if (resultSet.next()) {
-                return UserEntity(resultSet.getString("username"), resultSet.getString("provider"))
+                return UserEntity(resultSet.getString("username"), UUID.fromString(resultSet.getString("id")), resultSet.getString("provider"))
             }
             return null
         } catch (e: SQLException) {
@@ -29,12 +30,14 @@ class UserDataAccessService(private val dataSource: DataSource) : UserDao {
     }
 
     override fun createUser(user: UserEntity) {
-        val sql = "INSERT INTO USERS (username, provider) VALUES (?, ?)"
+        val sql = "INSERT INTO USERS (id, username, provider) VALUES (?, ?, ?)"
         try {
-            val preparedStatement = jdbcTemplate.connection.prepareStatement(sql)
-            preparedStatement.setString(1, user.username)
-            preparedStatement.setString(2, user.provider)
-            preparedStatement.executeUpdate()
+            jdbcTemplate.connection.prepareStatement(sql).run {
+                setObject(1, user.id)
+                setString(2, user.username)
+                setString(3, user.provider)
+                executeUpdate()
+            }
         } catch (e: SQLException) {
             e.printStackTrace()
             throw InternalServerException()

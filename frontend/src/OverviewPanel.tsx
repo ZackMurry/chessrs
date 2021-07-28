@@ -1,25 +1,26 @@
 import { Text } from '@chakra-ui/layout'
 import { Box, Button } from '@chakra-ui/react'
+import { useState } from 'react'
 import { FC, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { updateLichessGames, updateOpening } from './board/boardSlice'
 import { useAppSelector } from './hooks'
 
 const OverviewPanel: FC = () => {
-  const { lastMove, lichessGamesInPosition, commonMoves, fen, opening, halfMoveCount, historyLength } = useAppSelector(
-    state => ({
-      lastMove: state.board.moveHistory.length > 0 ? state.board.moveHistory[state.board.moveHistory.length - 1] : '',
-      lichessGamesInPosition:
-        state.board.games.lichess.white + state.board.games.lichess.draws + state.board.games.lichess.black,
-      commonMoves: state.board.games.lichess.moves.map(m => m.san),
-      fen: state.board.fen,
-      opening: state.board.opening,
-      halfMoveCount: state.board.halfMoveCount,
-      historyLength: state.board.history.length
-    })
-  )
+  const { lastMove, lichessGamesInPosition, commonMoves, fen, opening, history, halfMoveCount } = useAppSelector(state => ({
+    lastMove: state.board.moveHistory.length > 0 ? state.board.moveHistory[state.board.moveHistory.length - 1] : null,
+    lichessGamesInPosition:
+      state.board.games.lichess.white + state.board.games.lichess.draws + state.board.games.lichess.black,
+    commonMoves: state.board.games.lichess.moves.map(m => m.san),
+    fen: state.board.fen,
+    opening: state.board.opening,
+    history: state.board.history,
+    halfMoveCount: state.board.halfMoveCount
+  }))
 
   const dispatch = useDispatch()
+
+  const [isAddLoading, setAddLoading] = useState(false)
 
   useEffect(() => {
     console.log('fetching games')
@@ -34,6 +35,23 @@ const OverviewPanel: FC = () => {
       .then(json => dispatch(updateOpening(json.opening)))
   }, [fen, dispatch])
 
+  const onAddMove = async () => {
+    setAddLoading(true)
+    // todo: error message if failed
+    await fetch('/api/v1/moves', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fenBefore: history[halfMoveCount - 1],
+        fenAfter: history[halfMoveCount],
+        san: lastMove.san,
+        uci: lastMove.uci,
+        isWhite: history.length % 2 === 0
+      })
+    })
+    setAddLoading(false)
+  }
+
   return (
     <Box
       borderRadius='3px'
@@ -45,8 +63,9 @@ const OverviewPanel: FC = () => {
       h='100%'
       p='5%'
     >
-      <Button isDisabled={!lastMove} isFullWidth>
-        Add {lastMove || 'Move'} (A)
+      {/* todo: don't allow users to add already added moves */}
+      <Button isDisabled={!lastMove} isLoading={isAddLoading} isFullWidth onClick={onAddMove}>
+        Add {lastMove?.san || 'Move'} (A)
       </Button>
       {opening && (
         <Text fontSize='18px' fontWeight='bold' mt='20px' color='whiteText'>

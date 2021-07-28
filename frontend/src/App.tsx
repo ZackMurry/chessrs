@@ -19,7 +19,7 @@ function App() {
               ChesSRS
             </Heading>
             <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
-              <a href={`http://localhost/api/v1/oauth2/code/lichess`} rel='noreferrer noopener'>
+              <a href='/api/v1/oauth2/code/lichess' rel='noreferrer noopener'>
                 Login
               </a>
             </Heading>

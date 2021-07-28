@@ -7,12 +7,12 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.oauth2.core.user.OAuth2User
 import java.util.*
 
-class UserPrincipal(private var username: String, private var authorities: MutableCollection<out GrantedAuthority>, private var attributes: MutableMap<String, Any>) : OAuth2User, UserDetails {
+class UserPrincipal(private var username: String, private var id: UUID, private var authorities: MutableCollection<out GrantedAuthority>, private var attributes: MutableMap<String, Any>) : OAuth2User, UserDetails {
 
     companion object {
         fun create(userEntity: UserEntity): UserPrincipal {
             val grantedAuthorities = Collections.singletonList(SimpleGrantedAuthority("ROLE_USER"))
-            return UserPrincipal(userEntity.username, grantedAuthorities, HashMap())
+            return UserPrincipal(userEntity.username, userEntity.id, grantedAuthorities, HashMap())
         }
 
         fun create(userEntity: UserEntity, attributes: MutableMap<String, Any>): UserPrincipal {
@@ -56,6 +56,10 @@ class UserPrincipal(private var username: String, private var authorities: Mutab
 
     override fun getName(): String {
         return this.username
+    }
+
+    fun getId(): UUID {
+        return this.id
     }
 
 }
