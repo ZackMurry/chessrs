@@ -2,24 +2,20 @@ package com.zackmurry.chessrs.config
 
 import com.zackmurry.chessrs.security.OAuth2AuthenticationSuccessHandler
 import com.zackmurry.chessrs.security.HttpCookieOAuth2RequestRepository
-import com.zackmurry.chessrs.security.TokenAuthenticationFilter
 import com.zackmurry.chessrs.service.OAuth2UserService
 import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.reactive.function.client.WebClient
 
 @EnableWebSecurity
 class SecurityConfiguration(
     private val oAuth2AuthenticationSuccessHandler: OAuth2AuthenticationSuccessHandler,
     private val oAuth2UserService: OAuth2UserService,
-    private val tokenAuthenticationFilter: TokenAuthenticationFilter,
     private val httpCookieOAuth2RequestRepository: HttpCookieOAuth2RequestRepository
 ) : WebSecurityConfigurerAdapter() {
 
@@ -41,7 +37,6 @@ class SecurityConfiguration(
                 ?.userInfoEndpoint()?.userService(oAuth2UserService)
                 ?.and()?.authorizationEndpoint()?.authorizationRequestRepository(httpCookieOAuth2RequestRepository)
 
-//        http?.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
     }
 
     @Bean

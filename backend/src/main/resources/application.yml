@@ -24,8 +24,3 @@ spring:
             token-uri: https://oauth.lichess.org/oauth
             user-info-uri: https://lichess.org/api/account
             user-name-attribute: username
-logging:
-  level:
-    org:
-      springframework:
-        security: DEBUG

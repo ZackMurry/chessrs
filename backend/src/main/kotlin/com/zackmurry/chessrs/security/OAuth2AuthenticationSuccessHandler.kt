@@ -15,7 +15,7 @@ private val logger = LoggerFactory.getLogger(OAuth2AuthenticationSuccessHandler:
 const val JWT_COOKIE_NAME = "jwt"
 
 @Component
-class OAuth2AuthenticationSuccessHandler(private val tokenProvider: TokenProvider, private val httpCookieOAuth2RequestRepository: HttpCookieOAuth2RequestRepository) : SimpleUrlAuthenticationSuccessHandler() {
+class OAuth2AuthenticationSuccessHandler(private val httpCookieOAuth2RequestRepository: HttpCookieOAuth2RequestRepository) : SimpleUrlAuthenticationSuccessHandler() {
 
     override fun onAuthenticationSuccess(
         request: HttpServletRequest?,
@@ -41,8 +41,7 @@ class OAuth2AuthenticationSuccessHandler(private val tokenProvider: TokenProvide
         if (authentication == null) {
             throw BadRequestException()
         }
-        val token = tokenProvider.createToken(authentication)
-        return UriComponentsBuilder.fromUriString(targetUrl).queryParam("token", token).build().toString()
+        return targetUrl
     }
 
     protected fun clearAuthenticationAttributes(request: HttpServletRequest, response: HttpServletResponse) {
