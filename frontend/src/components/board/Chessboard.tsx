@@ -3,7 +3,7 @@ import ChessJS from 'chess.js'
 import BoardSquare from './BoardSquare'
 import { Flex } from '@chakra-ui/layout'
 import { useBreakpointValue } from '@chakra-ui/media-query'
-import { useAppSelector } from '../hooks'
+import { useAppSelector } from 'utils/hooks'
 
 interface Props {}
 

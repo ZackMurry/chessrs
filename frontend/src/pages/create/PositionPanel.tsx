@@ -3,10 +3,10 @@ import { ChevronLeftIcon, ChevronRightIcon, RepeatIcon } from '@chakra-ui/icons'
 import { Box, Flex, Text } from '@chakra-ui/layout'
 import { FC, useEffect, useMemo, useState } from 'react'
 import ChessJS from 'chess.js'
-import { useAppDispatch, useAppSelector } from './hooks'
-import { flipBoard, traverseBackwards, traverseForwards } from './board/boardSlice'
-import Stockfish from './analysis/Stockfish'
-import DarkTooltip from './ui/DarkTooltip'
+import { useAppDispatch, useAppSelector } from 'utils/hooks'
+import { flipBoard, traverseBackwards, traverseForwards } from 'store/boardSlice'
+import Stockfish from 'utils/analysis/Stockfish'
+import DarkTooltip from 'components/DarkTooltip'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
@@ -25,6 +25,10 @@ const PositionPanel: FC = () => {
   const [isLoading, setLoading] = useState(true)
   const uciMoves = useMemo(() => moveHistory.map(m => m.uci).join(' '), [moveHistory])
   const onAnalysis = (sf: Stockfish, bestMove: string, d: number) => {
+    if (!sf.isReady) {
+      return
+    }
+    console.log('onAnalysis')
     if (isLoading && d !== 5) {
       return
     }
@@ -43,9 +47,11 @@ const PositionPanel: FC = () => {
     setBestMove(matchingMoves[0].san)
   }
   const onEvaluation = (cp: number) => {
+    console.log('onEvaluation: ', new Date().getTime())
     setEvaluation(cp / 100)
   }
   const onReady = () => {
+    console.log('onReady')
     stockfish.createNewGame()
     stockfish.analyzePosition(uciMoves, 5)
   }
@@ -54,17 +60,28 @@ const PositionPanel: FC = () => {
 
   useEffect(() => {
     if (!stockfish.isReady) {
-      return
+      return () => {
+        console.log('unload: ', new Date().getTime())
+        stockfish.onAnalysis = null
+        stockfish.onEvaluation = null
+        stockfish.onReady = null
+        stockfish.terminate()
+      }
     }
-    ;(async function () {
-      console.log('analyzing...')
-      stockfish.quit()
-      stockfish.createNewGame()
-      setBestMove('...')
-      setDepth(0)
-      setLoading(true)
-      stockfish.analyzePosition(uciMoves, 5)
-    })()
+    console.log('analyzing...')
+    stockfish.quit()
+    stockfish.createNewGame()
+    setBestMove('...')
+    setDepth(0)
+    setLoading(true)
+    stockfish.analyzePosition(uciMoves, 5)
+    return () => {
+      console.log('unload: ', new Date().getTime())
+      stockfish.onAnalysis = null
+      stockfish.onEvaluation = null
+      stockfish.onReady = null
+      stockfish.terminate()
+    }
   }, [stockfish, uciMoves])
   const dispatch = useAppDispatch()
 

@@ -1,3 +1,3 @@
 package com.zackmurry.chessrs.model
 
-data class MoveCreateRequest(var fenBefore: String, var san: String, var uci: String, var fenAfter: String, var isWhite: Boolean)
+data class MoveCreateRequest(val fenBefore: String, val san: String, val uci: String, val fenAfter: String, val isWhite: Boolean)

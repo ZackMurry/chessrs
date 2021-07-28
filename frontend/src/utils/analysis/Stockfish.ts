@@ -26,13 +26,13 @@ export default class Stockfish {
   worker: Worker
   counter = 0
   interval: NodeJS.Timeout
-  isReady = false
+  public isReady = false
   fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
   depth = 5
 
   constructor(
     public onAnalysis: (sf: Stockfish, bestMove: string, depth: number) => void,
-    onReady: () => void,
+    public onReady: () => void,
     public onEvaluation: (cp: number) => void
   ) {
     this.worker = new Worker('stockfish.js')
@@ -47,17 +47,22 @@ export default class Stockfish {
       if (msg.startsWith('info')) {
         const hasBound = msg.includes('bound')
         const { depth, cp } = parseUCIStringToObject(msg.substring('info '.length), 18 + (hasBound ? 1 : 0)) as InfoObject
-        if (this.depth === depth) {
+        if (this.depth === depth && this.onEvaluation) {
           this.onEvaluation(cp)
         }
       } else if (msg.startsWith('bestmove')) {
+        if (!this.onAnalysis) {
+          return
+        }
         console.log(msg)
         const bestMove = msg.substring('bestmove '.length).substr(0, 4)
         this.onAnalysis(this, bestMove, this.depth)
         // this.stop()
       } else if (msg.startsWith('readyok')) {
         this.isReady = true
-        onReady()
+        if (this.onReady) {
+          this.onReady()
+        }
       }
     }
   }
@@ -90,5 +95,10 @@ export default class Stockfish {
 
   quit(): void {
     this.worker.postMessage('quit')
+  }
+
+  terminate(): void {
+    this.isReady = false
+    this.worker.terminate()
   }
 }

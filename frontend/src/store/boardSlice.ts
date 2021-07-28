@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import ChessJS, { PieceType } from 'chess.js'
-import appendMoveToPgn from '../appendMoveToPgn'
-import getFirstMovesOfPgn from '../getFirstMovesOfPgn'
+import appendMoveToPgn from 'utils/appendMoveToPgn'
+import getFirstMovesOfPgn from 'utils/getFirstMovesOfPgn'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
@@ -48,6 +48,12 @@ interface BoardState {
     lichess: LichessGames
   }
   perspective: 'white' | 'black'
+  enabled: boolean
+}
+
+interface PositionLoad {
+  fen: string
+  perspective: 'white' | 'black'
 }
 
 const STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -59,6 +65,7 @@ const initialState = {
   history: [STARTING_FEN], // History of FENs
   selectedPiece: null,
   moveHistory: [],
+  // todo: games should probably be stored in a different slice
   games: {
     lichess: {
       // todo: probably want to have a caching system for at least some of the data
@@ -68,7 +75,8 @@ const initialState = {
       moves: []
     }
   },
-  perspective: 'white'
+  perspective: 'white',
+  enabled: true
 } as BoardState
 
 export const boardSlice = createSlice({
@@ -155,6 +163,57 @@ export const boardSlice = createSlice({
         ...state,
         perspective: state.perspective === 'white' ? 'black' : 'white'
       }
+    },
+    loadPosition: (state, action: PayloadAction<PositionLoad>) => {
+      return {
+        ...state,
+        perspective: action.payload.perspective,
+        fen: action.payload.fen,
+        games: {
+          lichess: {
+            white: 0,
+            black: 0,
+            draws: 0,
+            moves: []
+          }
+        },
+        history: [action.payload.fen],
+        moveHistory: [],
+        pgn: '',
+        opening: undefined,
+        halfMoveCount: 0,
+        selectedPiece: null
+      }
+    },
+    resetBoard: () => {
+      return initialState
+    },
+    wrongMove: (state, action: PayloadAction<PositionLoad>) => {
+      return {
+        ...state,
+        enabled: false,
+        halfMoveCount: 0,
+        perspective: action.payload.perspective,
+        fen: action.payload.fen,
+        history: [action.payload.fen],
+        moveHistory: [],
+        pgn: '',
+        opening: undefined,
+        selectedPiece: null
+      }
+    },
+    wrongMoveReset: state => {
+      return {
+        ...state,
+        enabled: true,
+        halfMoveCount: 0
+      }
+    },
+    resetHalfMoveCount: state => {
+      return {
+        ...state,
+        halfMoveCount: 0
+      }
     }
   }
 })
@@ -167,7 +226,12 @@ export const {
   traverseForwards,
   updateLichessGames,
   updateOpening,
-  flipBoard
+  flipBoard,
+  loadPosition,
+  resetBoard,
+  wrongMove,
+  wrongMoveReset,
+  resetHalfMoveCount
 } = boardSlice.actions
 
 export default boardSlice.reducer

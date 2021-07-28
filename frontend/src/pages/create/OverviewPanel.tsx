@@ -3,8 +3,8 @@ import { Box, Button } from '@chakra-ui/react'
 import { useState } from 'react'
 import { FC, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { updateLichessGames, updateOpening } from './board/boardSlice'
-import { useAppSelector } from './hooks'
+import { updateLichessGames, updateOpening } from 'store/boardSlice'
+import { useAppSelector } from 'utils/hooks'
 
 const OverviewPanel: FC = () => {
   const { lastMove, lichessGamesInPosition, commonMoves, fen, opening, history, halfMoveCount } = useAppSelector(state => ({

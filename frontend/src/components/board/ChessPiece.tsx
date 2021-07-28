@@ -1,6 +1,7 @@
 import { ChessInstance, PieceType } from 'chess.js'
-import { FC, useEffect, useMemo } from 'react'
+import { FC, useMemo } from 'react'
 import { useDrag } from 'react-dnd'
+import { useAppSelector } from 'utils/hooks'
 import getImageByPiece from './getImageByPiece'
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 
 const ChessPiece: FC<Props> = ({ type, color, size, position, game, onDragStart, minSize }) => {
   const imageUrl = useMemo(() => getImageByPiece(type, color), [type, color])
+  const boardEnabled = useAppSelector(state => state.board.enabled)
   const [, drag] = useDrag(
     () => ({
       type: color === 'w' ? type.toUpperCase() : type,
@@ -25,7 +27,7 @@ const ChessPiece: FC<Props> = ({ type, color, size, position, game, onDragStart,
       },
       canDrag: () => {
         console.log('can drag called')
-        return (color === 'w') !== (game.turn() === 'b')
+        return (color === 'w') !== (game.turn() === 'b') && boardEnabled
       }
     }),
     [game]
