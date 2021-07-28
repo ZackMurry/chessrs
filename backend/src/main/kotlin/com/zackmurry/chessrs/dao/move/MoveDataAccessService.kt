@@ -116,4 +116,26 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
         }
     }
 
+    override fun getMoveByFen(userId: UUID, fen: String): MoveEntity? {
+        val sql = "SELECT * FROM moves WHERE user_id = ? AND fen_before = ?"
+        try {
+            jdbcTemplate.connection.prepareStatement(sql).run {
+                setObject(1, userId)
+                setString(2, fen)
+                executeQuery().run {
+                    return if (next()) {
+                        println("move found")
+                        extractMoveEntity(this)
+                    } else {
+                        println("no move found")
+                        null
+                    }
+                }
+            }
+        } catch (e: SQLException) {
+            e.printStackTrace()
+            throw InternalServerException()
+        }
+    }
+
 }

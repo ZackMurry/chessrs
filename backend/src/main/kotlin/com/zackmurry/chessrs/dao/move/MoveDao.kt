@@ -14,4 +14,6 @@ interface MoveDao {
 
     fun getRandomMoves(userId: UUID, limit: Int): List<MoveEntity>
 
+    fun getMoveByFen(userId: UUID, fen: String): MoveEntity?
+
 }

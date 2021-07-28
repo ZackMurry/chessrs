@@ -1,7 +1,7 @@
 package com.zackmurry.chessrs.config
 
-import com.zackmurry.chessrs.security.OAuth2AuthenticationSuccessHandler
 import com.zackmurry.chessrs.security.HttpCookieOAuth2RequestRepository
+import com.zackmurry.chessrs.security.OAuth2AuthenticationSuccessHandler
 import com.zackmurry.chessrs.service.OAuth2UserService
 import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -10,7 +10,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
+import org.springframework.security.web.firewall.HttpFirewall
+import org.springframework.security.web.firewall.StrictHttpFirewall
 import org.springframework.web.reactive.function.client.WebClient
+
 
 @EnableWebSecurity
 class SecurityConfiguration(
@@ -20,22 +23,18 @@ class SecurityConfiguration(
 ) : WebSecurityConfigurerAdapter() {
 
     override fun configure(http: HttpSecurity?) {
-        http
-            ?.csrf()?.disable()
-            ?.cors()?.and()
-            ?.antMatcher("/**")
-            ?.authorizeRequests()
-            ?.antMatchers("/")
-            ?.permitAll()
-            ?.anyRequest()
-            ?.authenticated()
-            ?.and()
-            ?.oauth2Login()
-                ?.redirectionEndpoint()
-                ?.baseUri("/api/v1/oauth2/callback/*")
-                ?.and()?.successHandler(oAuth2AuthenticationSuccessHandler)
-                ?.userInfoEndpoint()?.userService(oAuth2UserService)
-                ?.and()?.authorizationEndpoint()?.authorizationRequestRepository(httpCookieOAuth2RequestRepository)
+        http?.run {
+            csrf().disable()
+                .cors().and()
+                .antMatcher("/**").authorizeRequests()
+                .antMatchers("/").permitAll()
+                .anyRequest().authenticated().and()
+                .oauth2Login()
+                .redirectionEndpoint().baseUri("/api/v1/oauth2/callback/*").and()
+                .successHandler(oAuth2AuthenticationSuccessHandler)
+                .userInfoEndpoint().userService(oAuth2UserService).and()
+                .authorizationEndpoint().authorizationRequestRepository(httpCookieOAuth2RequestRepository)
+        }
 
     }
 

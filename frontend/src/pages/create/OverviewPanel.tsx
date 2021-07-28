@@ -1,9 +1,9 @@
 import { Text } from '@chakra-ui/layout'
 import { Box, Button } from '@chakra-ui/react'
-import { useState } from 'react'
-import { FC, useEffect } from 'react'
+import { FC, useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { updateLichessGames, updateOpening } from 'store/boardSlice'
+import { MoveEntity } from 'types'
 import { useAppSelector } from 'utils/hooks'
 
 const OverviewPanel: FC = () => {
@@ -21,6 +21,29 @@ const OverviewPanel: FC = () => {
   const dispatch = useDispatch()
 
   const [isAddLoading, setAddLoading] = useState(false)
+  const [currentMove, setCurrentMove] = useState<MoveEntity | null>(null)
+  const [previousMove, setPreviousMove] = useState<MoveEntity | null>(null)
+
+  console.log('current move: ', currentMove)
+  console.log('previous move: ', previousMove)
+
+  const getMoveForPosition = useCallback(async () => {
+    setPreviousMove(currentMove)
+    setCurrentMove(null)
+    const response = await fetch(`/api/v1/moves/fen/${history[history.length - 1]}`)
+    if (!response.ok) {
+      console.error('Error getting move for position', response.status)
+      return
+    }
+    if (response.status === 204) {
+      console.log('no current move')
+      setCurrentMove(null)
+    } else {
+      setCurrentMove(await response.json())
+    }
+    // Adding currentMove as a dependency would make useEffect be called in a loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setCurrentMove, history])
 
   useEffect(() => {
     console.log('fetching games')
@@ -33,7 +56,8 @@ const OverviewPanel: FC = () => {
         return json
       })
       .then(json => dispatch(updateOpening(json.opening)))
-  }, [fen, dispatch])
+    getMoveForPosition()
+  }, [fen, dispatch, getMoveForPosition])
 
   const onAddMove = async () => {
     setAddLoading(true)
@@ -64,7 +88,7 @@ const OverviewPanel: FC = () => {
       p='5%'
     >
       {/* todo: don't allow users to add already added moves */}
-      <Button isDisabled={!lastMove} isLoading={isAddLoading} isFullWidth onClick={onAddMove}>
+      <Button isDisabled={!lastMove || Boolean(previousMove)} isLoading={isAddLoading} isFullWidth onClick={onAddMove}>
         Add {lastMove?.san || 'Move'} (A)
       </Button>
       {opening && (
@@ -90,6 +114,11 @@ const OverviewPanel: FC = () => {
             </Text>
           ))}
         </>
+      )}
+      {currentMove?.san && (
+        <Text fontSize='16px' fontWeight='bold' mb='5px' mt='20px' color='whiteText'>
+          This position already has a move: {currentMove.san}
+        </Text>
       )}
     </Box>
   )

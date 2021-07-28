@@ -7,8 +7,10 @@ import com.zackmurry.chessrs.exception.NotFoundException
 import com.zackmurry.chessrs.model.MoveCreateRequest
 import com.zackmurry.chessrs.model.MoveEntity
 import com.zackmurry.chessrs.security.UserPrincipal
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @Service
@@ -31,6 +33,13 @@ class MoveService(private val moveDao: MoveDao) {
 
     fun getRandomMoves(limit: Int): List<MoveEntity> {
         return moveDao.getRandomMoves(getUserId(), limit)
+    }
+
+    fun getMoveByFen(fen: String): MoveEntity {
+        println("fen: $fen")
+        val move = moveDao.getMoveByFen(getUserId(), fen) ?: throw ResponseStatusException(HttpStatus.NO_CONTENT)
+        println("move: ${move.san}")
+        return move
     }
 
 }

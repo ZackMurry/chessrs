@@ -50,7 +50,7 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
   const squarePosition = useMemo(() => squareIndexToCoordinates(x, y), [x, y])
   const { selectedPiece, lastMoveUCI, boardEnabled } = useAppSelector(state => ({
     selectedPiece: state.board.selectedPiece,
-    lastMoveUCI: state.board.moveHistory.length ? state.board.moveHistory[state.board.moveHistory.length - 1].uci : '',
+    lastMoveUCI: state.board.halfMoveCount > 0 ? state.board.moveHistory[state.board.halfMoveCount - 1].uci : '',
     boardEnabled: state.board.enabled
   }))
   const [canSelectedPieceMove, setCanSelectedPieceMove] = useState(false)
