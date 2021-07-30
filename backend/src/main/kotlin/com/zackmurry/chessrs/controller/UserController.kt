@@ -1,5 +1,6 @@
 package com.zackmurry.chessrs.controller
 
+import com.zackmurry.chessrs.security.UserPrincipal
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -9,9 +10,9 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class UserController {
 
-    @GetMapping("/me")
-    fun getAccountInfo(): Any {
-        return SecurityContextHolder.getContext().authentication.principal
+    @GetMapping("/account")
+    fun getAccountData(): Any {
+        return SecurityContextHolder.getContext().authentication.principal as UserPrincipal
     }
 
 }

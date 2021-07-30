@@ -2,15 +2,7 @@ import { Flex, Text } from '@chakra-ui/layout'
 import { FC, useEffect } from 'react'
 import { useAppSelector } from 'utils/hooks'
 import { useDispatch } from 'react-redux'
-import {
-  clearMetaData,
-  loadPosition,
-  makeMove,
-  resetBoard,
-  resetHalfMoveCount,
-  wrongMove,
-  wrongMoveReset
-} from 'store/boardSlice'
+import { clearMetaData, loadPosition, makeMove, wrongMove, wrongMoveReset } from 'store/boardSlice'
 import { useState } from 'react'
 import { MoveEntity } from 'types'
 import { useCallback } from 'react'

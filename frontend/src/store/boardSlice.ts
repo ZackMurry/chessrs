@@ -80,7 +80,7 @@ const initialState = {
 } as BoardState
 
 export const boardSlice = createSlice({
-  name: 'boardPosition',
+  name: 'board',
   initialState,
   reducers: {
     makeMove: (state, action: PayloadAction<string>) => {

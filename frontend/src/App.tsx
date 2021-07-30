@@ -9,10 +9,13 @@ import store from 'store/store'
 import CreateMovesPage from 'pages/create/CreateMovesPage'
 import StudyPage from 'pages/study/StudyPage'
 import PracticePage from 'pages/practice/PracticePage'
+import AccountManager from 'components/AccountManager'
 
+// todo: add way to view all of your moves in the database
 function App() {
   return (
     <Provider store={store}>
+      <AccountManager />
       <ChakraProvider theme={theme}>
         <DndProvider backend={HTML5Backend}>
           <Router>

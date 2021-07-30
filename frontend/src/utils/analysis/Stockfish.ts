@@ -35,7 +35,7 @@ export default class Stockfish {
     public onReady: () => void,
     public onEvaluation: (cp: number) => void
   ) {
-    this.worker = new Worker('stockfish.js')
+    this.worker = new Worker('/stockfish.js')
     this.worker.postMessage('isready')
     this.worker.onmessage = event => {
       const { data } = event
