@@ -19,7 +19,7 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
     val jdbcTemplate = JdbcTemplate(dataSource.connection)
 
     override fun createMove(request: MoveCreateRequest, userId: UUID) {
-        val sql = "INSERT INTO moves (user_id, fen_before, san, uci, fen_after, last_reviewed, time_created, is_white) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        val sql = "INSERT INTO moves (user_id, fen_before, san, uci, fen_after, last_reviewed, time_created, is_white, due) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         val currentTime = System.currentTimeMillis()
         try {
             jdbcTemplate.connection.prepareStatement(sql).run {
@@ -31,6 +31,7 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
                 setLong(6, currentTime)
                 setLong(7, currentTime)
                 setBoolean(8, request.isWhite)
+                setLong(9, currentTime)
                 executeUpdate()
             }
         } catch (e: SQLException) {
@@ -51,7 +52,8 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
                 UUID.fromString(getString("user_id")),
                 getLong("last_reviewed"),
                 getLong("time_created"),
-                getInt("num_reviews")
+                getInt("num_reviews"),
+                getLong("due")
             )
         }
     }
@@ -131,6 +133,76 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
                         null
                     }
                 }
+            }
+        } catch (e: SQLException) {
+            e.printStackTrace()
+            throw InternalServerException()
+        }
+    }
+
+    override fun getDueMoves(userId: UUID, limit: Int): List<MoveEntity> {
+        val sql = "SELECT * FROM moves WHERE user_id = ? AND due <= ? ORDER BY due LIMIT ?"
+        try {
+            jdbcTemplate.connection.prepareStatement(sql).run {
+                setObject(1, userId)
+                setLong(2, System.currentTimeMillis())
+                setInt(3, limit)
+                executeQuery().run {
+                    val list = ArrayList<MoveEntity>()
+                    while (resultSet.next()) {
+                        list.add(extractMoveEntity(this))
+                    }
+                    return list
+                }
+            }
+        } catch (e: SQLException) {
+            e.printStackTrace()
+            throw InternalServerException()
+        }
+    }
+
+    override fun getNumberOfDueMoves(userId: UUID): Int {
+        val sql = "SELECT COUNT(*) FROM moves WHERE user_id = ? AND due <= ?"
+        try {
+            jdbcTemplate.connection.prepareStatement(sql).run {
+                setObject(1, userId)
+                setLong(2, System.currentTimeMillis())
+                executeQuery().run {
+                    if (next()) {
+                        return getInt("count")
+                    }
+                    throw InternalServerException()
+                }
+            }
+        } catch (e: SQLException) {
+            e.printStackTrace()
+            throw InternalServerException()
+        }
+    }
+
+    override fun resetMoveReviews(id: UUID) {
+        val sql = "UPDATE moves SET num_reviews = 0, last_reviewed = ?, due = ? WHERE id = ?"
+        val time = System.currentTimeMillis()
+        try {
+            jdbcTemplate.connection.prepareStatement(sql).run {
+                setLong(1, time)
+                setLong(2, time)
+                setObject(3, id)
+                executeUpdate()
+            }
+        } catch (e: SQLException) {
+            e.printStackTrace()
+            throw InternalServerException()
+        }
+    }
+
+    override fun addReview(id: UUID, due: Long) {
+        val sql = "UPDATE moves SET num_reviews = num_reviews + 1, due = ? WHERE id = ?"
+        try {
+            jdbcTemplate.connection.prepareStatement(sql).run {
+                setLong(1, due)
+                setObject(2, id)
+                executeUpdate()
             }
         } catch (e: SQLException) {
             e.printStackTrace()

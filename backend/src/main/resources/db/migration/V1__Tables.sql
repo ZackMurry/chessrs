@@ -3,7 +3,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS users (
     id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
     username VARCHAR(20) NOT NULL,
-    provider VARCHAR(32) NOT NULL
+    provider VARCHAR(32) NOT NULL,
+    ease_factor FLOAT NOT NULL DEFAULT 3.0
 );
 
 CREATE TABLE IF NOT EXISTS moves (
@@ -16,5 +17,6 @@ CREATE TABLE IF NOT EXISTS moves (
     last_reviewed BIGINT NOT NULL, -- last reviewed using SRS
     time_created BIGINT NOT NULL,
     num_reviews INT NOT NULL DEFAULT 0,
-    is_white BOOLEAN NOT NULL DEFAULT TRUE
+    is_white BOOLEAN NOT NULL DEFAULT TRUE,
+    due BIGINT NOT NULL -- Time that the move is next due to review
 );

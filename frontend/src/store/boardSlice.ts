@@ -220,6 +220,13 @@ export const boardSlice = createSlice({
         ...state,
         enabled: false
       }
+    },
+    clearMetaData: state => {
+      return {
+        ...initialState,
+        fen: state.fen,
+        perspective: state.perspective
+      }
     }
   }
 })
@@ -238,7 +245,8 @@ export const {
   wrongMove,
   wrongMoveReset,
   resetHalfMoveCount,
-  disableBoard
+  disableBoard,
+  clearMetaData
 } = boardSlice.actions
 
 export default boardSlice.reducer

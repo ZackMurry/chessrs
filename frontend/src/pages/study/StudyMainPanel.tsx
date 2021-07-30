@@ -2,9 +2,23 @@ import { Flex, Text } from '@chakra-ui/layout'
 import { FC, useEffect } from 'react'
 import { useAppSelector } from 'utils/hooks'
 import { useDispatch } from 'react-redux'
-import { loadPosition, makeMove, resetHalfMoveCount, wrongMove, wrongMoveReset } from 'store/boardSlice'
+import {
+  clearMetaData,
+  loadPosition,
+  makeMove,
+  resetBoard,
+  resetHalfMoveCount,
+  wrongMove,
+  wrongMoveReset
+} from 'store/boardSlice'
 import { useState } from 'react'
 import { MoveEntity } from 'types'
+import { useCallback } from 'react'
+
+interface GetReviewsResponse {
+  moves: MoveEntity[]
+  total: number
+}
 
 const StudyMainPanel: FC = () => {
   const { halfMoveCount, moveSAN } = useAppSelector(state => ({
@@ -15,6 +29,7 @@ const StudyMainPanel: FC = () => {
   const [movesInQueue, setMovesInQueue] = useState<MoveEntity[]>([])
   const [moveWrong, setMoveWrong] = useState(false)
   const [resetTimeout, setResetTimeout] = useState<NodeJS.Timeout>(null)
+  const [reviewsLeft, setReviewsLeft] = useState(0)
 
   const fetchMoves = async (): Promise<MoveEntity[]> => {
     const response = await fetch('/api/v1/moves/need-review')
@@ -22,9 +37,19 @@ const StudyMainPanel: FC = () => {
       console.error('Error fetching moves. Status: ', response.status)
       return
     }
-    const moves = await response.json()
-    setMovesInQueue(moves)
-    return moves
+    const json = (await response.json()) as GetReviewsResponse
+    setMovesInQueue(json.moves)
+    setReviewsLeft(json.total)
+    return json.moves
+  }
+
+  const sendReviewData = async (move: MoveEntity, success: Boolean) => {
+    const response = await fetch(`/api/v1/moves/study/${move.id}?success=${success}`, {
+      method: 'POST'
+    })
+    if (!response.ok) {
+      console.error('Error sending review data. Status: ', response.status)
+    }
   }
 
   // For the first load
@@ -39,28 +64,10 @@ const StudyMainPanel: FC = () => {
     })
   }, [dispatch])
 
-  useEffect(() => {
-    if (halfMoveCount === 0 || moveWrong || movesInQueue.length === 0) {
-      // Prevent loop from useEffect changing dependencies, which calls useEffect, etc
-      return
-    }
-    console.log('move made')
-    if (moveSAN !== '' && movesInQueue.length && moveSAN !== movesInQueue[0].san) {
-      console.warn('wrong move!')
-      setMoveWrong(true)
-      dispatch(wrongMove({ fen: movesInQueue[0].fenBefore, perspective: movesInQueue[0].isWhite ? 'white' : 'black' }))
-      dispatch(makeMove(movesInQueue[0].uci))
-      setResetTimeout(
-        setTimeout(() => {
-          setMoveWrong(false)
-          dispatch(wrongMoveReset())
-        }, 3000)
-      )
-      return
-    }
+  const nextMove = useCallback(() => {
+    dispatch(clearMetaData())
     if (movesInQueue.length === 1) {
       console.log('fetching more moves...')
-      dispatch(resetHalfMoveCount())
       fetchMoves().then(moves => {
         if (moves.length === 0) {
           console.log('no moves')
@@ -82,6 +89,32 @@ const StudyMainPanel: FC = () => {
         loadPosition({ fen: newMovesInQueue[0].fenBefore, perspective: newMovesInQueue[0].isWhite ? 'white' : 'black' })
       )
     }
+  }, [dispatch, movesInQueue, setMovesInQueue])
+
+  useEffect(() => {
+    if (halfMoveCount === 0 || moveWrong || movesInQueue.length === 0) {
+      // Prevent loop from useEffect changing dependencies, which calls useEffect, etc
+      return
+    }
+    console.log('move made')
+    if (moveSAN !== '' && movesInQueue.length && moveSAN !== movesInQueue[0].san) {
+      console.warn('wrong move!')
+      setMoveWrong(true)
+      sendReviewData(movesInQueue[0], false)
+      dispatch(wrongMove({ fen: movesInQueue[0].fenBefore, perspective: movesInQueue[0].isWhite ? 'white' : 'black' }))
+      dispatch(makeMove(movesInQueue[0].uci))
+      setResetTimeout(
+        setTimeout(() => {
+          dispatch(wrongMoveReset())
+          setMoveWrong(false)
+          nextMove()
+        }, 3000)
+      )
+      return
+    }
+    console.log('hmc: ', halfMoveCount)
+    sendReviewData(movesInQueue[0], true).then(nextMove)
+    setReviewsLeft(l => l - 1)
     return () => {
       if (resetTimeout) {
         clearTimeout(resetTimeout)
@@ -96,7 +129,9 @@ const StudyMainPanel: FC = () => {
     moveWrong,
     moveSAN,
     resetTimeout,
-    setResetTimeout
+    setResetTimeout,
+    setReviewsLeft,
+    nextMove
   ])
 
   // todo: delete move button
@@ -121,8 +156,7 @@ const StudyMainPanel: FC = () => {
         will be shown and highlighted.
       </Text>
       <Text fontSize='18px' fontWeight='bold' mb='5px' mt='15px' color='whiteText'>
-        {/* todo: left to study counter */}
-        24 left to study
+        {reviewsLeft} left to study
       </Text>
     </Flex>
   )

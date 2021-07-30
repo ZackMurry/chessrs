@@ -1,5 +1,6 @@
 package com.zackmurry.chessrs.controller
 
+import com.zackmurry.chessrs.exception.BadRequestException
 import com.zackmurry.chessrs.model.MoveCreateRequest
 import com.zackmurry.chessrs.model.MoveEntity
 import com.zackmurry.chessrs.service.MoveService
@@ -28,6 +29,12 @@ class MoveController(private val moveService: MoveService) {
         // The wildcard is for the raw FEN
         val fen = request.requestURI.split("/api/v1/moves/fen/")[1]
         return moveService.getMoveByFen(URLDecoder.decode(fen, StandardCharsets.UTF_8))
+    }
+
+    @PostMapping("/study/{id}")
+    fun studyMove(@PathVariable id: String, @RequestParam(required = true) success: Boolean) {
+        val uuid = UUID.fromString(id) ?: throw BadRequestException()
+        return moveService.studyMove(uuid, success)
     }
 
 }

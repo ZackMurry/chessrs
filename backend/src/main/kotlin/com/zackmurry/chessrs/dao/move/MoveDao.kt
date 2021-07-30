@@ -16,4 +16,12 @@ interface MoveDao {
 
     fun getMoveByFen(userId: UUID, fen: String): MoveEntity?
 
+    fun getDueMoves(userId: UUID, limit: Int): List<MoveEntity>
+
+    fun getNumberOfDueMoves(userId: UUID): Int
+
+    fun resetMoveReviews(id: UUID)
+
+    fun addReview(id: UUID, due: Long)
+
 }

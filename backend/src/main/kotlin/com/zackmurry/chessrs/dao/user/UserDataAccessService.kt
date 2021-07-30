@@ -20,7 +20,11 @@ class UserDataAccessService(private val dataSource: DataSource) : UserDao {
             preparedStatement.setString(1, username)
             val resultSet = preparedStatement.executeQuery()
             if (resultSet.next()) {
-                return UserEntity(resultSet.getString("username"), UUID.fromString(resultSet.getString("id")), resultSet.getString("provider"))
+                return UserEntity(
+                    resultSet.getString("username"),
+                    UUID.fromString(resultSet.getString("id")),
+                    resultSet.getString("provider"),
+                    resultSet.getFloat("ease_factor"))
             }
             return null
         } catch (e: SQLException) {

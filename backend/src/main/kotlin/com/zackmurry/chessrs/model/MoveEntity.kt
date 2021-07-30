@@ -11,4 +11,5 @@ data class MoveEntity(var fenBefore: String,
                       val userId: UUID,
                       val lastReviewed: Long,
                       val timeCreated: Long,
-                      val numReviews: Int)
+                      val numReviews: Int,
+                      val due: Long)

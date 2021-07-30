@@ -54,7 +54,7 @@ class OAuth2UserService(private val userDao: UserDao) : DefaultOAuth2UserService
 
     private fun registerNewUser(oAuth2UserRequest: OAuth2UserRequest, oAuth2UserInfo: OAuth2UserInfo): UserEntity {
         val username = oAuth2UserInfo.getUsername() ?: throw OAuth2AuthenticationProcessingException("Username not found from OAuth2 provider")
-        val user = UserEntity(username, UUID.randomUUID(), oAuth2UserRequest.clientRegistration.registrationId.uppercase())
+        val user = UserEntity(username, UUID.randomUUID(), oAuth2UserRequest.clientRegistration.registrationId.uppercase(), DEFAULT_EASE)
         userDao.createUser(user)
         return user
     }
