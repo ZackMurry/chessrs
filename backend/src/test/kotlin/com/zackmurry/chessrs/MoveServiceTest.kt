@@ -1,6 +1,7 @@
 package com.zackmurry.chessrs
 
 import com.zackmurry.chessrs.exception.BadRequestException
+import com.zackmurry.chessrs.exception.NoContentException
 import com.zackmurry.chessrs.exception.NotFoundException
 import com.zackmurry.chessrs.model.MoveCreateRequest
 import com.zackmurry.chessrs.model.UserEntity
@@ -17,8 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.web.server.ResponseStatusException
 import java.util.*
+import kotlin.collections.ArrayList
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
@@ -26,7 +27,6 @@ class MoveServiceTest {
 
     @Autowired
     private lateinit var moveService: MoveService
-
 
     @Autowired
     private lateinit var userService: UserService
@@ -41,7 +41,7 @@ class MoveServiceTest {
             createTestUser()
         } else {
             val user = UserEntity(testUsername, UUID.randomUUID(), AuthProvider.LICHESS.toString(), DEFAULT_EASE)
-            assertDoesNotThrow { userService.createUser(user) }
+            userService.createUser(user)
             val userPrincipal = UserPrincipal.create(user)
             val token = UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.authorities)
             SecurityContextHolder.getContext().authentication = token
@@ -50,7 +50,7 @@ class MoveServiceTest {
 
     @AfterEach
     fun deleteTestUser() {
-        assertDoesNotThrow { userService.delete(testUsername) }
+        userService.delete(testUsername)
     }
 
     @DisplayName("Create move")
@@ -135,7 +135,7 @@ class MoveServiceTest {
             val id = moveService.createMove(move)
             moveService.deleteById(id)
             assertThrows<NotFoundException>("Getting a deleted move by id should produce a NotFoundException") { moveService.getMoveById(id) }
-            assertThrows<ResponseStatusException>("Getting a deleted move by FEN should produce a ResponseStatusException (204)") { moveService.getMoveByFen(move.fenBefore) }
+            assertThrows<NoContentException>("Getting a deleted move by FEN should produce a NoContentException") { moveService.getMoveByFen(move.fenBefore) }
         }
         var id = UUID.randomUUID()
         // Making sure that there aren't any moves with this id lol
@@ -203,7 +203,128 @@ class MoveServiceTest {
         }
     }
 
-    // todo: tests for getting due moves and some of the getMovesBy_ methods
-    // todo: tests for SpacedRepetitionService
+    @DisplayName("Due moves")
+    @Test
+    fun testDueMoves() {
+        for (i in 1..10) {
+            val moveIds = ArrayList<UUID>()
+            for (j in 1..25) {
+                moveIds.add(moveService.createMove(
+                    MoveCreateRequest(
+                        RandomStringUtils.randomAlphanumeric(30, 90),
+                        RandomStringUtils.randomAlphanumeric(3, 5),
+                        RandomStringUtils.randomAlphanumeric(4),
+                        RandomStringUtils.randomAlphanumeric(30, 90),
+                        j % 2 == 0
+                    )
+                ))
+            }
+
+            var dueMoves = moveService.getMovesThatNeedReview(5)
+            assertEquals(5, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
+            assertEquals(25, dueMoves.total, "The total moves due should be accurate")
+            for (move in dueMoves.moves) {
+                moveService.studyMove(move.id, true)
+            }
+
+            dueMoves = moveService.getMovesThatNeedReview(5)
+            assertEquals(5, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
+            assertEquals(20, dueMoves.total, "The total moves due should be accurate")
+            for (move in dueMoves.moves) {
+                moveService.studyMove(move.id, true)
+            }
+
+            dueMoves = moveService.getMovesThatNeedReview(5)
+            assertEquals(5, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
+            assertEquals(15, dueMoves.total, "The total moves due should be accurate")
+            for (move in dueMoves.moves) {
+                moveService.studyMove(move.id, true)
+            }
+
+            dueMoves = moveService.getMovesThatNeedReview(5)
+            assertEquals(5, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
+            assertEquals(10, dueMoves.total, "The total moves due should be accurate")
+            for (move in dueMoves.moves) {
+                moveService.studyMove(move.id, true)
+            }
+
+            dueMoves = moveService.getMovesThatNeedReview(3)
+            assertEquals(3, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
+            assertEquals(5, dueMoves.total, "The total moves due should be accurate")
+            for (move in dueMoves.moves) {
+                moveService.studyMove(move.id, true)
+            }
+
+            dueMoves = moveService.getMovesThatNeedReview(2)
+            assertEquals(2, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
+            assertEquals(2, dueMoves.total, "The total moves due should be accurate")
+            for (move in dueMoves.moves) {
+                moveService.studyMove(move.id, true)
+            }
+
+            dueMoves = moveService.getMovesThatNeedReview(5)
+            assertEquals(0, dueMoves.moves.size, "Getting due moves should return no moves when there are no moves due")
+            assertEquals(0, dueMoves.total, "The total moves due should be accurate")
+            for (id in moveIds) {
+                moveService.deleteById(id)
+            }
+        }
+    }
+
+    @DisplayName("Get move by FEN")
+    @Test
+    fun testGetMovesByFen() {
+        val moveIds = ArrayList<UUID>()
+        for (i in 1..25) {
+            moveIds.add(moveService.createMove(
+                MoveCreateRequest(
+                    RandomStringUtils.randomAlphanumeric(90),
+                    RandomStringUtils.randomAlphanumeric(3, 5),
+                    RandomStringUtils.randomAlphanumeric(4),
+                    RandomStringUtils.randomAlphanumeric(30, 90),
+                    i % 2 == 0
+                )
+            ))
+        }
+
+        for (id in moveIds) {
+            val move = moveService.getMoveById(id)
+            val fenMove = moveService.getMoveByFen(move.fenBefore)
+            assertEquals(move, fenMove, "Getting a move by FEN should return the same data as getting it by id")
+        }
+
+        for (i in 1..10) {
+            assertThrows<NoContentException>("Getting a move that doesn't exist by FEN should produce a NoContentException"){ moveService.getMoveByFen(RandomStringUtils.randomAlphanumeric(30, 89)) }
+        }
+    }
+
+    @DisplayName("Get move by id")
+    @Test
+    fun testGetMoveById() {
+        val moveIds = ArrayList<UUID>()
+        val moves = ArrayList<MoveCreateRequest>()
+        for (i in 1..25) {
+            val move = MoveCreateRequest(
+                RandomStringUtils.randomAlphanumeric(30, 90),
+                RandomStringUtils.randomAlphanumeric(3, 5),
+                RandomStringUtils.randomAlphanumeric(4),
+                RandomStringUtils.randomAlphanumeric(30, 90),
+                i % 2 == 0
+            )
+            moves.add(move)
+            moveIds.add(moveService.createMove(move))
+        }
+
+        for (i in 0..24) {
+            val move = moves[i]
+            val id = moveIds[i]
+            val returnedMove = moveService.getMoveById(id)
+            assertEquals(id, returnedMove.id)
+            assertEquals(move.fenBefore, returnedMove.fenBefore)
+            assertEquals(move.uci, returnedMove.uci)
+            assertEquals(move.san, returnedMove.san)
+            assertEquals(move.fenAfter, returnedMove.fenAfter)
+        }
+    }
 
 }

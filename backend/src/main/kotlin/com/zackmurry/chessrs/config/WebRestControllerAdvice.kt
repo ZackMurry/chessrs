@@ -1,9 +1,6 @@
 package com.zackmurry.chessrs.config
 
-import com.zackmurry.chessrs.exception.BadRequestException
-import com.zackmurry.chessrs.exception.ForbiddenException
-import com.zackmurry.chessrs.exception.InternalServerException
-import com.zackmurry.chessrs.exception.NotFoundException
+import com.zackmurry.chessrs.exception.*
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -35,5 +32,9 @@ class WebRestControllerAdvice {
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFoundException(exception: NotFoundException): String? = exception.message
+
+    @ExceptionHandler(NoContentException::class)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun handleNoContentException(exception: NoContentException): String? = exception.message
 
 }

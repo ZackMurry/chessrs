@@ -3,6 +3,7 @@ package com.zackmurry.chessrs.service
 import com.zackmurry.chessrs.dao.move.MoveDao
 import com.zackmurry.chessrs.exception.BadRequestException
 import com.zackmurry.chessrs.exception.ForbiddenException
+import com.zackmurry.chessrs.exception.NoContentException
 import com.zackmurry.chessrs.exception.NotFoundException
 import com.zackmurry.chessrs.model.MoveCreateRequest
 import com.zackmurry.chessrs.model.MoveEntity
@@ -40,7 +41,7 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
     }
 
     fun getMoveByFen(fen: String): MoveEntity {
-        return moveDao.getByFen(getUserId(), fen) ?: throw ResponseStatusException(HttpStatus.NO_CONTENT)
+        return moveDao.getByFen(getUserId(), fen) ?: throw NoContentException()
     }
 
     fun studyMove(id: UUID, success: Boolean) {
