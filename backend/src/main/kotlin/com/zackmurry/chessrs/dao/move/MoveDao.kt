@@ -6,22 +6,24 @@ import java.util.*
 
 interface MoveDao {
 
-    fun createMove(request: MoveCreateRequest, userId: UUID)
+    fun create(request: MoveCreateRequest, userId: UUID): UUID
 
     fun getMovesOrderedByLastReviewAsc(userId: UUID, limit: Int): List<MoveEntity>
 
-    fun getMoveById(id: UUID): MoveEntity?
+    fun getById(id: UUID): MoveEntity?
 
-    fun getRandomMoves(userId: UUID, limit: Int): List<MoveEntity>
+    fun getRandom(userId: UUID, limit: Int): List<MoveEntity>
 
-    fun getMoveByFen(userId: UUID, fen: String): MoveEntity?
+    fun getByFen(userId: UUID, fen: String): MoveEntity?
 
-    fun getDueMoves(userId: UUID, limit: Int): List<MoveEntity>
+    fun getDue(userId: UUID, limit: Int): List<MoveEntity>
 
-    fun getNumberOfDueMoves(userId: UUID): Int
+    fun getAmountDue(userId: UUID): Int
 
-    fun resetMoveReviews(id: UUID)
+    fun resetReviewsById(id: UUID)
 
     fun addReview(id: UUID, due: Long)
+
+    fun deleteById(id: UUID)
 
 }

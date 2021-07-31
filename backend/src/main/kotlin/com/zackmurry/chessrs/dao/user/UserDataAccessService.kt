@@ -48,5 +48,17 @@ class UserDataAccessService(private val dataSource: DataSource) : UserDao {
         }
     }
 
+    override fun deleteUser(username: String) {
+        val sql = "DELETE FROM users WHERE username = ?"
+        try {
+            jdbcTemplate.connection.prepareStatement(sql).run {
+                setString(1, username)
+                executeUpdate()
+            }
+        } catch (e: SQLException) {
+            e.printStackTrace()
+            throw InternalServerException()
+        }
+    }
 
 }

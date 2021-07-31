@@ -18,11 +18,11 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
 
     val jdbcTemplate = JdbcTemplate(dataSource.connection)
 
-    override fun createMove(request: MoveCreateRequest, userId: UUID) {
+    override fun create(request: MoveCreateRequest, userId: UUID): UUID {
         val sql = "INSERT INTO moves (user_id, fen_before, san, uci, fen_after, last_reviewed, time_created, is_white, due) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         val currentTime = System.currentTimeMillis()
         try {
-            jdbcTemplate.connection.prepareStatement(sql).run {
+            jdbcTemplate.connection.prepareStatement(sql, arrayOf("id")).run {
                 setObject(1, userId)
                 setString(2, request.fenBefore)
                 setString(3, request.san)
@@ -33,6 +33,13 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
                 setBoolean(8, request.isWhite)
                 setLong(9, currentTime)
                 executeUpdate()
+                generatedKeys.run {
+                    if (next()) {
+                        return UUID.fromString(getString("id"))
+                    } else {
+                        throw InternalServerException()
+                    }
+                }
             }
         } catch (e: SQLException) {
             e.printStackTrace()
@@ -78,7 +85,7 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
         }
     }
 
-    override fun getRandomMoves(userId: UUID, limit: Int): List<MoveEntity> {
+    override fun getRandom(userId: UUID, limit: Int): List<MoveEntity> {
         val sql = "SELECT * FROM moves WHERE user_id = ? ORDER BY random() LIMIT ?"
         try {
             jdbcTemplate.connection.prepareStatement(sql).run {
@@ -99,7 +106,7 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
 
     }
 
-    override fun getMoveById(id: UUID): MoveEntity? {
+    override fun getById(id: UUID): MoveEntity? {
         val sql = "SELECT * FROM moves WHERE id = ?"
         try {
             jdbcTemplate.connection.prepareStatement(sql).run {
@@ -118,7 +125,7 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
         }
     }
 
-    override fun getMoveByFen(userId: UUID, fen: String): MoveEntity? {
+    override fun getByFen(userId: UUID, fen: String): MoveEntity? {
         val sql = "SELECT * FROM moves WHERE user_id = ? AND fen_before = ?"
         try {
             jdbcTemplate.connection.prepareStatement(sql).run {
@@ -140,7 +147,7 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
         }
     }
 
-    override fun getDueMoves(userId: UUID, limit: Int): List<MoveEntity> {
+    override fun getDue(userId: UUID, limit: Int): List<MoveEntity> {
         val sql = "SELECT * FROM moves WHERE user_id = ? AND due <= ? ORDER BY due LIMIT ?"
         try {
             jdbcTemplate.connection.prepareStatement(sql).run {
@@ -161,7 +168,7 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
         }
     }
 
-    override fun getNumberOfDueMoves(userId: UUID): Int {
+    override fun getAmountDue(userId: UUID): Int {
         val sql = "SELECT COUNT(*) FROM moves WHERE user_id = ? AND due <= ?"
         try {
             jdbcTemplate.connection.prepareStatement(sql).run {
@@ -180,7 +187,7 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
         }
     }
 
-    override fun resetMoveReviews(id: UUID) {
+    override fun resetReviewsById(id: UUID) {
         val sql = "UPDATE moves SET num_reviews = 0, last_reviewed = ?, due = ? WHERE id = ?"
         val time = System.currentTimeMillis()
         try {
@@ -202,6 +209,19 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
             jdbcTemplate.connection.prepareStatement(sql).run {
                 setLong(1, due)
                 setObject(2, id)
+                executeUpdate()
+            }
+        } catch (e: SQLException) {
+            e.printStackTrace()
+            throw InternalServerException()
+        }
+    }
+
+    override fun deleteById(id: UUID) {
+        val sql = "DELETE FROM moves WHERE id = ?"
+        try {
+            jdbcTemplate.connection.prepareStatement(sql).run {
+                setObject(1, id)
                 executeUpdate()
             }
         } catch (e: SQLException) {

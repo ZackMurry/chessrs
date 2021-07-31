@@ -21,33 +21,30 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
         return (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).getId()
     }
 
-    fun createMove(request: MoveCreateRequest) {
+    fun createMove(request: MoveCreateRequest): UUID {
         // todo: check if a position already has the same before_fen
         if (request.fenBefore.length > 90 || request.fenAfter.length > 90 || request.san.length > 5 || request.uci.length > 4) {
             throw BadRequestException()
         }
-        moveDao.createMove(request, getUserId())
+        return moveDao.create(request, getUserId())
     }
 
     fun getMovesThatNeedReview(limit: Int): NeedReviewResponse {
-        val moves = moveDao.getDueMoves(getUserId(), limit)
-        val total = moveDao.getNumberOfDueMoves(getUserId())
+        val moves = moveDao.getDue(getUserId(), limit)
+        val total = moveDao.getAmountDue(getUserId())
         return NeedReviewResponse(total, moves)
     }
 
     fun getRandomMoves(limit: Int): List<MoveEntity> {
-        return moveDao.getRandomMoves(getUserId(), limit)
+        return moveDao.getRandom(getUserId(), limit)
     }
 
     fun getMoveByFen(fen: String): MoveEntity {
-        println("fen: $fen")
-        val move = moveDao.getMoveByFen(getUserId(), fen) ?: throw ResponseStatusException(HttpStatus.NO_CONTENT)
-        println("move: ${move.san}")
-        return move
+        return moveDao.getByFen(getUserId(), fen) ?: throw ResponseStatusException(HttpStatus.NO_CONTENT)
     }
 
     fun studyMove(id: UUID, success: Boolean) {
-        val move = moveDao.getMoveById(id) ?: throw NotFoundException()
+        val move = moveDao.getById(id) ?: throw NotFoundException()
         if (getUserId() != move.userId) {
             throw ForbiddenException()
         }
@@ -56,8 +53,24 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
             val due = System.currentTimeMillis() + interval
             moveDao.addReview(id, due)
         } else {
-            moveDao.resetMoveReviews(id)
+            moveDao.resetReviewsById(id)
         }
+    }
+
+    fun getMoveById(id: UUID): MoveEntity {
+        val move = moveDao.getById(id) ?: throw NotFoundException()
+        if (getUserId() != move.userId) {
+            throw ForbiddenException()
+        }
+        return moveDao.getById(id) ?: throw NotFoundException()
+    }
+
+    fun deleteById(id: UUID) {
+        val move = moveDao.getById(id) ?: throw NotFoundException()
+        if (getUserId() != move.userId) {
+            throw ForbiddenException()
+        }
+        moveDao.deleteById(id)
     }
 
 }

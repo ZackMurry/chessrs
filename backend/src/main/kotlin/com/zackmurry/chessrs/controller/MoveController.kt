@@ -1,6 +1,7 @@
 package com.zackmurry.chessrs.controller
 
 import com.zackmurry.chessrs.exception.BadRequestException
+import com.zackmurry.chessrs.model.IdResponse
 import com.zackmurry.chessrs.model.MoveCreateRequest
 import com.zackmurry.chessrs.model.MoveEntity
 import com.zackmurry.chessrs.service.MoveService
@@ -15,7 +16,7 @@ import javax.servlet.http.HttpServletRequest
 class MoveController(private val moveService: MoveService) {
 
     @PostMapping("")
-    fun createMove(@RequestBody request: MoveCreateRequest) = moveService.createMove(request)
+    fun createMove(@RequestBody request: MoveCreateRequest) = IdResponse(moveService.createMove(request))
 
     // todo: switch this endpoint to an SRS algorithm
     @GetMapping("/need-review")

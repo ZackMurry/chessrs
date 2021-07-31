@@ -15,7 +15,7 @@ import java.util.*
 private val logger = LoggerFactory.getLogger(OAuth2UserService::class.java)
 
 @Service
-class OAuth2UserService(private val userDao: UserDao) : DefaultOAuth2UserService() {
+class OAuth2UserService(private val userService: UserService) : DefaultOAuth2UserService() {
 
     override fun loadUser(userRequest: OAuth2UserRequest?): OAuth2User {
         val oAuth2User = super.loadUser(userRequest)
@@ -38,7 +38,7 @@ class OAuth2UserService(private val userDao: UserDao) : DefaultOAuth2UserService
             throw OAuth2AuthenticationProcessingException("Username not found from OAuth2 provider")
         }
 
-        val queriedUser = userDao.getUserByUsername(username)
+        val queriedUser = userService.getUserByUsername(username)
         val user: UserEntity
         if (queriedUser != null) {
             user = queriedUser
@@ -55,7 +55,7 @@ class OAuth2UserService(private val userDao: UserDao) : DefaultOAuth2UserService
     private fun registerNewUser(oAuth2UserRequest: OAuth2UserRequest, oAuth2UserInfo: OAuth2UserInfo): UserEntity {
         val username = oAuth2UserInfo.getUsername() ?: throw OAuth2AuthenticationProcessingException("Username not found from OAuth2 provider")
         val user = UserEntity(username, UUID.randomUUID(), oAuth2UserRequest.clientRegistration.registrationId.uppercase(), DEFAULT_EASE)
-        userDao.createUser(user)
+        userService.createUser(user)
         return user
     }
 

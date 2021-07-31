@@ -8,4 +8,6 @@ interface UserDao {
 
     fun createUser(user: UserEntity)
 
+    fun deleteUser(username: String)
+
 }
