@@ -227,6 +227,14 @@ export const boardSlice = createSlice({
         fen: state.fen,
         perspective: state.perspective
       }
+    },
+    clearLichessGames: state => {
+      return {
+        ...state,
+        games: {
+          lichess: initialState.games.lichess
+        }
+      }
     }
   }
 })
@@ -246,7 +254,8 @@ export const {
   wrongMoveReset,
   resetHalfMoveCount,
   disableBoard,
-  clearMetaData
+  clearMetaData,
+  clearLichessGames
 } = boardSlice.actions
 
 export default boardSlice.reducer

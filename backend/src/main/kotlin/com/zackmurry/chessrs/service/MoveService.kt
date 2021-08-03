@@ -22,12 +22,14 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
         return (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).getId()
     }
 
-    fun createMove(request: MoveCreateRequest): UUID {
+    fun createMove(request: MoveCreateRequest): MoveEntity {
         // todo: check if a position already has the same before_fen
         if (request.fenBefore.length > 90 || request.fenAfter.length > 90 || request.san.length > 5 || request.uci.length > 4) {
             throw BadRequestException()
         }
-        return moveDao.create(request, getUserId())
+        val currTime = System.currentTimeMillis()
+        val id = moveDao.create(request, getUserId(), currTime)
+        return MoveEntity(request.fenBefore, request.san, request.uci, request.fenAfter, request.isWhite, id, getUserId(), currTime, currTime, 0, currTime)
     }
 
     fun getMovesThatNeedReview(limit: Int): NeedReviewResponse {

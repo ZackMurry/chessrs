@@ -18,9 +18,8 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
 
     val jdbcTemplate = JdbcTemplate(dataSource.connection)
 
-    override fun create(request: MoveCreateRequest, userId: UUID): UUID {
+    override fun create(request: MoveCreateRequest, userId: UUID, timeCreated: Long): UUID {
         val sql = "INSERT INTO moves (user_id, fen_before, san, uci, fen_after, last_reviewed, time_created, is_white, due) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        val currentTime = System.currentTimeMillis()
         try {
             jdbcTemplate.connection.prepareStatement(sql, arrayOf("id")).run {
                 setObject(1, userId)
@@ -28,10 +27,10 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
                 setString(3, request.san)
                 setString(4, request.uci)
                 setString(5, request.fenAfter)
-                setLong(6, currentTime)
-                setLong(7, currentTime)
+                setLong(6, timeCreated)
+                setLong(7, timeCreated)
                 setBoolean(8, request.isWhite)
-                setLong(9, currentTime)
+                setLong(9, timeCreated)
                 executeUpdate()
                 generatedKeys.run {
                     if (next()) {
@@ -133,10 +132,8 @@ class MoveDataAccessService(dataSource: DataSource) : MoveDao {
                 setString(2, fen)
                 executeQuery().run {
                     return if (next()) {
-                        println("move found")
                         extractMoveEntity(this)
                     } else {
-                        println("no move found")
                         null
                     }
                 }

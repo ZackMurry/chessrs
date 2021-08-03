@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest
 class MoveController(private val moveService: MoveService) {
 
     @PostMapping("")
-    fun createMove(@RequestBody request: MoveCreateRequest) = IdResponse(moveService.createMove(request))
+    fun createMove(@RequestBody request: MoveCreateRequest) = moveService.createMove(request)
 
     // todo: switch this endpoint to an SRS algorithm
     @GetMapping("/need-review")

@@ -23,7 +23,14 @@ const PositionPanel: FC = () => {
   const [bestMove, setBestMove] = useState('...')
   const [depth, setDepth] = useState(0)
   const [isLoading, setLoading] = useState(true)
-  const uciMoves = useMemo(() => moveHistory.map(m => m.uci).join(' '), [moveHistory])
+  const uciMoves = useMemo(
+    () =>
+      moveHistory
+        .slice(0, halfMoveCount)
+        .map(m => m.uci)
+        .join(' '),
+    [moveHistory, halfMoveCount]
+  )
   const onAnalysis = (sf: Stockfish, bestMove: string, d: number) => {
     if (!sf.isReady) {
       console.log('not ready')
@@ -85,7 +92,7 @@ const PositionPanel: FC = () => {
   }, [stockfish, uciMoves])
   const dispatch = useAppDispatch()
 
-  const whitePerspectiveEvaluation = evaluation * (moveHistory.length % 2 === 0 ? 1 : -1)
+  const whitePerspectiveEvaluation = evaluation * (halfMoveCount % 2 === 0 ? 1 : -1)
 
   return (
     <Flex

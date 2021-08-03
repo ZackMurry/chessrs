@@ -2,13 +2,13 @@ import { Text } from '@chakra-ui/layout'
 import { Box, Button } from '@chakra-ui/react'
 import { FC, useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { updateLichessGames, updateOpening } from 'store/boardSlice'
+import { clearLichessGames, updateLichessGames, updateOpening } from 'store/boardSlice'
 import { MoveEntity } from 'types'
 import { useAppSelector } from 'utils/hooks'
 
 const OverviewPanel: FC = () => {
   const { lastMove, lichessGamesInPosition, commonMoves, fen, opening, history, halfMoveCount } = useAppSelector(state => ({
-    lastMove: state.board.moveHistory.length > 0 ? state.board.moveHistory[state.board.moveHistory.length - 1] : null,
+    lastMove: state.board.moveHistory.length > 0 ? state.board.moveHistory[state.board.halfMoveCount - 1] : null,
     lichessGamesInPosition:
       state.board.games.lichess.white + state.board.games.lichess.draws + state.board.games.lichess.black,
     commonMoves: state.board.games.lichess.moves.map(m => m.san),
@@ -23,14 +23,14 @@ const OverviewPanel: FC = () => {
   const [isAddLoading, setAddLoading] = useState(false)
   const [currentMove, setCurrentMove] = useState<MoveEntity | null>(null)
   const [previousMove, setPreviousMove] = useState<MoveEntity | null>(null)
+  const [isLichessDataLoading, setLichessDataLoading] = useState(false)
 
-  console.log('current move: ', currentMove)
-  console.log('previous move: ', previousMove)
+  console.log('lastMove: ', lastMove)
 
   const getMoveForPosition = useCallback(async () => {
     setPreviousMove(currentMove)
     setCurrentMove(null)
-    const response = await fetch(`/api/v1/moves/fen/${history[history.length - 1]}`)
+    const response = await fetch(`/api/v1/moves/fen/${fen}`)
     if (!response.ok) {
       console.error('Error getting move for position', response.status)
       return
@@ -43,10 +43,12 @@ const OverviewPanel: FC = () => {
     }
     // Adding currentMove as a dependency would make useEffect be called in a loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setCurrentMove, history])
+  }, [setCurrentMove, history, fen])
 
   useEffect(() => {
     console.log('fetching games')
+    setLichessDataLoading(true)
+    dispatch(clearLichessGames())
     fetch(
       `https://explorer.lichess.ovh/lichess?variant=standard&speeds[]=bullet&speeds[]=blitz&speeds[]=rapid&speeds[]=classical&ratings[]=1600&ratings[]=2500&moves=6&fen=${fen}`
     )
@@ -56,13 +58,17 @@ const OverviewPanel: FC = () => {
         return json
       })
       .then(json => dispatch(updateOpening(json.opening)))
+      .then(() => setLichessDataLoading(false))
     getMoveForPosition()
-  }, [fen, dispatch, getMoveForPosition])
+  }, [fen, dispatch, getMoveForPosition, setLichessDataLoading])
 
   const onAddMove = async () => {
     setAddLoading(true)
+    setPreviousMove(currentMove)
+    setCurrentMove(null)
+    console.log('adding move')
     // todo: error message if failed
-    await fetch('/api/v1/moves', {
+    const response = await fetch('/api/v1/moves', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -73,7 +79,13 @@ const OverviewPanel: FC = () => {
         isWhite: history.length % 2 === 0
       })
     })
-    setAddLoading(false)
+    if (response.ok) {
+      setAddLoading(false)
+      const json = await response.json()
+      setPreviousMove(json)
+    } else {
+      console.error('Error creating move. Status: ', response.status)
+    }
   }
 
   return (
@@ -88,7 +100,12 @@ const OverviewPanel: FC = () => {
       p='5%'
     >
       {/* todo: don't allow users to add already added moves */}
-      <Button isDisabled={!lastMove || Boolean(previousMove)} isLoading={isAddLoading} isFullWidth onClick={onAddMove}>
+      <Button
+        isDisabled={Boolean(previousMove) || !Boolean(lastMove)}
+        isLoading={isAddLoading}
+        isFullWidth
+        onClick={onAddMove}
+      >
         Add {lastMove?.san || 'Move'} (A)
       </Button>
       {opening && (
@@ -100,7 +117,7 @@ const OverviewPanel: FC = () => {
         Times Reached
       </Text>
       <Text fontSize='16px' mb='3px' color='whiteText'>
-        Lichess games: {lichessGamesInPosition}
+        Lichess games: {isLichessDataLoading ? 'Loading...' : lichessGamesInPosition}
       </Text>
       {commonMoves.length > 0 && (
         <>

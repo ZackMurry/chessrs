@@ -6,7 +6,7 @@ import java.util.*
 
 interface MoveDao {
 
-    fun create(request: MoveCreateRequest, userId: UUID): UUID
+    fun create(request: MoveCreateRequest, userId: UUID, timeCreated: Long): UUID
 
     fun getMovesOrderedByLastReviewAsc(userId: UUID, limit: Int): List<MoveEntity>
 
