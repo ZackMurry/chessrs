@@ -15,8 +15,8 @@ import AccountManager from 'components/AccountManager'
 function App() {
   return (
     <Provider store={store}>
-      <AccountManager />
       <ChakraProvider theme={theme}>
+        <AccountManager />
         <DndProvider backend={HTML5Backend}>
           <Router>
             <Flex alignItems='center' pl='50px' pt='20px' color='whiteText'>

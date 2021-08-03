@@ -8,7 +8,8 @@ const theme = extendTheme({
     whiteText: '#e8e6e3',
     btnBg: '#242728',
     btnBorder: '#454442',
-    elevated: '#2e3133'
+    elevated: '#2e3133',
+    error: '#b73331'
   },
   styles: {
     global: {
@@ -28,3 +29,5 @@ const theme = extendTheme({
 })
 
 export default theme
+
+export const TOAST_DURATION = 5000

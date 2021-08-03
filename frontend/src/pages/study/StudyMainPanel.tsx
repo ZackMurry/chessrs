@@ -1,73 +1,84 @@
 import { Flex, Text } from '@chakra-ui/layout'
-import { FC, useEffect } from 'react'
+import { FC, useEffect, useCallback } from 'react'
 import { useAppSelector } from 'utils/hooks'
 import { useDispatch } from 'react-redux'
 import { clearMetaData, loadPosition, makeMove, wrongMove, wrongMoveReset } from 'store/boardSlice'
 import { useState } from 'react'
 import { MoveEntity } from 'types'
-import { useCallback } from 'react'
+import ErrorToast from 'components/ErrorToast'
+import { useToast } from '@chakra-ui/react'
+import { TOAST_DURATION } from 'theme'
 
 interface GetReviewsResponse {
   moves: MoveEntity[]
   total: number
 }
 
+// todo: some way of obviously indicating when there are no more reviews left
 const StudyMainPanel: FC = () => {
   const { halfMoveCount, moveSAN } = useAppSelector(state => ({
     halfMoveCount: state.board.halfMoveCount,
     moveSAN: state.board.moveHistory.length ? state.board.moveHistory[0].san : ''
   }))
   const dispatch = useDispatch()
+  const toast = useToast()
+
   const [movesInQueue, setMovesInQueue] = useState<MoveEntity[]>([])
   const [moveWrong, setMoveWrong] = useState(false)
   const [resetTimeout, setResetTimeout] = useState<NodeJS.Timeout>(null)
   const [reviewsLeft, setReviewsLeft] = useState(0)
 
-  const fetchMoves = async (): Promise<MoveEntity[]> => {
+  const fetchMoves = useCallback(async () => {
     const response = await fetch('/api/v1/moves/need-review')
     if (!response.ok) {
-      console.error('Error fetching moves. Status: ', response.status)
+      toast({
+        duration: TOAST_DURATION,
+        isClosable: true,
+        render: options => (
+          <ErrorToast description={`Error getting moves to review (status: ${response.status})`} onClose={options.onClose} />
+        )
+      })
       return
     }
     const json = (await response.json()) as GetReviewsResponse
     setMovesInQueue(json.moves)
     setReviewsLeft(json.total)
-    return json.moves
-  }
-
-  const sendReviewData = async (move: MoveEntity, success: Boolean) => {
-    const response = await fetch(`/api/v1/moves/study/${move.id}?success=${success}`, {
-      method: 'POST'
-    })
-    if (!response.ok) {
-      console.error('Error sending review data. Status: ', response.status)
+    if (json.moves.length === 0) {
+      console.log('no moves')
+      return
     }
-  }
+    dispatch(loadPosition({ fen: json.moves[0].fenBefore, perspective: json.moves[0].isWhite ? 'white' : 'black' }))
+  }, [setReviewsLeft, setMovesInQueue, toast, dispatch])
+
+  const sendReviewData = useCallback(
+    async (move: MoveEntity, success: Boolean) => {
+      const response = await fetch(`/api/v1/moves/study/${move.id}?success=${success}`, {
+        method: 'POST'
+      })
+      if (!response.ok) {
+        toast({
+          duration: TOAST_DURATION,
+          isClosable: true,
+          render: options => (
+            <ErrorToast description={`Error sending review data (status: ${response.status})`} onClose={options.onClose} />
+          )
+        })
+      }
+    },
+    [toast]
+  )
 
   // For the first load
   useEffect(() => {
     console.log('first load')
-    fetchMoves().then(moves => {
-      if (moves.length === 0) {
-        console.log('no moves')
-        return
-      }
-      dispatch(loadPosition({ fen: moves[0].fenBefore, perspective: moves[0].isWhite ? 'white' : 'black' }))
-    })
-  }, [dispatch])
+    fetchMoves()
+  }, [dispatch, fetchMoves])
 
   const nextMove = useCallback(() => {
     dispatch(clearMetaData())
     if (movesInQueue.length === 1) {
       console.log('fetching more moves...')
-      fetchMoves().then(moves => {
-        if (moves.length === 0) {
-          console.log('no moves')
-          return
-        }
-        console.log('loading pos from fetch')
-        dispatch(loadPosition({ fen: moves[0].fenBefore, perspective: moves[0].isWhite ? 'white' : 'black' }))
-      })
+      fetchMoves()
     } else {
       console.log('next move...')
       const newMovesInQueue = movesInQueue.slice()
@@ -81,7 +92,7 @@ const StudyMainPanel: FC = () => {
         loadPosition({ fen: newMovesInQueue[0].fenBefore, perspective: newMovesInQueue[0].isWhite ? 'white' : 'black' })
       )
     }
-  }, [dispatch, movesInQueue, setMovesInQueue])
+  }, [dispatch, movesInQueue, setMovesInQueue, fetchMoves])
 
   useEffect(() => {
     if (halfMoveCount === 0 || moveWrong || movesInQueue.length === 0) {
@@ -123,7 +134,8 @@ const StudyMainPanel: FC = () => {
     resetTimeout,
     setResetTimeout,
     setReviewsLeft,
-    nextMove
+    nextMove,
+    sendReviewData
   ])
 
   // todo: delete move button

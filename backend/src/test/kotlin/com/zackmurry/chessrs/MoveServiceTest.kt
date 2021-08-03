@@ -63,7 +63,7 @@ class MoveServiceTest {
                     RandomStringUtils.randomAlphanumeric(4),
                     RandomStringUtils.randomAlphanumeric(30, 90),
                     i % 2 == 0)
-            val id = moveService.createMove(move)
+            val id = moveService.createMove(move).id
             val createdMove = moveService.getMoveById(id)
             assertEquals(id, createdMove.id)
             assertEquals(move.fenBefore, createdMove.fenBefore)
@@ -132,7 +132,7 @@ class MoveServiceTest {
                 RandomStringUtils.randomAlphanumeric(30, 90),
                 i % 2 == 0
             )
-            val id = moveService.createMove(move)
+            val id = moveService.createMove(move).id
             moveService.deleteById(id)
             assertThrows<NotFoundException>("Getting a deleted move by id should produce a NotFoundException") { moveService.getMoveById(id) }
             assertThrows<NoContentException>("Getting a deleted move by FEN should produce a NoContentException") { moveService.getMoveByFen(move.fenBefore) }
@@ -161,7 +161,7 @@ class MoveServiceTest {
                 RandomStringUtils.randomAlphanumeric(30, 90),
                 i % 2 == 0
             )
-            val id = moveService.createMove(move)
+            val id = moveService.createMove(move).id
             var createdMove = moveService.getMoveById(id)
             assertEquals(0, createdMove.numReviews, "A newly created move should have 0 reviews")
             assertTrue(createdMove.due <= System.currentTimeMillis(), "A newly created move should be due")
@@ -191,7 +191,7 @@ class MoveServiceTest {
                     RandomStringUtils.randomAlphanumeric(30, 90),
                     i % 2 == 0
                 )
-            ))
+            ).id)
         }
 
         for (i in 1..25) {
@@ -217,7 +217,7 @@ class MoveServiceTest {
                         RandomStringUtils.randomAlphanumeric(30, 90),
                         j % 2 == 0
                     )
-                ))
+                ).id)
             }
 
             var dueMoves = moveService.getMovesThatNeedReview(5)
@@ -284,7 +284,7 @@ class MoveServiceTest {
                     RandomStringUtils.randomAlphanumeric(30, 90),
                     i % 2 == 0
                 )
-            ))
+            ).id)
         }
 
         for (id in moveIds) {
@@ -312,7 +312,7 @@ class MoveServiceTest {
                 i % 2 == 0
             )
             moves.add(move)
-            moveIds.add(moveService.createMove(move))
+            moveIds.add(moveService.createMove(move).id)
         }
 
         for (i in 0..24) {

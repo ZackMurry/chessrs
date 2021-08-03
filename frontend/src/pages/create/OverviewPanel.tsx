@@ -1,8 +1,10 @@
 import { Text } from '@chakra-ui/layout'
-import { Box, Button } from '@chakra-ui/react'
+import { Box, Button, useToast } from '@chakra-ui/react'
+import ErrorToast from 'components/ErrorToast'
 import { FC, useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { clearLichessGames, updateLichessGames, updateOpening } from 'store/boardSlice'
+import { TOAST_DURATION } from 'theme'
 import { MoveEntity } from 'types'
 import { useAppSelector } from 'utils/hooks'
 
@@ -19,6 +21,7 @@ const OverviewPanel: FC = () => {
   }))
 
   const dispatch = useDispatch()
+  const toast = useToast()
 
   const [isAddLoading, setAddLoading] = useState(false)
   const [currentMove, setCurrentMove] = useState<MoveEntity | null>(null)
@@ -32,7 +35,16 @@ const OverviewPanel: FC = () => {
     setCurrentMove(null)
     const response = await fetch(`/api/v1/moves/fen/${fen}`)
     if (!response.ok) {
-      console.error('Error getting move for position', response.status)
+      toast({
+        duration: TOAST_DURATION,
+        isClosable: true,
+        render: options => (
+          <ErrorToast
+            description={`Error getting current move for position (status: ${response.status})`}
+            onClose={options.onClose}
+          />
+        )
+      })
       return
     }
     if (response.status === 204) {
@@ -43,7 +55,7 @@ const OverviewPanel: FC = () => {
     }
     // Adding currentMove as a dependency would make useEffect be called in a loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setCurrentMove, history, fen])
+  }, [setCurrentMove, history, fen, toast])
 
   useEffect(() => {
     console.log('fetching games')
@@ -59,15 +71,21 @@ const OverviewPanel: FC = () => {
       })
       .then(json => dispatch(updateOpening(json.opening)))
       .then(() => setLichessDataLoading(false))
+      .catch(() =>
+        toast({
+          duration: TOAST_DURATION,
+          isClosable: true,
+          render: options => <ErrorToast description='Error getting games from Lichess' onClose={options.onClose} />
+        })
+      )
     getMoveForPosition()
-  }, [fen, dispatch, getMoveForPosition, setLichessDataLoading])
+  }, [fen, dispatch, getMoveForPosition, setLichessDataLoading, toast])
 
   const onAddMove = async () => {
     setAddLoading(true)
     setPreviousMove(currentMove)
     setCurrentMove(null)
     console.log('adding move')
-    // todo: error message if failed
     const response = await fetch('/api/v1/moves', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -84,7 +102,13 @@ const OverviewPanel: FC = () => {
       const json = await response.json()
       setPreviousMove(json)
     } else {
-      console.error('Error creating move. Status: ', response.status)
+      toast({
+        duration: TOAST_DURATION,
+        isClosable: true,
+        render: options => (
+          <ErrorToast description={`Error creating move (status: ${response.status})`} onClose={options.onClose} />
+        )
+      })
     }
   }
 

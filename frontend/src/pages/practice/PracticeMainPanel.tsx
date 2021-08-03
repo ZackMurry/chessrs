@@ -5,6 +5,9 @@ import { useDispatch } from 'react-redux'
 import { disableBoard, loadPosition, makeMove, resetHalfMoveCount, wrongMove, wrongMoveReset } from 'store/boardSlice'
 import { useState } from 'react'
 import { MoveEntity } from 'types'
+import { useToast } from '@chakra-ui/react'
+import ErrorToast from 'components/ErrorToast'
+import { TOAST_DURATION } from 'theme'
 
 const PracticeMainPanel: FC = () => {
   const { halfMoveCount, moveSAN } = useAppSelector(state => ({
@@ -12,33 +15,39 @@ const PracticeMainPanel: FC = () => {
     moveSAN: state.board.moveHistory.length ? state.board.moveHistory[0].san : ''
   }))
   const dispatch = useDispatch()
+  const toast = useToast()
+
   const [movesInQueue, setMovesInQueue] = useState<MoveEntity[]>([])
   const [moveWrong, setMoveWrong] = useState(false)
   const [resetTimeout, setResetTimeout] = useState<NodeJS.Timeout>(null)
 
-  const fetchMoves = useCallback(async (): Promise<MoveEntity[]> => {
+  const fetchMoves = useCallback(async () => {
     const response = await fetch('/api/v1/moves/need-practice')
     if (!response.ok) {
-      console.error('Error fetching moves. Status: ', response.status)
+      toast({
+        duration: TOAST_DURATION,
+        isClosable: true,
+        render: options => (
+          <ErrorToast description={`Error getting move data (status: ${response.status})`} onClose={options.onClose} />
+        )
+      })
       dispatch(disableBoard())
       return
     }
     const moves = await response.json()
     setMovesInQueue(moves)
-    return moves
-  }, [setMovesInQueue, dispatch])
+    if (moves.length === 0) {
+      console.log('no moves')
+      return
+    }
+    console.log('loading pos from fetch')
+    dispatch(loadPosition({ fen: moves[0].fenBefore, perspective: moves[0].isWhite ? 'white' : 'black' }))
+  }, [setMovesInQueue, dispatch, toast])
 
   // For the first load
   useEffect(() => {
-    fetchMoves().then(moves => {
-      if (moves.length === 0) {
-        console.log('no moves')
-        dispatch(disableBoard())
-        return
-      }
-      dispatch(loadPosition({ fen: moves[0].fenBefore, perspective: moves[0].isWhite ? 'white' : 'black' }))
-    })
-  }, [dispatch, fetchMoves])
+    fetchMoves()
+  }, [fetchMoves])
 
   useEffect(() => {
     if (halfMoveCount === 0 || moveWrong || movesInQueue.length === 0) {
@@ -62,14 +71,7 @@ const PracticeMainPanel: FC = () => {
     if (movesInQueue.length === 1) {
       console.log('fetching more moves...')
       dispatch(resetHalfMoveCount())
-      fetchMoves().then(moves => {
-        if (moves.length === 0) {
-          console.log('no moves')
-          return
-        }
-        console.log('loading pos from fetch')
-        dispatch(loadPosition({ fen: moves[0].fenBefore, perspective: moves[0].isWhite ? 'white' : 'black' }))
-      })
+      fetchMoves()
     } else {
       console.log('next move...')
       const newMovesInQueue = movesInQueue.slice()
