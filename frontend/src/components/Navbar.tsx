@@ -9,11 +9,11 @@ const Navbar: FC = () => {
     <MobileNavbar />
   ) : (
     <Flex alignItems='center' pl='50px' pt='20px' color='whiteText'>
-      <Link to='/'>
+      <a href='/'>
         <Heading as='h2' fontSize='32px' fontWeight='normal'>
           ChesSRS
         </Heading>
-      </Link>
+      </a>
       <Link to='/create'>
         <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
           Create

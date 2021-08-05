@@ -10,14 +10,14 @@ const MobileNavbar: FC = () => {
   return (
     <header style={{ background: theme.colors.surface }}>
       <Flex h='7vh' p='12.5px 25px' justifyContent='space-between' alignItems='center'>
-        <IconButton onClick={toggle} bg='transparent' aria-label='Open navigation'>
+        <IconButton onClick={toggle} bg='transparent' aria-label='Open navigation' borderRadius='3px'>
           <HamburgerIcon w='35px' h='35px' color='grayBtn' />
         </IconButton>
-        <Link to='/' onClick={toggle}>
+        <a href='/'>
           <Heading as='h2' fontSize='28px' fontWeight='normal' color='whiteText'>
             ChesSRS
           </Heading>
-        </Link>
+        </a>
       </Flex>
       <Collapse in={isExpanded}>
         <Box bg='surface' pb='10px'>

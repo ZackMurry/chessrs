@@ -10,11 +10,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
-import org.springframework.web.cors.CorsConfiguration
-import org.springframework.web.cors.CorsConfigurationSource
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.reactive.function.client.WebClient
-import java.util.List
+import org.springframework.security.config.web.servlet.invoke
 
 
 @EnableWebSecurity
@@ -25,19 +22,27 @@ class SecurityConfiguration(
 ) : WebSecurityConfigurerAdapter() {
 
     override fun configure(http: HttpSecurity?) {
-        http?.run {
-            csrf().disable()
-            antMatcher("/**").authorizeRequests()
-                .antMatchers("/").permitAll()
-                .anyRequest().authenticated()
-            oauth2Login()
-                .redirectionEndpoint().baseUri("/api/v1/oauth2/callback/*").and()
-                .successHandler(oAuth2AuthenticationSuccessHandler)
-                .userInfoEndpoint().userService(oAuth2UserService).and()
-                .authorizationEndpoint().authorizationRequestRepository(httpCookieOAuth2RequestRepository)
-            cors()
+        http {
+            csrf {
+                disable()
+            }
+            authorizeRequests {
+                authorize("/", permitAll)
+                authorize(anyRequest, authenticated)
+            }
+            oauth2Login {
+                redirectionEndpoint {
+                    baseUri = "/api/v1/oauth2/callback/*"
+                }
+                authenticationSuccessHandler = oAuth2AuthenticationSuccessHandler
+                userInfoEndpoint {
+                    userService = oAuth2UserService
+                }
+                authorizationEndpoint {
+                    authorizationRequestRepository = httpCookieOAuth2RequestRepository
+                }
+            }
         }
-
     }
 
     @Bean
