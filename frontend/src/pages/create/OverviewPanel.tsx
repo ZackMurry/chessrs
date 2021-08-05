@@ -3,8 +3,8 @@ import { Box, Button, useBreakpointValue, useToast } from '@chakra-ui/react'
 import ErrorToast from 'components/ErrorToast'
 import { FC, useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { clearLichessGames, updateLichessGames, updateOpening } from 'store/boardSlice'
-import theme, { TOAST_DURATION } from 'theme'
+import { updateLichessGames, updateOpening } from 'store/boardSlice'
+import { TOAST_DURATION } from 'theme'
 import { MoveEntity } from 'types'
 import { useAppSelector } from 'utils/hooks'
 
@@ -26,7 +26,6 @@ const OverviewPanel: FC = () => {
   const [isAddLoading, setAddLoading] = useState(false)
   const [currentMove, setCurrentMove] = useState<MoveEntity | null>(null)
   const [previousMove, setPreviousMove] = useState<MoveEntity | null>(null)
-  const [isLichessDataLoading, setLichessDataLoading] = useState(false)
   const isMobile = useBreakpointValue({ base: true, md: false })
 
   console.log('lastMove: ', lastMove)
@@ -60,8 +59,6 @@ const OverviewPanel: FC = () => {
 
   useEffect(() => {
     console.log('fetching games')
-    setLichessDataLoading(true)
-    // dispatch(clearLichessGames())
     fetch(
       `https://explorer.lichess.ovh/lichess?variant=standard&speeds[]=bullet&speeds[]=blitz&speeds[]=rapid&speeds[]=classical&ratings[]=1600&ratings[]=2500&moves=6&fen=${fen}`
     )
@@ -71,7 +68,6 @@ const OverviewPanel: FC = () => {
         return json
       })
       .then(json => dispatch(updateOpening(json.opening)))
-      .then(() => setLichessDataLoading(false))
       .catch(() =>
         toast({
           duration: TOAST_DURATION,
@@ -80,7 +76,7 @@ const OverviewPanel: FC = () => {
         })
       )
     getMoveForPosition()
-  }, [fen, dispatch, getMoveForPosition, setLichessDataLoading, toast])
+  }, [fen, dispatch, getMoveForPosition, toast])
 
   const onAddMove = async () => {
     setAddLoading(true)
@@ -148,7 +144,7 @@ const OverviewPanel: FC = () => {
         </Text>
       )}
       <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mt='5px' color='whiteText'>
-        Lichess games: {isLichessDataLoading ? 'Loading...' : lichessGamesInPosition}
+        Lichess games: {lichessGamesInPosition}
       </Text>
       {commonMoves.length > 0 ? (
         <>
@@ -171,7 +167,7 @@ const OverviewPanel: FC = () => {
           )}
         </>
       ) : (
-        <Text fontSize='1.1em' mb='1px' mt='20px' color='whiteText'>
+        <Text fontSize='1.4em' mb='1px' mt='20px' color='whiteText'>
           There are no moves found in this position
         </Text>
       )}

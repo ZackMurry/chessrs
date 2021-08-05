@@ -9,7 +9,8 @@ const theme = extendTheme({
     btnBg: '#242728',
     btnBorder: '#454442',
     elevated: '#2e3133',
-    error: '#b73331'
+    error: '#b73331',
+    grayBtn: '#767a7c'
   },
   styles: {
     global: {

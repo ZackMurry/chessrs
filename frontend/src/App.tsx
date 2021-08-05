@@ -10,6 +10,7 @@ import CreateMovesPage from 'pages/create/CreateMovesPage'
 import StudyPage from 'pages/study/StudyPage'
 import PracticePage from 'pages/practice/PracticePage'
 import AccountManager from 'components/AccountManager'
+import Navbar from 'components/Navbar'
 
 // todo: add way to view all of your moves in the database
 function App() {
@@ -19,31 +20,7 @@ function App() {
         <AccountManager />
         <DndProvider backend={HTML5Backend}>
           <Router>
-            <Flex alignItems='center' pl='50px' pt='20px' color='whiteText'>
-              <Heading as='h2' fontSize='32px' fontWeight='normal'>
-                ChesSRS
-              </Heading>
-              <Link to='/create'>
-                <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
-                  Create
-                </Heading>
-              </Link>
-              <Link to='/study'>
-                <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
-                  Study
-                </Heading>
-              </Link>
-              <Link to='/practice'>
-                <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
-                  Practice
-                </Heading>
-              </Link>
-              <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
-                <a href='/api/v1/oauth2/code/lichess' rel='noreferrer noopener'>
-                  Login
-                </a>
-              </Heading>
-            </Flex>
+            <Navbar />
             <Switch>
               <Route path='/create' exact>
                 <CreateMovesPage />

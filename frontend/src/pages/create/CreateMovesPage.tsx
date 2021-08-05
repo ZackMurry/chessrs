@@ -19,7 +19,7 @@ const CreateMovesPage: FC = () => {
         templateColumns='repeat(12, 1fr)'
         templateRows={{ base: 'repeat(10, 1fr)', md: 'repeat(5, 1fr)', xl: 'repeat(1, 1fr)' }}
         minH='90vh'
-        gap={{ base: 0, md: 4 }}
+        gap={{ base: 0, lg: 4 }}
         mt='10px'
       >
         <GridItem

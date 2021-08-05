@@ -151,16 +151,16 @@ const StudyMainPanel: FC = () => {
       h='100%'
       p='5%'
     >
-      <Text fontSize='16px' mb='5px' mt='15px' color='whiteText'>
-        Studying in ChesSRS reviews the moves that you've added for positions. This uses a Spaced Repetition algorithm (SM-2)
-        that spaces out your reviews automatically, giving you new reviews each day.
+      <Text fontSize='1.4em' fontWeight='bold' mb='5px' mt='0.4em' color='whiteText'>
+        {reviewsLeft} left to study
       </Text>
-      <Text fontSize='16px' mb='5px' mt='15px' color='whiteText'>
+      <Text fontSize='16px' mb='5px' mt='0.4em' color='whiteText'>
+        Studying in ChesSRS reviews the moves that you've added for positions. This uses a Spaced Repetition algorithm that
+        spaces out your reviews automatically, giving you new reviews each day.
+      </Text>
+      <Text fontSize='16px' mb='5px' mt='0.4em' color='whiteText'>
         All you have to do is make the move that you added on the board. When you make an incorrect move, the correct move
         will be shown and highlighted.
-      </Text>
-      <Text fontSize='18px' fontWeight='bold' mb='5px' mt='15px' color='whiteText'>
-        {reviewsLeft} left to study
       </Text>
     </Flex>
   )
