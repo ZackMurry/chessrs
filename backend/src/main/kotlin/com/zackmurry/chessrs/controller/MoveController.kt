@@ -38,4 +38,10 @@ class MoveController(private val moveService: MoveService) {
         return moveService.studyMove(uuid, success)
     }
 
+    @DeleteMapping("/id/{id}")
+    fun deleteMoveById(@PathVariable id: String) {
+        val uuid = UUID.fromString(id) ?: throw BadRequestException()
+        return moveService.deleteById(uuid)
+    }
+
 }

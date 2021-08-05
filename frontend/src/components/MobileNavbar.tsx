@@ -13,9 +13,11 @@ const MobileNavbar: FC = () => {
         <IconButton onClick={toggle} bg='transparent' aria-label='Open navigation'>
           <HamburgerIcon w='35px' h='35px' color='grayBtn' />
         </IconButton>
-        <Heading as='h2' fontSize='28px' fontWeight='normal' color='whiteText'>
-          ChesSRS
-        </Heading>
+        <Link to='/' onClick={toggle}>
+          <Heading as='h2' fontSize='28px' fontWeight='normal' color='whiteText'>
+            ChesSRS
+          </Heading>
+        </Link>
       </Flex>
       <Collapse in={isExpanded}>
         <Box bg='surface' pb='10px'>

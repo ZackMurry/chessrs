@@ -1,5 +1,7 @@
+import { DeleteIcon } from '@chakra-ui/icons'
 import { Text } from '@chakra-ui/layout'
-import { Box, Button, useBreakpointValue, useToast } from '@chakra-ui/react'
+import { Box, Button, Flex, IconButton, useBreakpointValue, useToast } from '@chakra-ui/react'
+import DarkTooltip from 'components/DarkTooltip'
 import ErrorToast from 'components/ErrorToast'
 import { FC, useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
@@ -27,6 +29,7 @@ const OverviewPanel: FC = () => {
   const [currentMove, setCurrentMove] = useState<MoveEntity | null>(null)
   const [previousMove, setPreviousMove] = useState<MoveEntity | null>(null)
   const isMobile = useBreakpointValue({ base: true, md: false })
+  const [isDeleteLoading, setDeleteLoading] = useState(false)
 
   console.log('lastMove: ', lastMove)
 
@@ -94,8 +97,8 @@ const OverviewPanel: FC = () => {
         isWhite: history.length % 2 === 0
       })
     })
+    setAddLoading(false)
     if (response.ok) {
-      setAddLoading(false)
       const json = await response.json()
       setPreviousMove(json)
     } else {
@@ -104,6 +107,26 @@ const OverviewPanel: FC = () => {
         isClosable: true,
         render: options => (
           <ErrorToast description={`Error creating move (status: ${response.status})`} onClose={options.onClose} />
+        )
+      })
+    }
+  }
+
+  const onDeleteMove = async () => {
+    console.log('Deleting ', currentMove.san)
+    setDeleteLoading(true)
+    const response = await fetch(`/api/v1/moves/id/${currentMove.id}`, {
+      method: 'DELETE'
+    })
+    setDeleteLoading(false)
+    if (response.ok) {
+      setCurrentMove(null)
+    } else {
+      toast({
+        duration: TOAST_DURATION,
+        isClosable: true,
+        render: options => (
+          <ErrorToast description={`Error deleting move (status: ${response.status})`} onClose={options.onClose} />
         )
       })
     }
@@ -120,7 +143,6 @@ const OverviewPanel: FC = () => {
       h='100%'
       p='5%'
     >
-      {/* todo: don't allow users to add already added moves */}
       <Button
         isDisabled={Boolean(previousMove) || !Boolean(lastMove)}
         isLoading={isAddLoading}
@@ -132,6 +154,10 @@ const OverviewPanel: FC = () => {
       {opening ? (
         <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' mt='20px' color='whiteText'>
           {opening.name} <span style={{ fontWeight: 'normal' }}>{opening.eco}</span>
+        </Text>
+      ) : halfMoveCount === 0 ? (
+        <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mt='20px' color='whiteText'>
+          Starting position
         </Text>
       ) : (
         <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mt='20px' color='whiteText'>
@@ -172,9 +198,21 @@ const OverviewPanel: FC = () => {
         </Text>
       )}
       {currentMove?.san ? (
-        <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' mb='5px' mt='0.8em' color='whiteText'>
-          This position already has a move: {currentMove.san}
-        </Text>
+        <Flex justifyContent='space-between' alignItems='center' mb='5px' mt='0.8em'>
+          <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' color='whiteText'>
+            Current move: {currentMove.san}
+          </Text>
+          <DarkTooltip label='Delete current move for position'>
+            <IconButton
+              aria-label='Delete current move for position'
+              borderRadius='5px'
+              onClick={onDeleteMove}
+              isLoading={isDeleteLoading}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </DarkTooltip>
+        </Flex>
       ) : (
         <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' mb='5px' mt='0.8em' color='whiteText'>
           This position does not have a move

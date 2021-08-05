@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import { useAppDispatch } from 'utils/hooks'
 import { resetBoard } from 'store/boardSlice'
 
+// todo: add option to delete move on this page too
 const StudyPage: FC = () => {
   const dispatch = useAppDispatch()
 
