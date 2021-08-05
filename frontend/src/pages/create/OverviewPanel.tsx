@@ -1,10 +1,10 @@
 import { Text } from '@chakra-ui/layout'
-import { Box, Button, useToast } from '@chakra-ui/react'
+import { Box, Button, useBreakpointValue, useToast } from '@chakra-ui/react'
 import ErrorToast from 'components/ErrorToast'
 import { FC, useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { clearLichessGames, updateLichessGames, updateOpening } from 'store/boardSlice'
-import { TOAST_DURATION } from 'theme'
+import theme, { TOAST_DURATION } from 'theme'
 import { MoveEntity } from 'types'
 import { useAppSelector } from 'utils/hooks'
 
@@ -27,6 +27,7 @@ const OverviewPanel: FC = () => {
   const [currentMove, setCurrentMove] = useState<MoveEntity | null>(null)
   const [previousMove, setPreviousMove] = useState<MoveEntity | null>(null)
   const [isLichessDataLoading, setLichessDataLoading] = useState(false)
+  const isMobile = useBreakpointValue({ base: true, md: false })
 
   console.log('lastMove: ', lastMove)
 
@@ -60,7 +61,7 @@ const OverviewPanel: FC = () => {
   useEffect(() => {
     console.log('fetching games')
     setLichessDataLoading(true)
-    dispatch(clearLichessGames())
+    // dispatch(clearLichessGames())
     fetch(
       `https://explorer.lichess.ovh/lichess?variant=standard&speeds[]=bullet&speeds[]=blitz&speeds[]=rapid&speeds[]=classical&ratings[]=1600&ratings[]=2500&moves=6&fen=${fen}`
     )
@@ -132,33 +133,55 @@ const OverviewPanel: FC = () => {
       >
         Add {lastMove?.san || 'Move'} (A)
       </Button>
-      {opening && (
-        <Text fontSize='18px' fontWeight='bold' mt='20px' color='whiteText'>
+      {opening ? (
+        <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' mt='20px' color='whiteText'>
           {opening.name} <span style={{ fontWeight: 'normal' }}>{opening.eco}</span>
         </Text>
+      ) : (
+        <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mt='20px' color='whiteText'>
+          Unknown opening
+        </Text>
       )}
-      <Text fontSize='18px' fontWeight='bold' mb='5px' mt='25px' color='whiteText'>
-        Times Reached
-      </Text>
-      <Text fontSize='16px' mb='3px' color='whiteText'>
+      {!isMobile && (
+        <Text fontSize='18px' fontWeight='bold' mt='0.8rem' color='whiteText'>
+          Times Reached
+        </Text>
+      )}
+      <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mt='5px' color='whiteText'>
         Lichess games: {isLichessDataLoading ? 'Loading...' : lichessGamesInPosition}
       </Text>
-      {commonMoves.length > 0 && (
+      {commonMoves.length > 0 ? (
         <>
-          <Text fontSize='18px' fontWeight='bold' mb='5px' mt='20px' color='whiteText'>
-            Most Common Moves
-          </Text>
           {/* todo: show some stats about the moves */}
-          {commonMoves.map(m => (
-            <Text fontSize='16px' mb='1px' key={m} color='whiteText'>
-              {m}
+          {isMobile ? (
+            <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mb='1px' mt='0.7em' color='whiteText'>
+              <span style={{ fontWeight: 'bold' }}>Common Moves</span> {commonMoves.join(', ')}
             </Text>
-          ))}
+          ) : (
+            <>
+              <Text fontSize='1.4em' fontWeight='bold' mb='5px' mt='20px' color='whiteText'>
+                Most Common Moves
+              </Text>
+              {commonMoves.map(m => (
+                <Text fontSize='1.4em' mb='1px' key={m} color='whiteText'>
+                  {m}
+                </Text>
+              ))}
+            </>
+          )}
         </>
+      ) : (
+        <Text fontSize='1.1em' mb='1px' mt='20px' color='whiteText'>
+          There are no moves found in this position
+        </Text>
       )}
-      {currentMove?.san && (
-        <Text fontSize='16px' fontWeight='bold' mb='5px' mt='20px' color='whiteText'>
+      {currentMove?.san ? (
+        <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' mb='5px' mt='0.8em' color='whiteText'>
           This position already has a move: {currentMove.san}
+        </Text>
+      ) : (
+        <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' mb='5px' mt='0.8em' color='whiteText'>
+          This position does not have a move
         </Text>
       )}
     </Box>

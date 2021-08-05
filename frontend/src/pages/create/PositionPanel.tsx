@@ -108,7 +108,7 @@ const PositionPanel: FC = () => {
       p='5%'
     >
       <Box>
-        <Text fontSize='18px' fontWeight='bold' color='whiteText' mb='10px'>
+        <Text fontSize='1.5em' fontWeight='bold' color='whiteText' mb='10px'>
           {pgn}
         </Text>
         <Flex>
