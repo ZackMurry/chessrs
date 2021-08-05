@@ -1,0 +1,31 @@
+.gradient-heading {
+  will-change: auto;
+  display: block;
+  text-align: center;
+  background-repeat: no-repeat;
+  background-image: url('https://products.ls.graphics/mesh-gradients/images/100.-Chetwode-Blue.jpg');
+  background-size: 200%;
+  color: transparent;
+  animation: bg 60s cubic-bezier(0.3, 0, 0.175, 0.5) 0s infinite;
+}
+
+@keyframes bg {
+  0% {
+    background-position: 5% 5%;
+  }
+  25% {
+    background-position: 5% 95%;
+    background-size: 150%;
+  }
+  50% {
+    background-position: 95% 95%;
+    background-size: 150%;
+  }
+  25% {
+    background-position: 95% 5%;
+    background-size: 150%;
+  }
+  100% {
+    background-position: 5% 5%;
+  }
+}
