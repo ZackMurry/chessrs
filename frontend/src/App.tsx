@@ -19,7 +19,7 @@ function App() {
       <ChakraProvider theme={theme}>
         <AccountManager />
         <DndProvider backend={HTML5Backend}>
-          <Router basename='/app'>
+          <Router>
             <Navbar />
             <Switch>
               <Route path='/create' exact>
