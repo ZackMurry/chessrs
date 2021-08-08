@@ -1,0 +1,26 @@
+type Move {
+    id: String!
+    userId: String!
+    fenBefore: String!
+    san: String!
+    uci: String!
+    fenAfter: String!
+    isWhite: Boolean!
+    lastReviewed: String!
+    timeCreated: String!
+    numReviews: Int!,
+    due: String!
+}
+
+type NeedReview
+
+type Query {
+    move(id: String, fenBefore: String): Move!
+    dueMoves(limit: Int): [Move]!
+    numberOfDueMoves: Int!
+}
+
+type Mutation {
+    createMove(fenBefore: String!, san: String!, uci: String!, fenAfter: String!, isWhite: Boolean!): Move
+    reviewMove(id: String!, success: Boolean!): Move!
+}

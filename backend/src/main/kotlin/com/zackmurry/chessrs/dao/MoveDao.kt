@@ -11,18 +11,12 @@ import java.util.*
 @Transactional
 interface MoveDao : JpaRepository<Move, UUID> {
 
-//    fun create(request: MoveCreateRequest, userId: UUID, timeCreated: Long): UUID
-//
-//    fun getMovesOrderedByLastReviewAsc(userId: UUID, limit: Int): List<MoveEntity>
-//
-//    fun getById(id: UUID): MoveEntity?
-
     @Query("SELECT * FROM move WHERE user_id = :userId ORDER BY random() LIMIT :limit", nativeQuery = true)
     fun getRandom(@Param("userId") userId: UUID, @Param("limit") limit: Int = 5): List<Move>
 
     @Query("SELECT * FROM move WHERE user_id = :userId AND fen_before = :fenBefore", nativeQuery = true)
     fun findByFenBefore(@Param("userId") userId: UUID, @Param("fenBefore") fen: String): Optional<Move>
-//
+
     @Query("SELECT * FROM move WHERE user_id = :userId AND due <= :time ORDER BY due LIMIT :limit", nativeQuery = true)
     fun getDue(@Param("userId") userId: UUID, @Param("limit") limit: Int = 5, @Param("time") time: Long = System.currentTimeMillis()): List<Move>
 
@@ -36,7 +30,5 @@ interface MoveDao : JpaRepository<Move, UUID> {
     @Modifying
     @Query("UPDATE move SET num_reviews = num_reviews + 1, due = :due WHERE id = :id", nativeQuery = true)
     fun addReview(@Param("id") id: UUID, @Param("due") due: Long)
-//
-//    fun deleteById(id: UUID)
 
 }

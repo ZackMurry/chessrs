@@ -22,7 +22,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 	implementation("org.springframework:spring-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("io.projectreactor.netty:reactor-netty")
@@ -36,6 +36,8 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("org.apache.commons:commons-lang3:3.11")
+	implementation("com.graphql-java-kickstart:graphql-spring-boot-starter:11.1.0")
+	implementation("com.graphql-java-kickstart:graphiql-spring-boot-starter:11.1.0")
 }
 
 tasks.withType<KotlinCompile> {

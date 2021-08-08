@@ -15,11 +15,11 @@ import javax.servlet.http.HttpServletRequest
 class MoveController(private val moveService: MoveService) {
 
     @PostMapping("")
-    fun createMove(@RequestBody request: MoveCreateRequest) = moveService.createMove(request)
+    fun createMove(@RequestBody request: MoveCreateRequest) = moveService.createMove(request.fenBefore, request.san, request.uci, request.fenAfter, request.isWhite)
 
     // todo: switch this endpoint to an SRS algorithm
     @GetMapping("/need-review")
-    fun getMovesThatNeedReview(@RequestParam(required = false, defaultValue = "5") limit: Int) = moveService.getMovesThatNeedReview(limit)
+    fun getMovesThatNeedReview(@RequestParam(required = false, defaultValue = "5") limit: Int) = moveService.getDueMoves(limit)
 
     @GetMapping("/need-practice")
     fun getMovesThatNeedPractice(@RequestParam(required = false, defaultValue = "5") limit: Int) = moveService.getRandomMoves(limit)
