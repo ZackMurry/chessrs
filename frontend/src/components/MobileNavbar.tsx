@@ -5,7 +5,7 @@ import { Box, Flex, Collapse, IconButton, useBoolean, Heading } from '@chakra-ui
 import theme from 'theme'
 
 const MobileNavbar: FC = () => {
-  const [isExpanded, { toggle }] = useBoolean(false)
+  const [isExpanded, { toggle, off }] = useBoolean(false)
 
   return (
     <header style={{ background: theme.colors.surface }}>
@@ -13,11 +13,11 @@ const MobileNavbar: FC = () => {
         <IconButton onClick={toggle} bg='transparent' aria-label='Open navigation' borderRadius='3px'>
           <HamburgerIcon w='35px' h='35px' color='grayBtn' />
         </IconButton>
-        <a href='/'>
+        <Link to='/' onClick={off}>
           <Heading as='h2' fontSize='28px' fontWeight='normal' color='whiteText'>
             ChesSRS
           </Heading>
-        </a>
+        </Link>
       </Flex>
       <Collapse in={isExpanded}>
         <Box bg='surface' pb='10px'>

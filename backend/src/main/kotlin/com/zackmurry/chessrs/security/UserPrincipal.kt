@@ -1,6 +1,7 @@
 package com.zackmurry.chessrs.security
 
-import com.zackmurry.chessrs.model.UserEntity
+import com.zackmurry.chessrs.entity.ChessrsUser
+import com.zackmurry.chessrs.exception.InternalServerException
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
@@ -10,13 +11,16 @@ import java.util.*
 class UserPrincipal(private var username: String, private var id: UUID, private var authorities: MutableCollection<out GrantedAuthority>, private var attributes: MutableMap<String, Any>, private var easeFactor: Float) : OAuth2User, UserDetails {
 
     companion object {
-        fun create(userEntity: UserEntity): UserPrincipal {
+        fun create(user: ChessrsUser): UserPrincipal {
+            if (user.username == null || user.id == null || user.easeFactor == null) {
+                throw InternalServerException()
+            }
             val grantedAuthorities = Collections.singletonList(SimpleGrantedAuthority("ROLE_USER"))
-            return UserPrincipal(userEntity.username, userEntity.id, grantedAuthorities, HashMap(), userEntity.easeFactor)
+            return UserPrincipal(user.username!!, user.id!!, grantedAuthorities, HashMap(), user.easeFactor)
         }
 
-        fun create(userEntity: UserEntity, attributes: MutableMap<String, Any>): UserPrincipal {
-            val userPrincipal = create(userEntity)
+        fun create(user: ChessrsUser, attributes: MutableMap<String, Any>): UserPrincipal {
+            val userPrincipal = create(user)
             userPrincipal.attributes = attributes
             return userPrincipal
         }

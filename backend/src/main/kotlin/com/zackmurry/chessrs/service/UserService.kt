@@ -1,7 +1,8 @@
 package com.zackmurry.chessrs.service
 
-import com.zackmurry.chessrs.dao.user.UserDao
-import com.zackmurry.chessrs.model.UserEntity
+import com.zackmurry.chessrs.dao.UserDao
+import com.zackmurry.chessrs.entity.ChessrsUser
+import com.zackmurry.chessrs.exception.NotFoundException
 import com.zackmurry.chessrs.security.UserPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -15,24 +16,24 @@ class UserService(private val userDao: UserDao) : UserDetailsService {
         if (username == null) {
             throw UsernameNotFoundException(null)
         }
-        val user = userDao.getUserByUsername(username) ?: throw UsernameNotFoundException(username)
+        val user = userDao.findByUsername(username).orElseThrow { throw NotFoundException() }
         return UserPrincipal.create(user)
     }
 
-    fun createUser(user: UserEntity) {
-        userDao.createUser(user)
+    fun createUser(user: ChessrsUser) {
+        userDao.save(user)
     }
 
     fun accountExists(username: String): Boolean {
-        return userDao.getUserByUsername(username) != null
+        return userDao.existsByUsername(username)
     }
 
-    fun getUserByUsername(username: String): UserEntity? {
-        return userDao.getUserByUsername(username)
+    fun getUserByUsername(username: String): ChessrsUser? {
+        return userDao.findByUsername(username).orElse(null)
     }
 
     fun delete(username: String) {
-        return userDao.deleteUser(username)
+        return userDao.deleteByUsername(username)
     }
 
 }

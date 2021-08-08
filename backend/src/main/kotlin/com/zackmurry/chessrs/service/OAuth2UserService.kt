@@ -1,8 +1,7 @@
 package com.zackmurry.chessrs.service
 
-import com.zackmurry.chessrs.dao.user.UserDao
 import com.zackmurry.chessrs.exception.OAuth2AuthenticationProcessingException
-import com.zackmurry.chessrs.model.UserEntity
+import com.zackmurry.chessrs.entity.ChessrsUser
 import com.zackmurry.chessrs.security.*
 import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.InternalAuthenticationServiceException
@@ -39,7 +38,7 @@ class OAuth2UserService(private val userService: UserService) : DefaultOAuth2Use
         }
 
         val queriedUser = userService.getUserByUsername(username)
-        val user: UserEntity
+        val user: ChessrsUser
         if (queriedUser != null) {
             user = queriedUser
             if (user.provider != userRequest.clientRegistration.registrationId.uppercase()) {
@@ -52,9 +51,9 @@ class OAuth2UserService(private val userService: UserService) : DefaultOAuth2Use
         return UserPrincipal.create(user, oAuth2User.attributes)
     }
 
-    private fun registerNewUser(oAuth2UserRequest: OAuth2UserRequest, oAuth2UserInfo: OAuth2UserInfo): UserEntity {
+    private fun registerNewUser(oAuth2UserRequest: OAuth2UserRequest, oAuth2UserInfo: OAuth2UserInfo): ChessrsUser {
         val username = oAuth2UserInfo.getUsername() ?: throw OAuth2AuthenticationProcessingException("Username not found from OAuth2 provider")
-        val user = UserEntity(username, UUID.randomUUID(), oAuth2UserRequest.clientRegistration.registrationId.uppercase(), DEFAULT_EASE)
+        val user = ChessrsUser(username, UUID.randomUUID(), oAuth2UserRequest.clientRegistration.registrationId.uppercase(), DEFAULT_EASE)
         userService.createUser(user)
         return user
     }

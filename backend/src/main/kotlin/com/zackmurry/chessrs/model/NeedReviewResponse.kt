@@ -1,3 +1,5 @@
 package com.zackmurry.chessrs.model
 
-data class NeedReviewResponse(val total: Int, val moves: List<MoveEntity>)
+import com.zackmurry.chessrs.entity.Move
+
+data class NeedReviewResponse(val total: Int, val moves: List<Move>)

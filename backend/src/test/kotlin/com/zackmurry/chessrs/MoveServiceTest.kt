@@ -4,7 +4,7 @@ import com.zackmurry.chessrs.exception.BadRequestException
 import com.zackmurry.chessrs.exception.NoContentException
 import com.zackmurry.chessrs.exception.NotFoundException
 import com.zackmurry.chessrs.model.MoveCreateRequest
-import com.zackmurry.chessrs.model.UserEntity
+import com.zackmurry.chessrs.entity.ChessrsUser
 import com.zackmurry.chessrs.security.AuthProvider
 import com.zackmurry.chessrs.security.UserPrincipal
 import com.zackmurry.chessrs.service.DEFAULT_EASE
@@ -12,8 +12,7 @@ import com.zackmurry.chessrs.service.MoveService
 import com.zackmurry.chessrs.service.UserService
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -40,7 +39,7 @@ class MoveServiceTest {
         if (userService.accountExists(testUsername)) {
             createTestUser()
         } else {
-            val user = UserEntity(testUsername, UUID.randomUUID(), AuthProvider.LICHESS.toString(), DEFAULT_EASE)
+            val user = ChessrsUser(testUsername, UUID.randomUUID(), AuthProvider.LICHESS.toString(), DEFAULT_EASE)
             userService.createUser(user)
             val userPrincipal = UserPrincipal.create(user)
             val token = UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.authorities)
@@ -64,7 +63,8 @@ class MoveServiceTest {
                     RandomStringUtils.randomAlphanumeric(30, 90),
                     i % 2 == 0)
             val id = moveService.createMove(move).id
-            val createdMove = moveService.getMoveById(id)
+            assertNotNull(id)
+            val createdMove = moveService.getMoveById(id!!)
             assertEquals(id, createdMove.id)
             assertEquals(move.fenBefore, createdMove.fenBefore)
             assertEquals(move.uci, createdMove.uci)
@@ -133,7 +133,8 @@ class MoveServiceTest {
                 i % 2 == 0
             )
             val id = moveService.createMove(move).id
-            moveService.deleteById(id)
+            assertNotNull(id)
+            moveService.deleteById(id!!)
             assertThrows<NotFoundException>("Getting a deleted move by id should produce a NotFoundException") { moveService.getMoveById(id) }
             assertThrows<NoContentException>("Getting a deleted move by FEN should produce a NoContentException") { moveService.getMoveByFen(move.fenBefore) }
         }
@@ -162,19 +163,24 @@ class MoveServiceTest {
                 i % 2 == 0
             )
             val id = moveService.createMove(move).id
-            var createdMove = moveService.getMoveById(id)
+            assertNotNull(id)
+            var createdMove = moveService.getMoveById(id!!)
+            assertNotNull(createdMove.due)
             assertEquals(0, createdMove.numReviews, "A newly created move should have 0 reviews")
-            assertTrue(createdMove.due <= System.currentTimeMillis(), "A newly created move should be due")
+            assertTrue(createdMove.due!! <= System.currentTimeMillis(), "A newly created move should be due")
 
             moveService.studyMove(id, true)
             createdMove = moveService.getMoveById(id)
+            assertNotNull(createdMove.due)
             assertEquals(1, createdMove.numReviews, "A move that has been successfully studied once should have one review")
-            assertTrue(createdMove.due > System.currentTimeMillis(), "A move that has just been studied should not be due")
+            assertTrue(createdMove.due!! > System.currentTimeMillis(), "A move that has just been studied should not be due")
 
             moveService.studyMove(id, false)
             createdMove = moveService.getMoveById(id)
+            assertNotNull(createdMove.due)
+            assertNotNull(createdMove.numReviews)
             assertEquals(0, createdMove.numReviews, "A move that has just been forgotten should have 0 reviews")
-            assertTrue(createdMove.numReviews <= System.currentTimeMillis(), "A move that has just been forgotten should be due")
+            assertTrue(createdMove.due!! <= System.currentTimeMillis(), "A move that has just been forgotten should be due")
         }
     }
 
@@ -191,12 +197,12 @@ class MoveServiceTest {
                     RandomStringUtils.randomAlphanumeric(30, 90),
                     i % 2 == 0
                 )
-            ).id)
+            ).id!!)
         }
 
         for (i in 1..25) {
             val randomMoves = moveService.getRandomMoves(5)
-            assertEquals(5, randomMoves.size, "5 random moves should be returned from ")
+            assertEquals(5, randomMoves.size, "5 random moves should be returned from getRandomMoves")
             for (rm in randomMoves) {
                 assertTrue(moveIds.contains(rm.id), "Random moves should be valid moves created by the user")
             }
@@ -217,49 +223,55 @@ class MoveServiceTest {
                         RandomStringUtils.randomAlphanumeric(30, 90),
                         j % 2 == 0
                     )
-                ).id)
+                ).id!!)
             }
 
             var dueMoves = moveService.getMovesThatNeedReview(5)
             assertEquals(5, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
             assertEquals(25, dueMoves.total, "The total moves due should be accurate")
             for (move in dueMoves.moves) {
-                moveService.studyMove(move.id, true)
+                assertNotNull(move.id)
+                moveService.studyMove(move.id!!, true)
             }
 
             dueMoves = moveService.getMovesThatNeedReview(5)
             assertEquals(5, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
             assertEquals(20, dueMoves.total, "The total moves due should be accurate")
             for (move in dueMoves.moves) {
-                moveService.studyMove(move.id, true)
+                assertNotNull(move.id)
+                moveService.studyMove(move.id!!, true)
             }
 
             dueMoves = moveService.getMovesThatNeedReview(5)
             assertEquals(5, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
             assertEquals(15, dueMoves.total, "The total moves due should be accurate")
             for (move in dueMoves.moves) {
-                moveService.studyMove(move.id, true)
+                assertNotNull(move.id)
+                moveService.studyMove(move.id!!, true)
             }
 
             dueMoves = moveService.getMovesThatNeedReview(5)
             assertEquals(5, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
             assertEquals(10, dueMoves.total, "The total moves due should be accurate")
             for (move in dueMoves.moves) {
-                moveService.studyMove(move.id, true)
+                assertNotNull(move.id)
+                moveService.studyMove(move.id!!, true)
             }
 
             dueMoves = moveService.getMovesThatNeedReview(3)
             assertEquals(3, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
             assertEquals(5, dueMoves.total, "The total moves due should be accurate")
             for (move in dueMoves.moves) {
-                moveService.studyMove(move.id, true)
+                assertNotNull(move.id)
+                moveService.studyMove(move.id!!, true)
             }
 
             dueMoves = moveService.getMovesThatNeedReview(2)
             assertEquals(2, dueMoves.moves.size, "Getting due moves should return limit moves when total >= limit")
             assertEquals(2, dueMoves.total, "The total moves due should be accurate")
             for (move in dueMoves.moves) {
-                moveService.studyMove(move.id, true)
+                assertNotNull(move.id)
+                moveService.studyMove(move.id!!, true)
             }
 
             dueMoves = moveService.getMovesThatNeedReview(5)
@@ -284,12 +296,13 @@ class MoveServiceTest {
                     RandomStringUtils.randomAlphanumeric(30, 90),
                     i % 2 == 0
                 )
-            ).id)
+            ).id!!)
         }
 
         for (id in moveIds) {
             val move = moveService.getMoveById(id)
-            val fenMove = moveService.getMoveByFen(move.fenBefore)
+            assertNotNull(move.fenBefore)
+            val fenMove = moveService.getMoveByFen(move.fenBefore!!)
             assertEquals(move, fenMove, "Getting a move by FEN should return the same data as getting it by id")
         }
 
@@ -312,7 +325,7 @@ class MoveServiceTest {
                 i % 2 == 0
             )
             moves.add(move)
-            moveIds.add(moveService.createMove(move).id)
+            moveIds.add(moveService.createMove(move).id!!)
         }
 
         for (i in 0..24) {

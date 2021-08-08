@@ -1,9 +1,8 @@
 package com.zackmurry.chessrs.controller
 
 import com.zackmurry.chessrs.exception.BadRequestException
-import com.zackmurry.chessrs.model.IdResponse
 import com.zackmurry.chessrs.model.MoveCreateRequest
-import com.zackmurry.chessrs.model.MoveEntity
+import com.zackmurry.chessrs.entity.Move
 import com.zackmurry.chessrs.service.MoveService
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
@@ -26,7 +25,7 @@ class MoveController(private val moveService: MoveService) {
     fun getMovesThatNeedPractice(@RequestParam(required = false, defaultValue = "5") limit: Int) = moveService.getRandomMoves(limit)
 
     @GetMapping("/fen/**")
-    fun getMoveByFen(request: HttpServletRequest): MoveEntity {
+    fun getMoveByFen(request: HttpServletRequest): Move {
         // The wildcard is for the raw FEN
         val fen = request.requestURI.split("/api/v1/moves/fen/")[1]
         return moveService.getMoveByFen(URLDecoder.decode(fen, StandardCharsets.UTF_8))

@@ -24,6 +24,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 	implementation("org.springframework:spring-webflux")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("io.projectreactor.netty:reactor-netty")
 	implementation("org.flywaydb:flyway-core")
 	compileOnly("io.jsonwebtoken:jjwt-api:0.11.2")
