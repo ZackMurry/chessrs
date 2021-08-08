@@ -24,3 +24,9 @@ spring:
             token-uri: https://oauth.lichess.org/oauth
             user-info-uri: https://lichess.org/api/account
             user-name-attribute: username
+graphql:
+  servlet:
+    mapping: /api/v1/graphql
+graphiql:
+  endpoint:
+    graphql: /api/v1/graphql

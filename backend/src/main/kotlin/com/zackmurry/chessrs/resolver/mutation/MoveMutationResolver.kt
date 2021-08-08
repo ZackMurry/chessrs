@@ -19,4 +19,11 @@ class MoveMutationResolver(val moveService: MoveService) : GraphQLMutationResolv
         return moveService.getMoveById(uuid).toResponse()
     }
 
+    fun deleteMove(id: String): MoveResponse {
+        val uuid = UUID.fromString(id)
+        val move = moveService.getMoveById(uuid)
+        moveService.deleteById(uuid)
+        return move.toResponse()
+    }
+
 }

@@ -2,11 +2,13 @@ package com.zackmurry.chessrs.security
 
 import com.zackmurry.chessrs.entity.ChessrsUser
 import com.zackmurry.chessrs.exception.InternalServerException
+import com.zackmurry.chessrs.model.UserPrincipalResponse
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.oauth2.core.user.OAuth2User
 import java.util.*
+
 
 class UserPrincipal(private var username: String, private var id: UUID, private var authorities: MutableCollection<out GrantedAuthority>, private var attributes: MutableMap<String, Any>, private var easeFactor: Float) : OAuth2User, UserDetails {
 
@@ -68,6 +70,10 @@ class UserPrincipal(private var username: String, private var id: UUID, private 
 
     fun getEaseFactor(): Float {
         return this.easeFactor
+    }
+
+    fun toResponse(): UserPrincipalResponse {
+        return UserPrincipalResponse(username, id, authorities, attributes, easeFactor, isEnabled, isAccountNonLocked, isAccountNonExpired, isCredentialsNonExpired, name)
     }
 
 }

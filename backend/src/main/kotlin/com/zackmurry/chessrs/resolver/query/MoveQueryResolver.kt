@@ -23,4 +23,6 @@ class MoveQueryResolver(val moveService: MoveService) : GraphQLQueryResolver {
 
     fun numberOfDueMoves() = moveService.getNumberOfDueMoves()
 
+    fun randomMoves(limit: Int?) = moveService.getRandomMoves(limit ?: 5).map(Move::toResponse)
+
 }
