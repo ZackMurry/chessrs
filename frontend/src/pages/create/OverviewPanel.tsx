@@ -3,6 +3,7 @@ import { Text } from '@chakra-ui/layout'
 import { Box, Button, Flex, IconButton, useBreakpointValue, useToast } from '@chakra-ui/react'
 import DarkTooltip from 'components/DarkTooltip'
 import ErrorToast from 'components/ErrorToast'
+import { gql, request } from 'graphql-request'
 import { FC, useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { updateLichessGames, updateOpening } from 'store/boardSlice'
@@ -36,25 +37,28 @@ const OverviewPanel: FC = () => {
   const getMoveForPosition = useCallback(async () => {
     setPreviousMove(currentMove)
     setCurrentMove(null)
-    const response = await fetch(`/api/v1/moves/fen/${fen}`)
-    if (!response.ok) {
+    const query = gql`
+      query GetMoveByFen($fen: String!) {
+        move(fenBefore: $fen) {
+          san
+          id
+        }
+      }
+    `
+    try {
+      const { data } = await request('/api/v1/graphql', query, { fen })
+      setCurrentMove(data)
+    } catch (e) {
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
         render: options => (
           <ErrorToast
-            description={`Error getting current move for position (status: ${response.status})`}
+            description={`Error getting current move for position: ${e.response.errors[0].message}`}
             onClose={options.onClose}
           />
         )
       })
-      return
-    }
-    if (response.status === 204) {
-      console.log('no current move')
-      setCurrentMove(null)
-    } else {
-      setCurrentMove(await response.json())
     }
     // Adding currentMove as a dependency would make useEffect be called in a loop
     // eslint-disable-next-line react-hooks/exhaustive-deps

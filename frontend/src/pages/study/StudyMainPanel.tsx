@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { MoveEntity } from 'types'
 import ErrorToast from 'components/ErrorToast'
 import { useToast } from '@chakra-ui/react'
+import { rawRequest, gql } from 'graphql-request'
 import { TOAST_DURATION } from 'theme'
 
 interface GetReviewsResponse {
@@ -52,15 +53,24 @@ const StudyMainPanel: FC = () => {
 
   const sendReviewData = useCallback(
     async (move: MoveEntity, success: Boolean) => {
-      const response = await fetch(`/api/v1/moves/study/${move.id}?success=${success}`, {
-        method: 'POST'
-      })
-      if (!response.ok) {
+      const query = gql`
+        mutation ReviewMove($id: String!, $success: Boolean!) {
+          reviewMove(id: $id, success: $success) {
+            numReviews
+          }
+        }
+      `
+      try {
+        await rawRequest('/api/v1/graphql', query, { id: move.id, success })
+      } catch (e) {
         toast({
           duration: TOAST_DURATION,
           isClosable: true,
           render: options => (
-            <ErrorToast description={`Error sending review data (status: ${response.status})`} onClose={options.onClose} />
+            <ErrorToast
+              description={`Error sending review data: ${e.response.errors[0].message}`}
+              onClose={options.onClose}
+            />
           )
         })
       }

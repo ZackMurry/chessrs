@@ -25,7 +25,7 @@ class MoveController(private val moveService: MoveService) {
     fun getMovesThatNeedPractice(@RequestParam(required = false, defaultValue = "5") limit: Int) = moveService.getRandomMoves(limit)
 
     @GetMapping("/fen/**")
-    fun getMoveByFen(request: HttpServletRequest): Move {
+    fun getMoveByFen(request: HttpServletRequest): Optional<Move> {
         // The wildcard is for the raw FEN
         val fen = request.requestURI.split("/api/v1/moves/fen/")[1]
         return moveService.getMoveByFen(URLDecoder.decode(fen, StandardCharsets.UTF_8))

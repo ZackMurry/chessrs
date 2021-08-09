@@ -27,6 +27,11 @@ spring:
 graphql:
   servlet:
     mapping: /api/v1/graphql
+    exception-handlers-enabled: true
 graphiql:
   endpoint:
     graphql: /api/v1/graphql
+logging:
+  level:
+    notprivacysafe:
+      graphql: ERROR # Disable logging for service exceptions unless explicitly logged in the exception handler

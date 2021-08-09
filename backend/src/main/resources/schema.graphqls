@@ -85,7 +85,7 @@ type Account {
 
 
 type Query {
-    move(id: String, fenBefore: String): Move!
+    move(id: String, fenBefore: String): Move
     dueMoves(limit: Int): [Move]!
     numberOfDueMoves: Int!
     randomMoves(limit: Int): [Move]!

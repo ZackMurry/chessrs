@@ -11,10 +11,10 @@ import java.util.*
 @Service
 class MoveQueryResolver(val moveService: MoveService) : GraphQLQueryResolver {
 
-    fun move(id: String?, fenBefore: String?): MoveResponse {
+    fun move(id: String?, fenBefore: String?): Optional<MoveResponse> {
         return when {
-            id != null -> moveService.getMoveById(UUID.fromString(id)).toResponse()
-            fenBefore != null -> moveService.getMoveByFen(fenBefore).toResponse()
+            id != null -> moveService.getMoveById(UUID.fromString(id)).map { it.toResponse() }
+            fenBefore != null -> moveService.getMoveByFen(fenBefore).map { it.toResponse() }
             else -> throw BadRequestException()
         }
     }

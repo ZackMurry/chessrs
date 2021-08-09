@@ -12,6 +12,9 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepo
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.security.config.web.servlet.invoke
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 
 @EnableWebSecurity
@@ -42,6 +45,9 @@ class SecurityConfiguration(
                     authorizationRequestRepository = httpCookieOAuth2RequestRepository
                 }
             }
+            cors {
+                configurationSource = corsConfigurationSource()
+            }
         }
     }
 
@@ -50,6 +56,13 @@ class SecurityConfiguration(
         val oauth2 = ServletOAuth2AuthorizedClientExchangeFilterFunction(clientRegistrationRepository, authorizedClientRepository)
         oauth2.setDefaultOAuth2AuthorizedClient(true)
         return WebClient.builder().apply(oauth2.oauth2Configuration()).build()
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", CorsConfiguration().applyPermitDefaultValues())
+        return source
     }
 
 }

@@ -35,8 +35,8 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
         return moveDao.getRandom(getUserId(), limit)
     }
 
-    fun getMoveByFen(fen: String): Move {
-        return moveDao.findByFenBefore(getUserId(), fen).orElseThrow { throw NoContentException() }
+    fun getMoveByFen(fen: String): Optional<Move> {
+        return moveDao.findByFenBefore(getUserId(), fen)
     }
 
     fun studyMove(id: UUID, success: Boolean) {
@@ -56,12 +56,12 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
         }
     }
 
-    fun getMoveById(id: UUID): Move {
-        val move = moveDao.findById(id).orElseThrow { throw NotFoundException() }
+    fun getMoveById(id: UUID): Optional<Move> {
+        val move = moveDao.findById(id).orElse(null) ?: return Optional.empty()
         if (getUserId() != move.userId) {
             throw ForbiddenException()
         }
-        return move
+        return Optional.of(move)
     }
 
     fun deleteById(id: UUID) {

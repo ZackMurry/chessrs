@@ -1,5 +1,6 @@
 package com.zackmurry.chessrs.resolver.mutation
 
+import com.zackmurry.chessrs.exception.BadRequestException
 import com.zackmurry.chessrs.model.MoveResponse
 import com.zackmurry.chessrs.service.MoveService
 import graphql.kickstart.tools.GraphQLMutationResolver
@@ -16,12 +17,12 @@ class MoveMutationResolver(val moveService: MoveService) : GraphQLMutationResolv
     fun reviewMove(id: String, success: Boolean): MoveResponse {
         val uuid = UUID.fromString(id)
         moveService.studyMove(uuid, success)
-        return moveService.getMoveById(uuid).toResponse()
+        return moveService.getMoveById(uuid).orElseThrow { BadRequestException() }.toResponse()
     }
 
     fun deleteMove(id: String): MoveResponse {
         val uuid = UUID.fromString(id)
-        val move = moveService.getMoveById(uuid)
+        val move = moveService.getMoveById(uuid).orElseThrow { BadRequestException() }
         moveService.deleteById(uuid)
         return move.toResponse()
     }
