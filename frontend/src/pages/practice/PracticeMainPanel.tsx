@@ -4,8 +4,8 @@ import { useAppSelector } from 'utils/hooks'
 import { useDispatch } from 'react-redux'
 import { disableBoard, loadPosition, makeMove, resetHalfMoveCount, wrongMove, wrongMoveReset } from 'store/boardSlice'
 import { useState } from 'react'
-import { MoveEntity } from 'types'
 import { useToast } from '@chakra-ui/react'
+import { gql, request } from 'graphql-request'
 import ErrorToast from 'components/ErrorToast'
 import { TOAST_DURATION } from 'theme'
 
@@ -17,31 +17,42 @@ const PracticeMainPanel: FC = () => {
   const dispatch = useDispatch()
   const toast = useToast()
 
-  const [movesInQueue, setMovesInQueue] = useState<MoveEntity[]>([])
+  const [movesInQueue, setMovesInQueue] = useState<{ fenBefore: string; isWhite: string; san: string; uci: string }[]>([])
   const [moveWrong, setMoveWrong] = useState(false)
   const [resetTimeout, setResetTimeout] = useState<NodeJS.Timeout>(null)
 
   const fetchMoves = useCallback(async () => {
-    const response = await fetch('/api/v1/moves/need-practice')
-    if (!response.ok) {
+    const query = gql`
+      query GetPracticeMoves {
+        randomMoves {
+          fenBefore
+          isWhite
+          san
+          uci
+        }
+      }
+    `
+    try {
+      const data = await request('/api/v1/graphql', query)
+      setMovesInQueue(data.randomMoves)
+      if (!data.randomMoves?.length) {
+        console.log('no moves')
+        return
+      }
+      console.log('loading pos from fetch')
+      dispatch(
+        loadPosition({ fen: data.randomMoves[0].fenBefore, perspective: data.randomMoves[0].isWhite ? 'white' : 'black' })
+      )
+    } catch (e) {
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
         render: options => (
-          <ErrorToast description={`Error getting move data (status: ${response.status})`} onClose={options.onClose} />
+          <ErrorToast description={`Error getting move data: ${e.response.errors[0].message}`} onClose={options.onClose} />
         )
       })
       dispatch(disableBoard())
-      return
     }
-    const moves = await response.json()
-    setMovesInQueue(moves)
-    if (moves.length === 0) {
-      console.log('no moves')
-      return
-    }
-    console.log('loading pos from fetch')
-    dispatch(loadPosition({ fen: moves[0].fenBefore, perspective: moves[0].isWhite ? 'white' : 'black' }))
   }, [setMovesInQueue, dispatch, toast])
 
   // For the first load

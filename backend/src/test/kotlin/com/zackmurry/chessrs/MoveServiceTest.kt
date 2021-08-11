@@ -64,7 +64,8 @@ class MoveServiceTest {
                     i % 2 == 0)
             val id = moveService.createMove(move.fenBefore, move.san, move.uci, move.fenAfter, move.isWhite).id
             assertNotNull(id)
-            val createdMove = moveService.getMoveById(id!!)
+            val createdMove = moveService.getMoveById(id!!).orElse(null)
+            assertNotNull(createdMove)
             assertEquals(id, createdMove.id)
             assertEquals(move.fenBefore, createdMove.fenBefore)
             assertEquals(move.uci, createdMove.uci)
@@ -155,19 +156,22 @@ class MoveServiceTest {
                 i % 2 == 0
             ).id
             assertNotNull(id)
-            var createdMove = moveService.getMoveById(id!!)
+            var createdMove = moveService.getMoveById(id!!).orElse(null)
+            assertNotNull(createdMove)
             assertNotNull(createdMove.due)
             assertEquals(0, createdMove.numReviews, "A newly created move should have 0 reviews")
             assertTrue(createdMove.due!! <= System.currentTimeMillis(), "A newly created move should be due")
 
             moveService.studyMove(id, true)
-            createdMove = moveService.getMoveById(id)
+            createdMove = moveService.getMoveById(id).orElse(null)
+            assertNotNull(createdMove)
             assertNotNull(createdMove.due)
             assertEquals(1, createdMove.numReviews, "A move that has been successfully studied once should have one review")
             assertTrue(createdMove.due!! > System.currentTimeMillis(), "A move that has just been studied should not be due")
 
             moveService.studyMove(id, false)
-            createdMove = moveService.getMoveById(id)
+            createdMove = moveService.getMoveById(id).orElse(null)
+            assertNotNull(createdMove)
             assertNotNull(createdMove.due)
             assertNotNull(createdMove.numReviews)
             assertEquals(0, createdMove.numReviews, "A move that has just been forgotten should have 0 reviews")
@@ -293,8 +297,8 @@ class MoveServiceTest {
         }
 
         for (id in moveIds) {
-            val move = moveService.getMoveById(id)
-            assertNotNull(move.fenBefore)
+            val move = moveService.getMoveById(id).orElse(null)
+            assertNotNull(move?.fenBefore)
             val fenMove = moveService.getMoveByFen(move.fenBefore!!)
             assertEquals(move, fenMove, "Getting a move by FEN should return the same data as getting it by id")
         }
@@ -324,7 +328,8 @@ class MoveServiceTest {
         for (i in 0..24) {
             val move = moves[i]
             val id = moveIds[i]
-            val returnedMove = moveService.getMoveById(id)
+            val returnedMove = moveService.getMoveById(id).orElse(null)
+            assertNotNull(returnedMove)
             assertEquals(id, returnedMove.id)
             assertEquals(move.fenBefore, returnedMove.fenBefore)
             assertEquals(move.uci, returnedMove.uci)

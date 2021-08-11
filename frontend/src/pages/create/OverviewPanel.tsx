@@ -27,8 +27,8 @@ const OverviewPanel: FC = () => {
   const toast = useToast()
 
   const [isAddLoading, setAddLoading] = useState(false)
-  const [currentMove, setCurrentMove] = useState<MoveEntity | null>(null)
-  const [previousMove, setPreviousMove] = useState<MoveEntity | null>(null)
+  const [currentMove, setCurrentMove] = useState<{ san: string; id: string } | null>(null)
+  const [previousMove, setPreviousMove] = useState<{ san: string; id: string } | null>(null)
   const isMobile = useBreakpointValue({ base: true, md: false })
   const [isDeleteLoading, setDeleteLoading] = useState(false)
 
@@ -46,8 +46,8 @@ const OverviewPanel: FC = () => {
       }
     `
     try {
-      const { data } = await request('/api/v1/graphql', query, { fen })
-      setCurrentMove(data)
+      const data = await request('/api/v1/graphql', query, { fen })
+      setCurrentMove(data.move)
     } catch (e) {
       toast({
         duration: TOAST_DURATION,
@@ -90,50 +90,59 @@ const OverviewPanel: FC = () => {
     setPreviousMove(currentMove)
     setCurrentMove(null)
     console.log('adding move')
-    const response = await fetch('/api/v1/moves', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const query = gql`
+      mutation CreateMove($san: String!, $uci: String!, $fenBefore: String!, $fenAfter: String!, $isWhite: Boolean!) {
+        createMove(san: $san, uci: $uci, fenBefore: $fenBefore, fenAfter: $fenAfter, isWhite: $isWhite) {
+          san
+          id
+        }
+      }
+    `
+    try {
+      const data = await request('/api/v1/graphql', query, {
         fenBefore: history[halfMoveCount - 1],
         fenAfter: history[halfMoveCount],
         san: lastMove.san,
         uci: lastMove.uci,
         isWhite: history.length % 2 === 0
       })
-    })
-    setAddLoading(false)
-    if (response.ok) {
-      const json = await response.json()
-      setPreviousMove(json)
-    } else {
+      console.log(data)
+      setPreviousMove(data.createMove)
+    } catch (e) {
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
         render: options => (
-          <ErrorToast description={`Error creating move (status: ${response.status})`} onClose={options.onClose} />
+          <ErrorToast description={`Error creating move: ${e.response.errors[0].message}`} onClose={options.onClose} />
         )
       })
     }
+    setAddLoading(false)
   }
 
   const onDeleteMove = async () => {
     console.log('Deleting ', currentMove.san)
     setDeleteLoading(true)
-    const response = await fetch(`/api/v1/moves/id/${currentMove.id}`, {
-      method: 'DELETE'
-    })
-    setDeleteLoading(false)
-    if (response.ok) {
+    const query = gql`
+      mutation DeleteMove($id: String!) {
+        deleteMove(id: $id) {
+          id
+        }
+      }
+    `
+    try {
+      await request('/api/v1/graphql', query, { id: currentMove.id })
       setCurrentMove(null)
-    } else {
+    } catch (e) {
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
         render: options => (
-          <ErrorToast description={`Error deleting move (status: ${response.status})`} onClose={options.onClose} />
+          <ErrorToast description={`Error deleting move: ${e.response.errors[0].message}`} onClose={options.onClose} />
         )
       })
     }
+    setDeleteLoading(false)
   }
 
   return (

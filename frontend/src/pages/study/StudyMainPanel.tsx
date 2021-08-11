@@ -7,13 +7,8 @@ import { useState } from 'react'
 import { MoveEntity } from 'types'
 import ErrorToast from 'components/ErrorToast'
 import { useToast } from '@chakra-ui/react'
-import { rawRequest, gql } from 'graphql-request'
+import { request, gql } from 'graphql-request'
 import { TOAST_DURATION } from 'theme'
-
-interface GetReviewsResponse {
-  moves: MoveEntity[]
-  total: number
-}
 
 // todo: some way of obviously indicating when there are no more reviews left
 const StudyMainPanel: FC = () => {
@@ -24,35 +19,51 @@ const StudyMainPanel: FC = () => {
   const dispatch = useDispatch()
   const toast = useToast()
 
-  const [movesInQueue, setMovesInQueue] = useState<MoveEntity[]>([])
+  const [movesInQueue, setMovesInQueue] = useState<
+    { id: string; fenBefore: string; isWhite: string; uci: string; san: string }[]
+  >([])
   const [moveWrong, setMoveWrong] = useState(false)
   const [resetTimeout, setResetTimeout] = useState<NodeJS.Timeout>(null)
   const [reviewsLeft, setReviewsLeft] = useState(0)
 
   const fetchMoves = useCallback(async () => {
-    const response = await fetch('/api/v1/moves/need-review')
-    if (!response.ok) {
+    const query = gql`
+      query GetDueMoves {
+        dueMoves {
+          id
+          fenBefore
+          isWhite
+          uci
+          san
+        }
+        numberOfDueMoves
+      }
+    `
+    try {
+      const data = await request('/api/v1/graphql', query)
+      setMovesInQueue(data.dueMoves)
+      setReviewsLeft(data.numberOfDueMoves)
+      if (!data.dueMoves?.length) {
+        console.log('no moves')
+        return
+      }
+      dispatch(loadPosition({ fen: data.dueMoves[0].fenBefore, perspective: data.dueMoves[0].isWhite ? 'white' : 'black' }))
+    } catch (e) {
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
         render: options => (
-          <ErrorToast description={`Error getting moves to review (status: ${response.status})`} onClose={options.onClose} />
+          <ErrorToast
+            description={`Error getting moves to review: ${e.response.errors[0].message}`}
+            onClose={options.onClose}
+          />
         )
       })
-      return
     }
-    const json = (await response.json()) as GetReviewsResponse
-    setMovesInQueue(json.moves)
-    setReviewsLeft(json.total)
-    if (json.moves.length === 0) {
-      console.log('no moves')
-      return
-    }
-    dispatch(loadPosition({ fen: json.moves[0].fenBefore, perspective: json.moves[0].isWhite ? 'white' : 'black' }))
   }, [setReviewsLeft, setMovesInQueue, toast, dispatch])
 
   const sendReviewData = useCallback(
-    async (move: MoveEntity, success: Boolean) => {
+    async (id: string, success: Boolean) => {
       const query = gql`
         mutation ReviewMove($id: String!, $success: Boolean!) {
           reviewMove(id: $id, success: $success) {
@@ -61,7 +72,7 @@ const StudyMainPanel: FC = () => {
         }
       `
       try {
-        await rawRequest('/api/v1/graphql', query, { id: move.id, success })
+        await request('/api/v1/graphql', query, { id, success })
       } catch (e) {
         toast({
           duration: TOAST_DURATION,
@@ -113,7 +124,7 @@ const StudyMainPanel: FC = () => {
     if (moveSAN !== '' && movesInQueue.length && moveSAN !== movesInQueue[0].san) {
       console.warn('wrong move!')
       setMoveWrong(true)
-      sendReviewData(movesInQueue[0], false)
+      sendReviewData(movesInQueue[0].id, false)
       dispatch(wrongMove({ fen: movesInQueue[0].fenBefore, perspective: movesInQueue[0].isWhite ? 'white' : 'black' }))
       dispatch(makeMove(movesInQueue[0].uci))
       setResetTimeout(
@@ -126,7 +137,7 @@ const StudyMainPanel: FC = () => {
       return
     }
     console.log('hmc: ', halfMoveCount)
-    sendReviewData(movesInQueue[0], true).then(nextMove)
+    sendReviewData(movesInQueue[0].id, true).then(nextMove)
     setReviewsLeft(l => l - 1)
     return () => {
       if (resetTimeout) {
