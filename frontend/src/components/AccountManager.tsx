@@ -1,5 +1,6 @@
 import { useToast } from '@chakra-ui/react'
 import { FC, useCallback, useEffect } from 'react'
+import { gql, request } from 'graphql-request'
 import { setAccount } from 'store/userSlice'
 import { TOAST_DURATION } from 'theme'
 import { useAppDispatch } from 'utils/hooks'
@@ -11,25 +12,47 @@ const AccountManager: FC = () => {
 
   const getUserData = useCallback(async () => {
     try {
-      const response = await fetch('/api/v1/users/account')
-      if (!response.ok) {
+      const query = gql`
+        query GetUserAccount {
+          account {
+            id
+            username
+            name
+          }
+        }
+      `
+      const data = await request('/api/v1/graphql', query)
+      if (!data.account) {
+        console.log(data)
         toast({
           duration: TOAST_DURATION,
           isClosable: true,
           render: options => (
             <ErrorToast
-              description={`Error getting account data from server (status: ${response.status})`}
+              description={`Error getting account data from server: ${data.errors[0].message}`}
               onClose={options.onClose}
             />
           )
         })
         return
       }
-      const json = await response.json()
-      dispatch(setAccount(json))
+      dispatch(setAccount(data))
     } catch (e: any) {
-      // Sign in with lichess
-      window.location.href = '/api/v1/oauth2/code/lichess'
+      if (e.response) {
+        toast({
+          duration: TOAST_DURATION,
+          isClosable: true,
+          render: options => (
+            <ErrorToast
+              description={`Error getting account data from server: ${e.response.errors[0].message}`}
+              onClose={options.onClose}
+            />
+          )
+        })
+      } else {
+        // Sign in with lichess
+        window.location.href = '/api/v1/oauth2/code/lichess'
+      }
     }
   }, [dispatch, toast])
 

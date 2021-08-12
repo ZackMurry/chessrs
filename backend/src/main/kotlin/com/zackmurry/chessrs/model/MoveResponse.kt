@@ -12,7 +12,8 @@ class MoveResponse(val fenBefore: String,
                 _lastReviewed: Long,
                 _timeCreated: Long,
                 val numReviews: Int,
-                _due: Long) {
+                _due: Long,
+                val opening: String) {
     val id = _id.toString()
     val userId = _userId.toString()
     val lastReviewed = _lastReviewed.toString()

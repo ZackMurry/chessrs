@@ -8,7 +8,6 @@ import { FC, useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { updateLichessGames, updateOpening } from 'store/boardSlice'
 import { TOAST_DURATION } from 'theme'
-import { MoveEntity } from 'types'
 import { useAppSelector } from 'utils/hooks'
 
 const OverviewPanel: FC = () => {
@@ -91,8 +90,15 @@ const OverviewPanel: FC = () => {
     setCurrentMove(null)
     console.log('adding move')
     const query = gql`
-      mutation CreateMove($san: String!, $uci: String!, $fenBefore: String!, $fenAfter: String!, $isWhite: Boolean!) {
-        createMove(san: $san, uci: $uci, fenBefore: $fenBefore, fenAfter: $fenAfter, isWhite: $isWhite) {
+      mutation CreateMove(
+        $san: String!
+        $uci: String!
+        $fenBefore: String!
+        $fenAfter: String!
+        $isWhite: Boolean!
+        $opening: String!
+      ) {
+        createMove(san: $san, uci: $uci, fenBefore: $fenBefore, fenAfter: $fenAfter, isWhite: $isWhite, opening: $opening) {
           san
           id
         }
@@ -104,7 +110,8 @@ const OverviewPanel: FC = () => {
         fenAfter: history[halfMoveCount],
         san: lastMove.san,
         uci: lastMove.uci,
-        isWhite: history.length % 2 === 0
+        isWhite: history.length % 2 === 0,
+        opening: opening.name
       })
       console.log(data)
       setPreviousMove(data.createMove)

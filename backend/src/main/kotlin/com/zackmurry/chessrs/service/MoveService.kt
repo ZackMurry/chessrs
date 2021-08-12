@@ -18,13 +18,13 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
         return (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).getId()
     }
 
-    fun createMove(fenBefore: String, san: String, uci: String, fenAfter: String, isWhite: Boolean): Move {
+    fun createMove(fenBefore: String, san: String, uci: String, fenAfter: String, isWhite: Boolean, opening: String): Move {
         // todo: check if a position already has the same before_fen
-        if (fenBefore.length > 90 || fenAfter.length > 90 || san.length > 5 || uci.length > 4) {
+        if (fenBefore.length > 90 || fenAfter.length > 90 || san.length > 5 || uci.length > 4 || opening.length > 256) {
             throw BadRequestException()
         }
         val currTime = System.currentTimeMillis()
-        val move = Move(fenBefore, san, uci, fenAfter, isWhite, UUID.randomUUID(), getUserId(), currTime, currTime, 0, currTime)
+        val move = Move(fenBefore, san, uci, fenAfter, isWhite, UUID.randomUUID(), getUserId(), currTime, currTime, 0, currTime, opening)
         moveDao.save(move)
         return move
     }

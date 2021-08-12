@@ -11,6 +11,7 @@ import StudyPage from 'pages/study/StudyPage'
 import PracticePage from 'pages/practice/PracticePage'
 import AccountManager from 'components/AccountManager'
 import Navbar from 'components/Navbar'
+import DashboardPage from 'pages/dash/DashboardPage'
 
 // todo: add way to view all of your moves in the database
 function App() {
@@ -22,6 +23,9 @@ function App() {
           <Router>
             <Navbar />
             <Switch>
+              <Route path='/' exact>
+                <DashboardPage />
+              </Route>
               <Route path='/create' exact>
                 <CreateMovesPage />
               </Route>

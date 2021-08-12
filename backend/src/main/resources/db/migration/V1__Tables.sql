@@ -19,5 +19,6 @@ CREATE TABLE IF NOT EXISTS move (
     time_created BIGINT NOT NULL,
     num_reviews INT NOT NULL DEFAULT 0,
     is_white BOOLEAN NOT NULL DEFAULT TRUE,
-    due BIGINT NOT NULL -- Time that the move is next due to review
+    due BIGINT NOT NULL, -- Time that the move is next due to review
+    opening VARCHAR(256) NOT NULL
 );

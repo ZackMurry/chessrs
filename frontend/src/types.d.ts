@@ -9,6 +9,7 @@ export interface MoveEntity {
   lastReviewed: number
   timeCreated: number
   numReviews: number
+  opening: string
 }
 
 export interface UserPerf {

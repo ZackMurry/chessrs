@@ -10,6 +10,7 @@ type Move {
     timeCreated: String!
     numReviews: Int!,
     due: String!
+    opening: String!
 }
 
 type UserPerf {
@@ -93,7 +94,7 @@ type Query {
 }
 
 type Mutation {
-    createMove(fenBefore: String!, san: String!, uci: String!, fenAfter: String!, isWhite: Boolean!): Move
+    createMove(fenBefore: String!, san: String!, uci: String!, fenAfter: String!, isWhite: Boolean!, opening: String!): Move
     reviewMove(id: String!, success: Boolean!): Move!
     deleteMove(id: String!): Move!
 }
