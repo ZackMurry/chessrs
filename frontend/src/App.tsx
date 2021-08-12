@@ -1,8 +1,8 @@
 import './App.css'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import { ChakraProvider, Flex, Heading } from '@chakra-ui/react'
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
+import { ChakraProvider } from '@chakra-ui/react'
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import theme from 'theme'
 import { Provider } from 'react-redux'
 import store from 'store/store'
@@ -12,8 +12,8 @@ import PracticePage from 'pages/practice/PracticePage'
 import AccountManager from 'components/AccountManager'
 import Navbar from 'components/Navbar'
 import DashboardPage from 'pages/dash/DashboardPage'
+import MovesPage from 'pages/moves/MovesPage'
 
-// todo: add way to view all of your moves in the database
 function App() {
   return (
     <Provider store={store}>
@@ -34,6 +34,9 @@ function App() {
               </Route>
               <Route path='/practice' exact>
                 <PracticePage />
+              </Route>
+              <Route path='/moves' exact>
+                <MovesPage />
               </Route>
             </Switch>
           </Router>

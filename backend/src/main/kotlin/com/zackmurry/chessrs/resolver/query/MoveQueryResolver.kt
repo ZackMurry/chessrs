@@ -25,4 +25,8 @@ class MoveQueryResolver(val moveService: MoveService) : GraphQLQueryResolver {
 
     fun randomMoves(limit: Int?) = moveService.getRandomMoves(limit ?: 5).map(Move::toResponse)
 
+    fun moves(page: Int?, limit: Int?) = moveService.getMoves(page ?: 0, limit ?: 50).map(Move::toResponse)
+
+    fun numberOfMoves() = moveService.getNumberOfMoves()
+
 }

@@ -1,6 +1,6 @@
-import { extendTheme } from '@chakra-ui/react'
+import { extendTheme, ThemeOverride } from '@chakra-ui/react'
 
-const theme = extendTheme({
+const config: ThemeOverride = {
   colors: {
     bg: '#181a1b',
     surface: '#202424',
@@ -27,7 +27,17 @@ const theme = extendTheme({
     initialColorMode: 'dark',
     useSystemColorMode: false
   }
-})
+}
+
+// Needed for the table on /moves
+config.colors = {
+  ...config.colors,
+  chessrs: {
+    700: config.colors.surface
+  }
+}
+
+const theme = extendTheme(config)
 
 export default theme
 

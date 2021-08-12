@@ -1,5 +1,6 @@
 import { Box, Heading, Text } from '@chakra-ui/react'
 import { FC } from 'react'
+import { Link } from 'react-router-dom'
 
 const DashboardMoveData: FC = () => {
   return (
@@ -10,6 +11,11 @@ const DashboardMoveData: FC = () => {
       <Text fontSize='18px' mt='10px'>
         23 moves need review
       </Text>
+      <Link to='/moves'>
+        <Text fontSize='18px' mt='10px' textDecor='underline'>
+          View moves
+        </Text>
+      </Link>
     </Box>
   )
 }

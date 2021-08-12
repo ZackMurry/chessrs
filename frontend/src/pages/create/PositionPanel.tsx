@@ -1,6 +1,6 @@
 import { IconButton } from '@chakra-ui/button'
-import { ChevronLeftIcon, ChevronRightIcon, RepeatIcon } from '@chakra-ui/icons'
-import { Box, Flex, Text } from '@chakra-ui/layout'
+import { ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, RepeatIcon } from '@chakra-ui/icons'
+import { Box, Flex, Link as ChakraLink, Text } from '@chakra-ui/layout'
 import { FC, useEffect, useMemo, useState } from 'react'
 import ChessJS from 'chess.js'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
@@ -148,7 +148,10 @@ const PositionPanel: FC = () => {
           {/* todo: allow user to increase depth */}
         </Text>
         <Text fontSize='16px' color='whiteText' mb='10px' wordBreak='break-all'>
-          FEN: {fen}
+          FEN:
+          <ChakraLink ml='2px' isExternal href={`https://lichess.org/analysis?fen=${encodeURIComponent(fen)}`}>
+            {fen} <ExternalLinkIcon ml='4px' mt='-2px' />
+          </ChakraLink>
         </Text>
       </Box>
     </Flex>

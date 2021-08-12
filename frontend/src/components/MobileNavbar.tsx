@@ -8,8 +8,8 @@ const MobileNavbar: FC = () => {
   const [isExpanded, { toggle, off }] = useBoolean(false)
 
   return (
-    <header style={{ background: theme.colors.surface }}>
-      <Flex h='7vh' p='12.5px 25px' justifyContent='space-between' alignItems='center'>
+    <header style={{ background: String(theme.colors.surface) }}>
+      <Flex h='7vh' p='12.5px 25px' w='100%' justifyContent='space-between' alignItems='center'>
         <IconButton onClick={toggle} bg='transparent' aria-label='Open navigation' borderRadius='3px'>
           <HamburgerIcon w='35px' h='35px' color='grayBtn' />
         </IconButton>

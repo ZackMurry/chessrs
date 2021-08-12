@@ -31,4 +31,10 @@ interface MoveDao : JpaRepository<Move, UUID> {
     @Query("UPDATE move SET num_reviews = num_reviews + 1, due = :due WHERE id = :id", nativeQuery = true)
     fun addReview(@Param("id") id: UUID, @Param("due") due: Long)
 
+    @Query("SELECT * FROM move WHERE user_id = :userId ORDER BY time_created DESC OFFSET :page * :limit LIMIT :limit", nativeQuery = true)
+    fun findByUserId(@Param("userId") userId: UUID, @Param("page") page: Int, @Param("limit") limit: Int): List<Move>
+
+    @Query("SELECT COUNT(*) FROM move WHERE user_id = :userId", nativeQuery = true)
+    fun getNumberOfMoves(@Param("userId") userId: UUID): Int
+
 }

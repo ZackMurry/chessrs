@@ -20,7 +20,7 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
 
     fun createMove(fenBefore: String, san: String, uci: String, fenAfter: String, isWhite: Boolean, opening: String): Move {
         // todo: check if a position already has the same before_fen
-        if (fenBefore.length > 90 || fenAfter.length > 90 || san.length > 5 || uci.length > 4 || opening.length > 256) {
+        if (fenBefore.length > 90 || fenAfter.length > 90 || san.length > 7 || uci.length > 4 || opening.length > 256) {
             throw BadRequestException()
         }
         val currTime = System.currentTimeMillis()
@@ -73,5 +73,16 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
     }
 
     fun getNumberOfDueMoves() = moveDao.getAmountDue(getUserId())
+
+    fun getMoves(page: Int, limit: Int): List<Move> {
+        if (page < 0 || limit < 0) {
+            throw BadRequestException()
+        }
+        return moveDao.findByUserId(getUserId(), page, limit)
+    }
+
+    fun getNumberOfMoves(): Int {
+        return moveDao.getNumberOfMoves(getUserId())
+    }
 
 }
