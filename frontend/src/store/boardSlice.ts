@@ -87,6 +87,7 @@ export const boardSlice = createSlice({
       const game = new Chess(state.fen)
       const move = game.move(action.payload, { sloppy: true })
       if (move === null) {
+        console.warn('illegal move: ', action.payload)
         // Move was illegal
         return state
       }
@@ -235,6 +236,30 @@ export const boardSlice = createSlice({
           lichess: initialState.games.lichess
         }
       }
+    },
+    loadMoves: (state, action: PayloadAction<string>) => {
+      const game = new Chess()
+      const history: string[] = [game.fen()]
+      const moves = action.payload.split(' ')
+      const moveHistory: Move[] = []
+      for (const move of moves) {
+        const m = game.move(move, { sloppy: true })
+        if (m === null) {
+          console.warn('Invalid move')
+          break
+        }
+        const { san, from, to } = m
+        moveHistory.push({ san: san, uci: `${from}${to}` })
+        history.push(game.fen())
+      }
+      return {
+        ...state,
+        perspective: 'white',
+        fen: history[0],
+        history,
+        moveHistory,
+        pgn: game.pgn()
+      }
     }
   }
 })
@@ -248,6 +273,7 @@ export const {
   updateLichessGames,
   updateOpening,
   flipBoard,
+  loadMoves,
   loadPosition,
   resetBoard,
   wrongMove,

@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, GridItem } from '@chakra-ui/react'
+import { Grid, GridItem } from '@chakra-ui/react'
 import { FC, useEffect } from 'react'
 import PositionPanel from './PositionPanel'
 import OverviewPanel from './OverviewPanel'

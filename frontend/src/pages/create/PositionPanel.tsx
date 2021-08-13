@@ -4,9 +4,10 @@ import { Box, Flex, Link as ChakraLink, Text } from '@chakra-ui/layout'
 import { FC, useEffect, useMemo, useState } from 'react'
 import ChessJS from 'chess.js'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
-import { flipBoard, traverseBackwards, traverseForwards } from 'store/boardSlice'
+import { flipBoard, loadMoves, resetBoard, traverseBackwards, traverseForwards } from 'store/boardSlice'
 import Stockfish from 'utils/analysis/Stockfish'
 import DarkTooltip from 'components/DarkTooltip'
+import ImportGameFromLichess from 'components/ImportGameFromLichess'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
@@ -55,7 +56,8 @@ const PositionPanel: FC = () => {
     setBestMove(matchingMoves[0].san)
   }
   const onEvaluation = (cp: number) => {
-    console.log('onEvaluation: ', new Date().getTime())
+    // todo: mate in ...
+    console.log('onEvaluation: ', cp)
     setEvaluation(cp / 100)
   }
   const onReady = () => {
@@ -94,6 +96,14 @@ const PositionPanel: FC = () => {
 
   const whitePerspectiveEvaluation = evaluation * (halfMoveCount % 2 === 0 ? 1 : -1)
 
+  const onImportGame = (moveStr: string, isWhite: boolean) => {
+    dispatch(resetBoard())
+    dispatch(loadMoves(moveStr))
+    if (!isWhite) {
+      dispatch(flipBoard())
+    }
+  }
+
   return (
     <Flex
       flexDir='column'
@@ -108,9 +118,11 @@ const PositionPanel: FC = () => {
       p='5%'
     >
       <Box>
-        <Text fontSize='1.5em' fontWeight='bold' color='whiteText' mb='10px'>
-          {pgn}
-        </Text>
+        <Box maxH='40vh' overflowY='auto'>
+          <Text fontSize='1.2em' fontWeight='bold' color='whiteText' mb='10px'>
+            {pgn}
+          </Text>
+        </Box>
         <Flex>
           <DarkTooltip label='Back'>
             <IconButton
@@ -133,6 +145,7 @@ const PositionPanel: FC = () => {
           </DarkTooltip>
         </Flex>
       </Box>
+      <ImportGameFromLichess onImport={onImportGame} />
       <Box>
         <Text fontSize='18px' fontWeight='bold' color='whiteText' mb='5px'>
           Analysis

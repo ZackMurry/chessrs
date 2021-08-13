@@ -5881,6 +5881,11 @@
   dependencies:
     "bser" "2.1.1"
 
+"fetch-ndjson@^1.1.6":
+  "integrity" "sha512-M9nf0kTIJV2lrSRCBYTtp61cBBKqeh2InEaZ/NfHZAjS96ZKVno8SXiw3w9Z0ry+S5JS2Dat5OkpauKgyyHXMg=="
+  "resolved" "https://registry.npmjs.org/fetch-ndjson/-/fetch-ndjson-1.1.6.tgz"
+  "version" "1.1.6"
+
 "figgy-pudding@^3.5.1":
   "integrity" "sha512-0btnI/H8f2pavGMN8w40mlSKOfTK2SVJmBfBeVIj3kNw0swwgzyRq0d5TJVOwodFmtvpPeWPN/MCcfuWF0Ezbw=="
   "resolved" "https://registry.npmjs.org/figgy-pudding/-/figgy-pudding-3.5.2.tgz"

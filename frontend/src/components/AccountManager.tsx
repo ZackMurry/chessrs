@@ -36,7 +36,7 @@ const AccountManager: FC = () => {
         })
         return
       }
-      dispatch(setAccount(data))
+      dispatch(setAccount(data.account))
     } catch (e: any) {
       if (e.response) {
         toast({

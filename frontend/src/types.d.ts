@@ -84,3 +84,36 @@ export interface UserData {
   credentialsNonExpired: boolean
   name: string
 }
+
+interface LichessPlayerUser {
+  name: string
+  id: string
+}
+
+interface LichessPlayer {
+  user: LichessPlayerUser
+  rating: number
+  provisional: boolean
+}
+
+export interface LichessGame {
+  id: string
+  rated: boolean
+  variant: string
+  speed: string
+  perf: string
+  createdAt: number
+  lastMoveAt: number
+  players: {
+    white: LichessPlayer
+    black: LichessPlayer
+  }
+  winner: 'white' | 'black'
+  moves: string
+  pgn: string
+  opening?: {
+    eco: string
+    name: string
+    ply: number
+  }
+}
