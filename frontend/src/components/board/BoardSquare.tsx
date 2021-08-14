@@ -12,15 +12,15 @@ const isMoveMatching = (move: Move, position: string, origin: string) => {
   }
   // Check using startsWith() because it could be O-O-O# or something
   if (move.san.startsWith('O-O-O')) {
-    if (move.color === 'w' && position === 'c1' && origin === 'e1') {
+    if (move.color === 'w' && (position === 'c1' || position === 'a1') && origin === 'e1') {
       return true
-    } else if (move.color === 'b' && position === 'c8' && origin === 'e8') {
+    } else if (move.color === 'b' && (position === 'c8' || position === 'a8') && origin === 'e8') {
       return true
     }
   } else if (move.san.startsWith('O-O')) {
-    if (move.color === 'w' && position === 'g1' && origin === 'e1') {
+    if (move.color === 'w' && (position === 'g1' || position === 'h1') && origin === 'e1') {
       return true
-    } else if (move.color === 'b' && position === 'g8' && origin === 'e8') {
+    } else if (move.color === 'b' && (position === 'g8' || position === 'h8') && origin === 'e8') {
       return true
     }
   }
@@ -105,7 +105,23 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
     console.log('selected square')
     console.log(game.fen())
     if (selectedPiece !== null) {
-      const move = `${selectedPiece.position}${squarePosition}`
+      let move = `${selectedPiece.position}${squarePosition}`
+      // Adjust for clicking on the king then the rook to castle
+      if (selectedPiece.type === 'k') {
+        if (selectedPiece.position === 'e1') {
+          if (squarePosition === 'a1') {
+            move = `${selectedPiece.position}c1`
+          } else if (squarePosition === 'h1') {
+            move = `${selectedPiece.position}g1`
+          }
+        } else if (selectedPiece.position === 'e8') {
+          if (squarePosition === 'a8') {
+            move = `${selectedPiece.position}c8`
+          } else if (squarePosition === 'h8') {
+            move = `${selectedPiece.position}g8`
+          }
+        }
+      }
       if (
         game.moves({ verbose: true }).filter(move => isMoveMatching(move, squarePosition, selectedPiece.position)).length !==
         0

@@ -102,15 +102,8 @@ const OverviewPanel: FC = () => {
     setCurrentMove(null)
     console.log('adding move')
     const query = gql`
-      mutation CreateMove(
-        $san: String!
-        $uci: String!
-        $fenBefore: String!
-        $fenAfter: String!
-        $isWhite: Boolean!
-        $opening: String!
-      ) {
-        createMove(san: $san, uci: $uci, fenBefore: $fenBefore, fenAfter: $fenAfter, isWhite: $isWhite, opening: $opening) {
+      mutation CreateMove($san: String!, $uci: String!, $fenBefore: String!, $isWhite: Boolean!, $opening: String!) {
+        createMove(san: $san, uci: $uci, fenBefore: $fenBefore, isWhite: $isWhite, opening: $opening) {
           san
           id
         }
