@@ -5,10 +5,13 @@ import DarkTooltip from 'components/DarkTooltip'
 import ErrorToast from 'components/ErrorToast'
 import { gql, request } from 'graphql-request'
 import { FC, useCallback, useEffect, useState } from 'react'
+import { GlobalHotKeys, configure } from 'react-hotkeys'
 import { useDispatch } from 'react-redux'
-import { updateLichessGames, updateOpening } from 'store/boardSlice'
+import { traverseBackwards, traverseForwards, updateLichessGames, updateOpening } from 'store/boardSlice'
 import { TOAST_DURATION } from 'theme'
 import { useAppSelector } from 'utils/hooks'
+
+configure({ ignoreKeymapAndHandlerChangesByDefault: false })
 
 const OverviewPanel: FC = () => {
   const { lastMove, lichessGamesInPosition, commonMoves, fen, opening, history, halfMoveCount } = useAppSelector(state => ({
@@ -31,7 +34,13 @@ const OverviewPanel: FC = () => {
   const isMobile = useBreakpointValue({ base: true, md: false })
   const [isDeleteLoading, setDeleteLoading] = useState(false)
 
-  console.log('lastMove: ', lastMove)
+  const handleTraverseForwards = useCallback(() => {
+    dispatch(traverseForwards())
+  }, [dispatch])
+
+  const handleTraverseBackwards = useCallback(() => {
+    dispatch(traverseBackwards())
+  }, [dispatch])
 
   const getMoveForPosition = useCallback(async () => {
     setPreviousMove(currentMove)
@@ -84,7 +93,10 @@ const OverviewPanel: FC = () => {
     getMoveForPosition()
   }, [fen, dispatch, getMoveForPosition, toast])
 
-  const onAddMove = async () => {
+  const onAddMove = useCallback(async () => {
+    if (previousMove || !Boolean(lastMove?.san) || isAddLoading) {
+      return
+    }
     setAddLoading(true)
     setPreviousMove(currentMove)
     setCurrentMove(null)
@@ -125,7 +137,19 @@ const OverviewPanel: FC = () => {
       })
     }
     setAddLoading(false)
-  }
+  }, [
+    setAddLoading,
+    setPreviousMove,
+    history,
+    opening,
+    setCurrentMove,
+    previousMove,
+    isAddLoading,
+    toast,
+    currentMove,
+    halfMoveCount,
+    lastMove
+  ])
 
   const onDeleteMove = async () => {
     console.log('Deleting ', currentMove.san)
@@ -152,6 +176,18 @@ const OverviewPanel: FC = () => {
     setDeleteLoading(false)
   }
 
+  const handlers = {
+    TRAVERSE_FORWARDS: handleTraverseForwards,
+    TRAVERSE_BACKWARDS: handleTraverseBackwards,
+    ADD_MOVE: onAddMove
+  }
+
+  const keyMap = {
+    TRAVERSE_FORWARDS: ['right', 'd'],
+    TRAVERSE_BACKWARDS: ['left', 'a'],
+    ADD_MOVE: 'space'
+  }
+
   return (
     <Box
       borderRadius='3px'
@@ -163,81 +199,84 @@ const OverviewPanel: FC = () => {
       h='100%'
       p='5%'
     >
-      <Button
-        isDisabled={Boolean(previousMove) || !Boolean(lastMove)}
-        isLoading={isAddLoading}
-        isFullWidth
-        onClick={onAddMove}
-      >
-        Add {lastMove?.san || 'Move'} (A)
-      </Button>
-      {opening ? (
-        <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' mt='20px' color='whiteText'>
-          {opening.name} <span style={{ fontWeight: 'normal' }}>{opening.eco}</span>
-        </Text>
-      ) : halfMoveCount === 0 ? (
-        <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mt='20px' color='whiteText'>
-          Starting position
-        </Text>
-      ) : (
-        <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mt='20px' color='whiteText'>
-          Unknown opening
-        </Text>
-      )}
-      {!isMobile && (
-        <Text fontSize='18px' fontWeight='bold' mt='0.8rem' color='whiteText'>
-          Times Reached
-        </Text>
-      )}
-      <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mt='5px' color='whiteText'>
-        Lichess games: {lichessGamesInPosition}
-      </Text>
-      {commonMoves.length > 0 ? (
-        <>
-          {/* todo: show some stats about the moves */}
-          {isMobile ? (
-            <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mb='1px' mt='0.7em' color='whiteText'>
-              <span style={{ fontWeight: 'bold' }}>Common Moves</span> {commonMoves.join(', ')}
-            </Text>
-          ) : (
-            <>
-              <Text fontSize='1.4em' fontWeight='bold' mb='5px' mt='20px' color='whiteText'>
-                Most Common Moves
-              </Text>
-              {commonMoves.map(m => (
-                <Text fontSize='1.4em' mb='1px' key={m} color='whiteText'>
-                  {m}
-                </Text>
-              ))}
-            </>
-          )}
-        </>
-      ) : (
-        <Text fontSize='1.4em' mb='1px' mt='20px' color='whiteText'>
-          There are no moves found in this position
-        </Text>
-      )}
-      {currentMove?.san ? (
-        <Flex justifyContent='space-between' alignItems='center' mb='5px' mt='0.8em'>
-          <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' color='whiteText'>
-            Current move: {currentMove.san}
+      <GlobalHotKeys keyMap={keyMap} handlers={handlers}>
+        <Button
+          isDisabled={Boolean(previousMove) || !Boolean(lastMove)}
+          isLoading={isAddLoading}
+          isFullWidth
+          onClick={onAddMove}
+        >
+          Add {lastMove?.san || 'Move'}
+          {!isMobile ? ' (Space)' : ''}
+        </Button>
+        {opening ? (
+          <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' mt='20px' color='whiteText'>
+            {opening.name} <span style={{ fontWeight: 'normal' }}>{opening.eco}</span>
           </Text>
-          <DarkTooltip label='Delete current move for position'>
-            <IconButton
-              aria-label='Delete current move for position'
-              borderRadius='5px'
-              onClick={onDeleteMove}
-              isLoading={isDeleteLoading}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </DarkTooltip>
-        </Flex>
-      ) : (
-        <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' mb='5px' mt='0.8em' color='whiteText'>
-          This position does not have a move
+        ) : halfMoveCount === 0 ? (
+          <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mt='20px' color='whiteText'>
+            Starting position
+          </Text>
+        ) : (
+          <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mt='20px' color='whiteText'>
+            Unknown opening
+          </Text>
+        )}
+        {!isMobile && (
+          <Text fontSize='18px' fontWeight='bold' mt='0.8rem' color='whiteText'>
+            Times Reached
+          </Text>
+        )}
+        <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mt='5px' color='whiteText'>
+          Lichess games: {lichessGamesInPosition}
         </Text>
-      )}
+        {commonMoves.length > 0 ? (
+          <>
+            {/* todo: show some stats about the moves */}
+            {isMobile ? (
+              <Text fontSize={{ base: '1.1em', sm: '1.4em' }} mb='1px' mt='0.7em' color='whiteText'>
+                <span style={{ fontWeight: 'bold' }}>Common Moves</span> {commonMoves.join(', ')}
+              </Text>
+            ) : (
+              <>
+                <Text fontSize='1.4em' fontWeight='bold' mb='5px' mt='20px' color='whiteText'>
+                  Most Common Moves
+                </Text>
+                {commonMoves.map(m => (
+                  <Text fontSize='1.4em' mb='1px' key={m} color='whiteText'>
+                    {m}
+                  </Text>
+                ))}
+              </>
+            )}
+          </>
+        ) : (
+          <Text fontSize='1.4em' mb='1px' mt='20px' color='whiteText'>
+            There are no moves found in this position
+          </Text>
+        )}
+        {currentMove?.san ? (
+          <Flex justifyContent='space-between' alignItems='center' mb='5px' mt='0.8em'>
+            <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' color='whiteText'>
+              Current move: {currentMove.san}
+            </Text>
+            <DarkTooltip label='Delete current move for position'>
+              <IconButton
+                aria-label='Delete current move for position'
+                borderRadius='5px'
+                onClick={onDeleteMove}
+                isLoading={isDeleteLoading}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </DarkTooltip>
+          </Flex>
+        ) : (
+          <Text fontSize={{ base: '1.1em', sm: '1.4em' }} fontWeight='bold' mb='5px' mt='0.8em' color='whiteText'>
+            This position does not have a move
+          </Text>
+        )}
+      </GlobalHotKeys>
     </Box>
   )
 }

@@ -128,6 +128,9 @@ export const boardSlice = createSlice({
       selectedPiece: null
     }),
     traverseBackwards: state => {
+      if (state.halfMoveCount === 0) {
+        return state
+      }
       return {
         ...state,
         halfMoveCount: state.halfMoveCount - 1,
@@ -135,6 +138,9 @@ export const boardSlice = createSlice({
       }
     },
     traverseForwards: state => {
+      if (state.halfMoveCount === state.moveHistory.length) {
+        return state
+      }
       return {
         ...state,
         halfMoveCount: state.halfMoveCount + 1,

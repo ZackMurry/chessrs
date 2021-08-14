@@ -1,7 +1,4 @@
-import ChessJS from 'chess.js'
 import parseUCIStringToObject from './parseUCIStringToObject'
-
-const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 export interface Analysis {
   depth?: number
@@ -27,7 +24,6 @@ export default class Stockfish {
   counter = 0
   interval: NodeJS.Timeout
   public isReady = false
-  fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
   depth = 5
 
   constructor(
