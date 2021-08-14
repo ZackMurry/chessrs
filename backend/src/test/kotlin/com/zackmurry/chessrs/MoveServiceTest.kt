@@ -1,10 +1,9 @@
 package com.zackmurry.chessrs
 
+import com.zackmurry.chessrs.entity.ChessrsUser
 import com.zackmurry.chessrs.exception.BadRequestException
-import com.zackmurry.chessrs.exception.NoContentException
 import com.zackmurry.chessrs.exception.NotFoundException
 import com.zackmurry.chessrs.model.MoveCreateRequest
-import com.zackmurry.chessrs.entity.ChessrsUser
 import com.zackmurry.chessrs.security.AuthProvider
 import com.zackmurry.chessrs.security.UserPrincipal
 import com.zackmurry.chessrs.service.DEFAULT_EASE
@@ -18,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import java.util.*
-import kotlin.collections.ArrayList
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
@@ -57,11 +55,11 @@ class MoveServiceTest {
     fun testCreateMove() {
         for (i in 1..100) {
             val move = MoveCreateRequest(
-                    RandomStringUtils.randomAlphanumeric(30, 90),
-                    RandomStringUtils.randomAlphanumeric(3, 5),
-                    RandomStringUtils.randomAlphanumeric(4),
-                    i % 2 == 0,
-                    RandomStringUtils.randomAlphanumeric(0, 256),
+                RandomStringUtils.randomAlphanumeric(30, 90),
+                RandomStringUtils.randomAlphanumeric(3, 5),
+                RandomStringUtils.randomAlphanumeric(4),
+                i % 2 == 0,
+                RandomStringUtils.randomAlphanumeric(0, 256),
             )
             val id = moveService.createMove(move.fenBefore, move.san, move.uci, move.isWhite, move.opening).id
             assertNotNull(id)
@@ -130,8 +128,14 @@ class MoveServiceTest {
             ).id
             assertNotNull(id)
             moveService.deleteById(id!!)
-            assertNull(moveService.getMoveById(id).orElse(null), "Getting a deleted move by id should produce an empty optional")
-            assertNull(moveService.getMoveById(id).orElse(null), "Getting a deleted move by FEN should produce an empty optional")
+            assertNull(
+                moveService.getMoveById(id).orElse(null),
+                "Getting a deleted move by id should produce an empty optional"
+            )
+            assertNull(
+                moveService.getMoveById(id).orElse(null),
+                "Getting a deleted move by FEN should produce an empty optional"
+            )
         }
         var id = UUID.randomUUID()
         // Making sure that there aren't any moves with this id lol
@@ -141,7 +145,11 @@ class MoveServiceTest {
             }
             id = UUID.randomUUID()
         }
-        assertThrows<NotFoundException>("Deleting a non-existent move should produce a NotFoundException") { moveService.deleteById(id) }
+        assertThrows<NotFoundException>("Deleting a non-existent move should produce a NotFoundException") {
+            moveService.deleteById(
+                id
+            )
+        }
     }
 
     @DisplayName("Study move")
@@ -166,8 +174,15 @@ class MoveServiceTest {
             createdMove = moveService.getMoveById(id).orElse(null)
             assertNotNull(createdMove)
             assertNotNull(createdMove.due)
-            assertEquals(1, createdMove.numReviews, "A move that has been successfully studied once should have one review")
-            assertTrue(createdMove.due!! > System.currentTimeMillis(), "A move that has just been studied should not be due")
+            assertEquals(
+                1,
+                createdMove.numReviews,
+                "A move that has been successfully studied once should have one review"
+            )
+            assertTrue(
+                createdMove.due!! > System.currentTimeMillis(),
+                "A move that has just been studied should not be due"
+            )
 
             moveService.studyMove(id, false)
             createdMove = moveService.getMoveById(id).orElse(null)
@@ -175,7 +190,10 @@ class MoveServiceTest {
             assertNotNull(createdMove.due)
             assertNotNull(createdMove.numReviews)
             assertEquals(0, createdMove.numReviews, "A move that has just been forgotten should have 0 reviews")
-            assertTrue(createdMove.due!! <= System.currentTimeMillis(), "A move that has just been forgotten should be due")
+            assertTrue(
+                createdMove.due!! <= System.currentTimeMillis(),
+                "A move that has just been forgotten should be due"
+            )
         }
     }
 
@@ -184,13 +202,15 @@ class MoveServiceTest {
     fun testRandomMoves() {
         val moveIds = ArrayList<UUID>()
         for (i in 1..25) {
-            moveIds.add(moveService.createMove(
-                RandomStringUtils.randomAlphanumeric(30, 90),
-                RandomStringUtils.randomAlphanumeric(3, 5),
-                RandomStringUtils.randomAlphanumeric(4),
-                i % 2 == 0,
-                RandomStringUtils.randomAlphanumeric(0, 256),
-            ).id!!)
+            moveIds.add(
+                moveService.createMove(
+                    RandomStringUtils.randomAlphanumeric(30, 90),
+                    RandomStringUtils.randomAlphanumeric(3, 5),
+                    RandomStringUtils.randomAlphanumeric(4),
+                    i % 2 == 0,
+                    RandomStringUtils.randomAlphanumeric(0, 256),
+                ).id!!
+            )
         }
 
         for (i in 1..25) {
@@ -208,13 +228,15 @@ class MoveServiceTest {
         for (i in 1..10) {
             val moveIds = ArrayList<UUID>()
             for (j in 1..25) {
-                moveIds.add(moveService.createMove(
-                    RandomStringUtils.randomAlphanumeric(30, 90),
-                    RandomStringUtils.randomAlphanumeric(3, 7),
-                    RandomStringUtils.randomAlphanumeric(4),
-                    j % 2 == 0,
-                    RandomStringUtils.randomAlphanumeric(0, 256),
-                ).id!!)
+                moveIds.add(
+                    moveService.createMove(
+                        RandomStringUtils.randomAlphanumeric(30, 90),
+                        RandomStringUtils.randomAlphanumeric(3, 7),
+                        RandomStringUtils.randomAlphanumeric(4),
+                        j % 2 == 0,
+                        RandomStringUtils.randomAlphanumeric(0, 256),
+                    ).id!!
+                )
             }
 
             var dueMoves = moveService.getDueMoves(5)
@@ -287,26 +309,33 @@ class MoveServiceTest {
     fun testGetMovesByFen() {
         val moveIds = ArrayList<UUID>()
         for (i in 1..25) {
-            moveIds.add(moveService.createMove(
-                RandomStringUtils.randomAlphanumeric(90),
-                RandomStringUtils.randomAlphanumeric(3, 5),
-                RandomStringUtils.randomAlphanumeric(4),
-                i % 2 == 0,
-                RandomStringUtils.randomAlphanumeric(0, 256),
-            ).id!!)
+            moveIds.add(
+                moveService.createMove(
+                    RandomStringUtils.randomAlphanumeric(90),
+                    RandomStringUtils.randomAlphanumeric(3, 5),
+                    RandomStringUtils.randomAlphanumeric(4),
+                    i % 2 == 0,
+                    RandomStringUtils.randomAlphanumeric(0, 256),
+                ).id!!
+            )
         }
 
         for (id in moveIds) {
             val move = moveService.getMoveById(id).orElse(null)
             assertNotNull(move?.fenBefore)
             val fenMove = moveService.getMoveByFen(move.fenBefore!!)
-            assertEquals(move, fenMove.orElse(null), "Getting a move by FEN should return the same data as getting it by id")
+            assertEquals(
+                move,
+                fenMove.orElse(null),
+                "Getting a move by FEN should return the same data as getting it by id"
+            )
         }
 
         for (i in 1..10) {
             assertNull(
                 moveService.getMoveByFen(RandomStringUtils.randomAlphanumeric(30, 89)).orElse(null),
-                "Getting a move that doesn't exist by FEN should produce a NoContentException")
+                "Getting a move that doesn't exist by FEN should produce a NoContentException"
+            )
         }
     }
 

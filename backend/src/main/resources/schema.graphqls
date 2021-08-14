@@ -13,74 +13,74 @@ type Move {
 }
 
 type UserPerf {
-  games: Int!
-  rating: Int!
-  rd: Int!
-  prog: Int!
-  prov: Boolean
+    games: Int!
+    rating: Int!
+    rd: Int!
+    prog: Int!
+    prov: Boolean
 }
 
 type UserRacer {
-  runs: Int!
-  score: Int!
+    runs: Int!
+    score: Int!
 }
 
 type Perfs {
-  chess960: UserPerf!
-  antichess: UserPerf!
-  puzzle: UserPerf!
-  atomic: UserPerf!
-  blitz: UserPerf!
-  crazyhouse: UserPerf!
-  threeCheck: UserPerf!
-  bullet: UserPerf!
-  correspondence: UserPerf!
-  classical: UserPerf!
-  rapid: UserPerf!
-  storm: UserRacer!
-  racer: UserRacer!
-  streak: UserRacer!
+    chess960: UserPerf!
+    antichess: UserPerf!
+    puzzle: UserPerf!
+    atomic: UserPerf!
+    blitz: UserPerf!
+    crazyhouse: UserPerf!
+    threeCheck: UserPerf!
+    bullet: UserPerf!
+    correspondence: UserPerf!
+    classical: UserPerf!
+    rapid: UserPerf!
+    storm: UserRacer!
+    racer: UserRacer!
+    streak: UserRacer!
 }
 
 type PlayTime {
-  total: Int!
-  tv: Int!
+    total: Int!
+    tv: Int!
 }
 
 type Attributes {
-  id: String!
-  username: String!
-  online: Boolean!
-  perfs: Perfs!
-  createdAt: String!
-  seenAt: String!
-  playTime: PlayTime!
-  language: String!
-  url: String!
-  nbFollowing: Int!
-  nbFollowers: Int!
-  completionRate: Int!
-  followable: Boolean!
-  following: Boolean!
-  blocking: Boolean!
-  followsYou: Boolean!
+    id: String!
+    username: String!
+    online: Boolean!
+    perfs: Perfs!
+    createdAt: String!
+    seenAt: String!
+    playTime: PlayTime!
+    language: String!
+    url: String!
+    nbFollowing: Int!
+    nbFollowers: Int!
+    completionRate: Int!
+    followable: Boolean!
+    following: Boolean!
+    blocking: Boolean!
+    followsYou: Boolean!
 }
 
 type Authority {
-  authority: String!
+    authority: String!
 }
 
 type Account {
-  username: String!
-  id: String!
-  authorities: [Authority]!
-  attributes: Attributes!
-  easeFactor: Float!
-  enabled: Boolean!
-  accountNonLocked: Boolean!
-  accountNonExpired: Boolean!
-  credentialsNonExpired: Boolean!
-  name: String!
+    username: String!
+    id: String!
+    authorities: [Authority]!
+    attributes: Attributes!
+    easeFactor: Float!
+    enabled: Boolean!
+    accountNonLocked: Boolean!
+    accountNonExpired: Boolean!
+    credentialsNonExpired: Boolean!
+    name: String!
 }
 
 

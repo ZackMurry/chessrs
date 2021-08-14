@@ -1,12 +1,11 @@
 package com.zackmurry.chessrs.config
 
-import com.zackmurry.chessrs.exception.*
+import com.zackmurry.chessrs.exception.InternalServerException
 import graphql.kickstart.spring.error.ThrowableGraphQLError
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.RestControllerAdvice
 
 val logger: Logger = LoggerFactory.getLogger(GraphQLExceptionHandler::class.java)
 

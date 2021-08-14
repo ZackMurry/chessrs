@@ -1,11 +1,11 @@
 package com.zackmurry.chessrs.service
 
 import com.zackmurry.chessrs.dao.MoveDao
-import com.zackmurry.chessrs.model.MoveCreateRequest
 import com.zackmurry.chessrs.entity.Move
-import com.zackmurry.chessrs.exception.*
-import com.zackmurry.chessrs.model.MoveResponse
-import com.zackmurry.chessrs.model.NeedReviewResponse
+import com.zackmurry.chessrs.exception.BadRequestException
+import com.zackmurry.chessrs.exception.ForbiddenException
+import com.zackmurry.chessrs.exception.InternalServerException
+import com.zackmurry.chessrs.exception.NotFoundException
 import com.zackmurry.chessrs.security.UserPrincipal
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -28,7 +28,8 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
             throw BadRequestException()
         }
         val currTime = System.currentTimeMillis()
-        val move = Move(fenBefore, san, uci, isWhite, UUID.randomUUID(), getUserId(), currTime, currTime, 0, currTime, opening)
+        val move =
+            Move(fenBefore, san, uci, isWhite, UUID.randomUUID(), getUserId(), currTime, currTime, 0, currTime, opening)
         moveDao.save(move)
         return move
     }

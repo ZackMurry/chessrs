@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class ChesSRSApplication
 
 fun main(args: Array<String>) {
-	runApplication<ChesSRSApplication>(*args)
+    runApplication<ChesSRSApplication>(*args)
 }

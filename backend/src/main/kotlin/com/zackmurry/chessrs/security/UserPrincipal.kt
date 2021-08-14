@@ -10,7 +10,13 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 import java.util.*
 
 
-class UserPrincipal(private var username: String, private var id: UUID, private var authorities: MutableCollection<out GrantedAuthority>, private var attributes: MutableMap<String, Any>, private var easeFactor: Float) : OAuth2User, UserDetails {
+class UserPrincipal(
+    private var username: String,
+    private var id: UUID,
+    private var authorities: MutableCollection<out GrantedAuthority>,
+    private var attributes: MutableMap<String, Any>,
+    private var easeFactor: Float
+) : OAuth2User, UserDetails {
 
     companion object {
         fun create(user: ChessrsUser): UserPrincipal {
@@ -73,7 +79,18 @@ class UserPrincipal(private var username: String, private var id: UUID, private 
     }
 
     fun toResponse(): UserPrincipalResponse {
-        return UserPrincipalResponse(username, id, authorities, attributes, easeFactor, isEnabled, isAccountNonLocked, isAccountNonExpired, isCredentialsNonExpired, name)
+        return UserPrincipalResponse(
+            username,
+            id,
+            authorities,
+            attributes,
+            easeFactor,
+            isEnabled,
+            isAccountNonLocked,
+            isAccountNonExpired,
+            isCredentialsNonExpired,
+            name
+        )
     }
 
 }

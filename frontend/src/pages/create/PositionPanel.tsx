@@ -1,23 +1,40 @@
 import { IconButton } from '@chakra-ui/button'
-import { ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, RepeatIcon } from '@chakra-ui/icons'
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ExternalLinkIcon,
+  RepeatIcon
+} from '@chakra-ui/icons'
 import { Box, Flex, Link as ChakraLink, Text } from '@chakra-ui/layout'
 import { FC, useEffect, useMemo, useState } from 'react'
 import ChessJS from 'chess.js'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
-import { flipBoard, loadMoves, resetBoard, traverseBackwards, traverseForwards } from 'store/boardSlice'
+import {
+  flipBoard,
+  loadMoves,
+  Opening,
+  resetBoard,
+  traverseBackwards,
+  traverseForwards,
+  traverseToEnd,
+  traverseToStart,
+  updateOpening
+} from 'store/boardSlice'
 import Stockfish from 'utils/analysis/Stockfish'
 import DarkTooltip from 'components/DarkTooltip'
 import ImportGameFromLichess from 'components/ImportGameFromLichess'
+import { useBreakpointValue } from '@chakra-ui/react'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 // todo: add lichess cloud eval when available for greater depth
 // todo: skip to end and beginning of PGN
 const PositionPanel: FC = () => {
-  const { pgn, halfMoveCount, historySize, moveHistory, fen } = useAppSelector(state => ({
+  const { pgn, halfMoveCount, moveHistory, fen } = useAppSelector(state => ({
     pgn: state.board.pgn,
     halfMoveCount: state.board.halfMoveCount,
-    historySize: state.board.history.length,
     moveHistory: state.board.moveHistory,
     fen: state.board.fen
   }))
@@ -26,6 +43,7 @@ const PositionPanel: FC = () => {
   const [depth, setDepth] = useState(0)
   const [isLoading, setLoading] = useState(true)
   const [isForcedMate, setForcedMate] = useState(false)
+  const isTraverseBarShowing = useBreakpointValue({ base: true, lg: false })
 
   const uciMoves = useMemo(
     () =>
@@ -115,9 +133,12 @@ const PositionPanel: FC = () => {
 
   const whitePerspectiveEvaluation = evaluation * (halfMoveCount % 2 === 0 ? 1 : -1)
 
-  const onImportGame = (moveStr: string, isWhite: boolean) => {
+  const onImportGame = (moveStr: string, isWhite: boolean, opening?: Opening) => {
     dispatch(resetBoard())
     dispatch(loadMoves(moveStr))
+    if (opening) {
+      updateOpening(opening)
+    }
     if (!isWhite) {
       dispatch(flipBoard())
     }
@@ -143,24 +164,46 @@ const PositionPanel: FC = () => {
           </Text>
         </Box>
         <Flex>
-          <DarkTooltip label='Back'>
-            <IconButton
-              icon={<ChevronLeftIcon />}
-              aria-label='Back'
-              onClick={() => dispatch(traverseBackwards())}
-              disabled={halfMoveCount <= 0}
-            />
-          </DarkTooltip>
-          <DarkTooltip label='Forward'>
-            <IconButton
-              icon={<ChevronRightIcon />}
-              aria-label='Forward'
-              onClick={() => dispatch(traverseForwards())}
-              disabled={halfMoveCount >= historySize - 1}
-            />
-          </DarkTooltip>
+          {!isTraverseBarShowing && (
+            <Box mr='20px'>
+              <DarkTooltip label='Start'>
+                <IconButton
+                  icon={<ArrowLeftIcon />}
+                  aria-label='Start'
+                  onClick={() => dispatch(traverseToStart())}
+                  disabled={halfMoveCount <= 0}
+                />
+              </DarkTooltip>
+              <DarkTooltip label='Back'>
+                <IconButton
+                  icon={<ChevronLeftIcon />}
+                  aria-label='Back'
+                  onClick={() => dispatch(traverseBackwards())}
+                  disabled={halfMoveCount <= 0}
+                  fontSize='4xl'
+                />
+              </DarkTooltip>
+              <DarkTooltip label='Forward'>
+                <IconButton
+                  icon={<ChevronRightIcon />}
+                  aria-label='Forward'
+                  onClick={() => dispatch(traverseForwards())}
+                  disabled={halfMoveCount >= moveHistory.length}
+                  fontSize='4xl'
+                />
+              </DarkTooltip>
+              <DarkTooltip label='End'>
+                <IconButton
+                  icon={<ArrowRightIcon />}
+                  aria-label='End'
+                  onClick={() => dispatch(traverseToEnd())}
+                  disabled={halfMoveCount >= moveHistory.length}
+                />
+              </DarkTooltip>
+            </Box>
+          )}
           <DarkTooltip label='Flip board'>
-            <IconButton icon={<RepeatIcon />} aria-label='Flip board' onClick={() => dispatch(flipBoard())} ml='20px' />
+            <IconButton icon={<RepeatIcon />} aria-label='Flip board' onClick={() => dispatch(flipBoard())} />
           </DarkTooltip>
         </Flex>
       </Box>

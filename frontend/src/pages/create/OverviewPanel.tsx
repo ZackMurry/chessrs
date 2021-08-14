@@ -74,6 +74,7 @@ const OverviewPanel: FC = () => {
 
   useEffect(() => {
     console.log('fetching games')
+    // todo: when skipping to the end, the opening isn't updated to the last available value
     fetch(
       `https://explorer.lichess.ovh/lichess?variant=standard&speeds[]=bullet&speeds[]=blitz&speeds[]=rapid&speeds[]=classical&ratings[]=1600&ratings[]=2500&moves=6&fen=${fen}`
     )
@@ -174,6 +175,7 @@ const OverviewPanel: FC = () => {
     ADD_MOVE: onAddMove
   }
 
+  // todo: a hotkey for traverseToStart and traverseToEnd
   const keyMap = {
     TRAVERSE_FORWARDS: ['right', 'd'],
     TRAVERSE_BACKWARDS: ['left', 'a'],

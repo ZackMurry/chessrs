@@ -1,8 +1,10 @@
 package com.zackmurry.chessrs.service
 
-import com.zackmurry.chessrs.exception.OAuth2AuthenticationProcessingException
 import com.zackmurry.chessrs.entity.ChessrsUser
-import com.zackmurry.chessrs.security.*
+import com.zackmurry.chessrs.exception.OAuth2AuthenticationProcessingException
+import com.zackmurry.chessrs.security.OAuth2UserInfo
+import com.zackmurry.chessrs.security.OAuth2UserInfoFactory
+import com.zackmurry.chessrs.security.UserPrincipal
 import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.InternalAuthenticationServiceException
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
@@ -31,7 +33,10 @@ class OAuth2UserService(private val userService: UserService) : DefaultOAuth2Use
             throw OAuth2AuthenticationProcessingException("User request is not found")
         }
 //        oAuth2User.attributes.keys.forEach { println("$it: ${oAuth2User.attributes[it]}") }
-        val oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(userRequest.clientRegistration.registrationId, oAuth2User.attributes)
+        val oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(
+            userRequest.clientRegistration.registrationId,
+            oAuth2User.attributes
+        )
         val username = oAuth2UserInfo.getUsername()
         if (username == null || username.isBlank()) {
             throw OAuth2AuthenticationProcessingException("Username not found from OAuth2 provider")
@@ -52,8 +57,14 @@ class OAuth2UserService(private val userService: UserService) : DefaultOAuth2Use
     }
 
     private fun registerNewUser(oAuth2UserRequest: OAuth2UserRequest, oAuth2UserInfo: OAuth2UserInfo): ChessrsUser {
-        val username = oAuth2UserInfo.getUsername() ?: throw OAuth2AuthenticationProcessingException("Username not found from OAuth2 provider")
-        val user = ChessrsUser(username, UUID.randomUUID(), oAuth2UserRequest.clientRegistration.registrationId.uppercase(), DEFAULT_EASE)
+        val username = oAuth2UserInfo.getUsername()
+            ?: throw OAuth2AuthenticationProcessingException("Username not found from OAuth2 provider")
+        val user = ChessrsUser(
+            username,
+            UUID.randomUUID(),
+            oAuth2UserRequest.clientRegistration.registrationId.uppercase(),
+            DEFAULT_EASE
+        )
         userService.createUser(user)
         return user
     }

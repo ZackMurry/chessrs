@@ -10,7 +10,7 @@ export interface SelectedPiece {
   type: PieceType
 }
 
-interface Opening {
+export interface Opening {
   eco: string
   name: string
 }
@@ -138,13 +138,28 @@ export const boardSlice = createSlice({
       }
     },
     traverseForwards: state => {
-      if (state.halfMoveCount === state.moveHistory.length) {
+      if (state.halfMoveCount >= state.moveHistory.length) {
         return state
       }
       return {
         ...state,
         halfMoveCount: state.halfMoveCount + 1,
         fen: state.history[state.halfMoveCount + 1]
+      }
+    },
+    traverseToStart: state => ({
+      ...state,
+      fen: state.history[0],
+      halfMoveCount: 0
+    }),
+    traverseToEnd: state => {
+      if (state.halfMoveCount >= state.moveHistory.length) {
+        return state
+      }
+      return {
+        ...state,
+        halfMoveCount: state.moveHistory.length,
+        fen: state.history[state.history.length - 1]
       }
     },
     updateLichessGames: (state, action: PayloadAction<LichessGames>) => {
@@ -276,6 +291,8 @@ export const {
   unselectPiece,
   traverseBackwards,
   traverseForwards,
+  traverseToStart,
+  traverseToEnd,
   updateLichessGames,
   updateOpening,
   flipBoard,

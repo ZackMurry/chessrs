@@ -7,14 +7,14 @@ import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.config.web.servlet.invoke
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.security.config.web.servlet.invoke
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.reactive.function.client.WebClient
 
 
 @EnableWebSecurity
@@ -52,8 +52,14 @@ class SecurityConfiguration(
     }
 
     @Bean
-    fun webClient(clientRegistrationRepository: ClientRegistrationRepository, authorizedClientRepository: OAuth2AuthorizedClientRepository): WebClient {
-        val oauth2 = ServletOAuth2AuthorizedClientExchangeFilterFunction(clientRegistrationRepository, authorizedClientRepository)
+    fun webClient(
+        clientRegistrationRepository: ClientRegistrationRepository,
+        authorizedClientRepository: OAuth2AuthorizedClientRepository
+    ): WebClient {
+        val oauth2 = ServletOAuth2AuthorizedClientExchangeFilterFunction(
+            clientRegistrationRepository,
+            authorizedClientRepository
+        )
         oauth2.setDefaultOAuth2AuthorizedClient(true)
         return WebClient.builder().apply(oauth2.oauth2Configuration()).build()
     }

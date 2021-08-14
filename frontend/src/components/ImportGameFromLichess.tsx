@@ -4,9 +4,10 @@ import { useAppSelector } from 'utils/hooks'
 import { LichessGame } from 'types'
 import LichessGamePreview from './LichessGamePreview'
 import { Box, Button, Flex, useBoolean } from '@chakra-ui/react'
+import { Opening } from 'store/boardSlice'
 
 interface Props {
-  onImport: (moves: string, isWhite: boolean) => void
+  onImport: (moves: string, isWhite: boolean, opening?: Opening) => void
 }
 
 const GAMES_LOADED_PER_FETCH = 10
@@ -24,7 +25,7 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
       }
       startLoading()
       const response = await fetch(
-        `https://lichess.org/api/games/user/${username}?max=${GAMES_LOADED_PER_FETCH}&pgnInJson=true&tags=false&opening=true`,
+        `https://lichess.org/api/games/user/${username}?max=${GAMES_LOADED_PER_FETCH}&pgnInJson=true&tags=false&opening=true&perfType=ultraBullet,bullet,blitz,rapid,classical,correspondence`,
         {
           headers: { Accept: 'application/x-ndjson' }
         }
@@ -53,7 +54,7 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
     }
     startLoading()
     const response = await fetch(
-      `https://lichess.org/api/games/user/${username}?max=${GAMES_LOADED_PER_FETCH}&pgnInJson=true&tags=false&opening=true&until=${
+      `https://lichess.org/api/games/user/${username}?max=${GAMES_LOADED_PER_FETCH}&pgnInJson=true&tags=false&opening=true&perfType=ultraBullet,bullet,blitz,rapid,classical,correspondence&until=${
         games[games.length - 1].createdAt
       }`,
       {
@@ -77,9 +78,11 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
 
   if (!isSelectorVisible) {
     return (
-      <Button maxW='50%' variant='ghost' onClick={showSelector}>
-        Import from Lichess
-      </Button>
+      <Box py='15px'>
+        <Button variant='ghost' onClick={showSelector}>
+          Import from Lichess
+        </Button>
+      </Box>
     )
   }
 
@@ -91,7 +94,7 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
           game={game}
           onClick={() => {
             hideSelector()
-            onImport(game.moves, game.players.black.user.name !== username)
+            onImport(game.moves, game.players.black.user.name !== username, game.opening)
           }}
         />
       ))}

@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
-import org.springframework.web.util.UriComponentsBuilder
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -15,7 +14,8 @@ private val logger = LoggerFactory.getLogger(OAuth2AuthenticationSuccessHandler:
 const val JWT_COOKIE_NAME = "jwt"
 
 @Component
-class OAuth2AuthenticationSuccessHandler(private val httpCookieOAuth2RequestRepository: HttpCookieOAuth2RequestRepository) : SimpleUrlAuthenticationSuccessHandler() {
+class OAuth2AuthenticationSuccessHandler(private val httpCookieOAuth2RequestRepository: HttpCookieOAuth2RequestRepository) :
+    SimpleUrlAuthenticationSuccessHandler() {
 
     override fun onAuthenticationSuccess(
         request: HttpServletRequest?,
@@ -36,7 +36,11 @@ class OAuth2AuthenticationSuccessHandler(private val httpCookieOAuth2RequestRepo
         redirectStrategy.sendRedirect(request, response, targetUrl)
     }
 
-    override fun determineTargetUrl(request: HttpServletRequest, response: HttpServletResponse, authentication: Authentication?): String {
+    override fun determineTargetUrl(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        authentication: Authentication?
+    ): String {
         val targetUrl = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)?.value ?: defaultTargetUrl
         if (authentication == null) {
             throw BadRequestException()

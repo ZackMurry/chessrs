@@ -18,7 +18,11 @@ interface MoveDao : JpaRepository<Move, UUID> {
     fun findByFenBefore(@Param("userId") userId: UUID, @Param("fenBefore") fen: String): Optional<Move>
 
     @Query("SELECT * FROM move WHERE user_id = :userId AND due <= :time ORDER BY due LIMIT :limit", nativeQuery = true)
-    fun getDue(@Param("userId") userId: UUID, @Param("limit") limit: Int = 5, @Param("time") time: Long = System.currentTimeMillis()): List<Move>
+    fun getDue(
+        @Param("userId") userId: UUID,
+        @Param("limit") limit: Int = 5,
+        @Param("time") time: Long = System.currentTimeMillis()
+    ): List<Move>
 
     @Query("SELECT COUNT(*) FROM move WHERE user_id = :userId AND due <= :time", nativeQuery = true)
     fun getAmountDue(@Param("userId") userId: UUID, @Param("time") time: Long = System.currentTimeMillis()): Int
@@ -31,7 +35,10 @@ interface MoveDao : JpaRepository<Move, UUID> {
     @Query("UPDATE move SET num_reviews = num_reviews + 1, due = :due WHERE id = :id", nativeQuery = true)
     fun addReview(@Param("id") id: UUID, @Param("due") due: Long)
 
-    @Query("SELECT * FROM move WHERE user_id = :userId ORDER BY time_created DESC OFFSET :page * :limit LIMIT :limit", nativeQuery = true)
+    @Query(
+        "SELECT * FROM move WHERE user_id = :userId ORDER BY time_created DESC OFFSET :page * :limit LIMIT :limit",
+        nativeQuery = true
+    )
     fun findByUserId(@Param("userId") userId: UUID, @Param("page") page: Int, @Param("limit") limit: Int): List<Move>
 
     @Query("SELECT * FROM move WHERE user_id = :userId ORDER BY time_created DESC", nativeQuery = true)

@@ -7,7 +7,13 @@ data class LichessPerf(val games: Int, val rating: Int, val rd: Int, val prog: I
 
     companion object {
         fun fromMap(map: MutableMap<String, Any>): LichessPerf {
-            return LichessPerf(map["games"] as Int, map["rating"] as Int, map["rd"] as Int, map["prog"] as Int, map["prov"] as Boolean?)
+            return LichessPerf(
+                map["games"] as Int,
+                map["rating"] as Int,
+                map["rd"] as Int,
+                map["prog"] as Int,
+                map["prov"] as Boolean?
+            )
         }
     }
 
@@ -21,20 +27,22 @@ data class LichessRacer(val runs: Int, val score: Int) {
 
 }
 
-data class LichessPerfs(val chess960: LichessPerf,
-                    val antichess: LichessPerf,
-                    val puzzle: LichessPerf,
-                    val atomic: LichessPerf,
-                    val blitz: LichessPerf,
-                    val crazyhouse: LichessPerf,
-                    val threeCheck: LichessPerf,
-                    val bullet: LichessPerf,
-                    val correspondence: LichessPerf,
-                    val classical: LichessPerf,
-                    val rapid: LichessPerf,
-                    val storm: LichessRacer,
-                    val racer: LichessRacer,
-                    val streak: LichessRacer) {
+data class LichessPerfs(
+    val chess960: LichessPerf,
+    val antichess: LichessPerf,
+    val puzzle: LichessPerf,
+    val atomic: LichessPerf,
+    val blitz: LichessPerf,
+    val crazyhouse: LichessPerf,
+    val threeCheck: LichessPerf,
+    val bullet: LichessPerf,
+    val correspondence: LichessPerf,
+    val classical: LichessPerf,
+    val rapid: LichessPerf,
+    val storm: LichessRacer,
+    val racer: LichessRacer,
+    val streak: LichessRacer
+) {
     companion object {
         fun fromMap(map: MutableMap<String, Any>): LichessPerfs {
             return LichessPerfs(
@@ -63,22 +71,24 @@ data class LichessPlayTime(val total: Int, val tv: Int) {
     }
 }
 
-data class LichessAttributes(val id: String,
-                        val username: String,
-                        val online: Boolean,
-                        val perfs: LichessPerfs,
-                        val createdAt: String,
-                        val seenAt: String,
-                        val playTime: LichessPlayTime,
-                        val language: String,
-                        val url: String,
-                        val nbFollowing: Int,
-                        val nbFollowers: Int,
-                        val completionRate: Int,
-                        val followable: Boolean,
-                        val following: Boolean,
-                        val blocking: Boolean,
-                        val followsYou: Boolean) {
+data class LichessAttributes(
+    val id: String,
+    val username: String,
+    val online: Boolean,
+    val perfs: LichessPerfs,
+    val createdAt: String,
+    val seenAt: String,
+    val playTime: LichessPlayTime,
+    val language: String,
+    val url: String,
+    val nbFollowing: Int,
+    val nbFollowers: Int,
+    val completionRate: Int,
+    val followable: Boolean,
+    val following: Boolean,
+    val blocking: Boolean,
+    val followsYou: Boolean
+) {
 
     companion object {
         fun fromMap(map: MutableMap<String, Any>): LichessAttributes {
@@ -111,16 +121,18 @@ data class LichessAttributes(val id: String,
 
 data class AuthorityResponse(val authority: String)
 
-class UserPrincipalResponse(val username: String,
-                            uuid: UUID,
-                            authoritiesMap: MutableCollection<out GrantedAuthority>,
-                            attributesMap: MutableMap<String, Any>,
-                            val easeFactor: Float,
-                            val enabled: Boolean,
-                            val accountNonLocked: Boolean,
-                            val accountNonExpired: Boolean,
-                            val credentialsNonExpired: Boolean,
-                            val name: String) {
+class UserPrincipalResponse(
+    val username: String,
+    uuid: UUID,
+    authoritiesMap: MutableCollection<out GrantedAuthority>,
+    attributesMap: MutableMap<String, Any>,
+    val easeFactor: Float,
+    val enabled: Boolean,
+    val accountNonLocked: Boolean,
+    val accountNonExpired: Boolean,
+    val credentialsNonExpired: Boolean,
+    val name: String
+) {
     val id = uuid.toString()
     val authorities = authoritiesMap.map { AuthorityResponse(it.authority) }
     val attributes = LichessAttributes.fromMap(attributesMap)

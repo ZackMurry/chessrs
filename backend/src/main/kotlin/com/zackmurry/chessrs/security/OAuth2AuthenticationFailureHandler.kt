@@ -13,7 +13,8 @@ import javax.servlet.http.HttpServletResponse
 private val oauthLogger: Logger = LoggerFactory.getLogger(OAuth2AuthenticationFailureHandler::class.java)
 
 @Component
-class OAuth2AuthenticationFailureHandler(private val httpCookieOAuth2RequestRepository: HttpCookieOAuth2RequestRepository) : SimpleUrlAuthenticationFailureHandler() {
+class OAuth2AuthenticationFailureHandler(private val httpCookieOAuth2RequestRepository: HttpCookieOAuth2RequestRepository) :
+    SimpleUrlAuthenticationFailureHandler() {
 
 
     override fun onAuthenticationFailure(
@@ -26,7 +27,9 @@ class OAuth2AuthenticationFailureHandler(private val httpCookieOAuth2RequestRepo
             return
         }
         var targetUrl = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)?.value ?: "/"
-        targetUrl = UriComponentsBuilder.fromUriString(targetUrl).queryParam("error", exception?.localizedMessage ?: "An error occurred while authenticating").build().toUriString()
+        targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
+            .queryParam("error", exception?.localizedMessage ?: "An error occurred while authenticating").build()
+            .toUriString()
         httpCookieOAuth2RequestRepository.removeAuthorizationRequestCookies(request, response)
         redirectStrategy.sendRedirect(request, response, targetUrl)
     }
