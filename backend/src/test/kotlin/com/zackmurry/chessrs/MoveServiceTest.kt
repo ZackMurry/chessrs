@@ -60,9 +60,10 @@ class MoveServiceTest {
                     RandomStringUtils.randomAlphanumeric(30, 90),
                     RandomStringUtils.randomAlphanumeric(3, 5),
                     RandomStringUtils.randomAlphanumeric(4),
-                    RandomStringUtils.randomAlphanumeric(30, 90),
-                    i % 2 == 0)
-            val id = moveService.createMove(move.fenBefore, move.san, move.uci, move.fenAfter, move.isWhite).id
+                    i % 2 == 0,
+                    RandomStringUtils.randomAlphanumeric(0, 256),
+            )
+            val id = moveService.createMove(move.fenBefore, move.san, move.uci, move.isWhite, move.opening).id
             assertNotNull(id)
             val createdMove = moveService.getMoveById(id!!).orElse(null)
             assertNotNull(createdMove)
@@ -70,7 +71,8 @@ class MoveServiceTest {
             assertEquals(move.fenBefore, createdMove.fenBefore)
             assertEquals(move.uci, createdMove.uci)
             assertEquals(move.san, createdMove.san)
-            assertEquals(move.fenAfter, createdMove.fenAfter)
+            assertEquals(move.isWhite, createdMove.isWhite)
+            assertEquals(move.opening, createdMove.opening)
         }
 
         assertThrows<BadRequestException>("A move with a starting FEN with > 90 chars is invalid") {
@@ -78,28 +80,28 @@ class MoveServiceTest {
                 RandomStringUtils.randomAlphanumeric(91),
                 RandomStringUtils.randomAlphanumeric(3, 5),
                 RandomStringUtils.randomAlphanumeric(4),
-                RandomStringUtils.randomAlphanumeric(91),
-                true
+                true,
+                RandomStringUtils.randomAlphanumeric(0, 256)
             )
         }
 
-        assertThrows<BadRequestException>("A move with a ending FEN with > 90 chars is invalid") {
+        assertThrows<BadRequestException>("A move with an opening with > 256 chars is invalid") {
             moveService.createMove(
                 RandomStringUtils.randomAlphanumeric(30, 90),
                 RandomStringUtils.randomAlphanumeric(3, 5),
                 RandomStringUtils.randomAlphanumeric(4),
-                RandomStringUtils.randomAlphanumeric(91),
-                true
+                true,
+                RandomStringUtils.randomAlphanumeric(257),
             )
         }
 
-        assertThrows<BadRequestException>("A move with a SAN with > 5 chars is invalid") {
+        assertThrows<BadRequestException>("A move with a SAN with > 7 chars is invalid") {
             moveService.createMove(
                 RandomStringUtils.randomAlphanumeric(30, 90),
-                RandomStringUtils.randomAlphanumeric(6),
+                RandomStringUtils.randomAlphanumeric(8),
                 RandomStringUtils.randomAlphanumeric(4),
-                RandomStringUtils.randomAlphanumeric(30, 90),
-                true
+                true,
+                RandomStringUtils.randomAlphanumeric(0, 256),
             )
         }
 
@@ -108,8 +110,8 @@ class MoveServiceTest {
                 RandomStringUtils.randomAlphanumeric(30, 90),
                 RandomStringUtils.randomAlphanumeric(3, 5),
                 RandomStringUtils.randomAlphanumeric(5),
-                RandomStringUtils.randomAlphanumeric(30, 90),
-                true
+                true,
+                RandomStringUtils.randomAlphanumeric(0, 256),
             )
         }
     }
@@ -123,23 +125,21 @@ class MoveServiceTest {
                 fenBefore,
                 RandomStringUtils.randomAlphanumeric(3, 5),
                 RandomStringUtils.randomAlphanumeric(4),
-                RandomStringUtils.randomAlphanumeric(30, 90),
-                i % 2 == 0
+                i % 2 == 0,
+                RandomStringUtils.randomAlphanumeric(0, 256),
             ).id
             assertNotNull(id)
             moveService.deleteById(id!!)
-            assertThrows<NotFoundException>("Getting a deleted move by id should produce a NotFoundException") { moveService.getMoveById(id) }
-            assertThrows<NoContentException>("Getting a deleted move by FEN should produce a NoContentException") { moveService.getMoveByFen(fenBefore) }
+            assertNull(moveService.getMoveById(id).orElse(null), "Getting a deleted move by id should produce an empty optional")
+            assertNull(moveService.getMoveById(id).orElse(null), "Getting a deleted move by FEN should produce an empty optional")
         }
         var id = UUID.randomUUID()
         // Making sure that there aren't any moves with this id lol
         while (true) {
-            try {
-                moveService.getMoveById(id)
-                id = UUID.randomUUID()
-            } catch (_: Exception) {
+            if (moveService.getMoveById(id).isEmpty) {
                 break
             }
+            id = UUID.randomUUID()
         }
         assertThrows<NotFoundException>("Deleting a non-existent move should produce a NotFoundException") { moveService.deleteById(id) }
     }
@@ -152,8 +152,8 @@ class MoveServiceTest {
                 RandomStringUtils.randomAlphanumeric(30, 90),
                 RandomStringUtils.randomAlphanumeric(3, 5),
                 RandomStringUtils.randomAlphanumeric(4),
-                RandomStringUtils.randomAlphanumeric(30, 90),
-                i % 2 == 0
+                i % 2 == 0,
+                RandomStringUtils.randomAlphanumeric(0, 256),
             ).id
             assertNotNull(id)
             var createdMove = moveService.getMoveById(id!!).orElse(null)
@@ -188,8 +188,8 @@ class MoveServiceTest {
                 RandomStringUtils.randomAlphanumeric(30, 90),
                 RandomStringUtils.randomAlphanumeric(3, 5),
                 RandomStringUtils.randomAlphanumeric(4),
-                RandomStringUtils.randomAlphanumeric(30, 90),
-                i % 2 == 0
+                i % 2 == 0,
+                RandomStringUtils.randomAlphanumeric(0, 256),
             ).id!!)
         }
 
@@ -210,10 +210,10 @@ class MoveServiceTest {
             for (j in 1..25) {
                 moveIds.add(moveService.createMove(
                     RandomStringUtils.randomAlphanumeric(30, 90),
-                    RandomStringUtils.randomAlphanumeric(3, 5),
+                    RandomStringUtils.randomAlphanumeric(3, 7),
                     RandomStringUtils.randomAlphanumeric(4),
-                    RandomStringUtils.randomAlphanumeric(30, 90),
-                    j % 2 == 0
+                    j % 2 == 0,
+                    RandomStringUtils.randomAlphanumeric(0, 256),
                 ).id!!)
             }
 
@@ -291,8 +291,8 @@ class MoveServiceTest {
                 RandomStringUtils.randomAlphanumeric(90),
                 RandomStringUtils.randomAlphanumeric(3, 5),
                 RandomStringUtils.randomAlphanumeric(4),
-                RandomStringUtils.randomAlphanumeric(30, 90),
-                i % 2 == 0
+                i % 2 == 0,
+                RandomStringUtils.randomAlphanumeric(0, 256),
             ).id!!)
         }
 
@@ -300,11 +300,13 @@ class MoveServiceTest {
             val move = moveService.getMoveById(id).orElse(null)
             assertNotNull(move?.fenBefore)
             val fenMove = moveService.getMoveByFen(move.fenBefore!!)
-            assertEquals(move, fenMove, "Getting a move by FEN should return the same data as getting it by id")
+            assertEquals(move, fenMove.orElse(null), "Getting a move by FEN should return the same data as getting it by id")
         }
 
         for (i in 1..10) {
-            assertThrows<NoContentException>("Getting a move that doesn't exist by FEN should produce a NoContentException"){ moveService.getMoveByFen(RandomStringUtils.randomAlphanumeric(30, 89)) }
+            assertNull(
+                moveService.getMoveByFen(RandomStringUtils.randomAlphanumeric(30, 89)).orElse(null),
+                "Getting a move that doesn't exist by FEN should produce a NoContentException")
         }
     }
 
@@ -318,11 +320,11 @@ class MoveServiceTest {
                 RandomStringUtils.randomAlphanumeric(30, 90),
                 RandomStringUtils.randomAlphanumeric(3, 5),
                 RandomStringUtils.randomAlphanumeric(4),
-                RandomStringUtils.randomAlphanumeric(30, 90),
-                i % 2 == 0
+                i % 2 == 0,
+                RandomStringUtils.randomAlphanumeric(0, 256)
             )
             moves.add(move)
-            moveIds.add(moveService.createMove(move.fenBefore, move.san, move.uci, move.fenAfter, move.isWhite).id!!)
+            moveIds.add(moveService.createMove(move.fenBefore, move.san, move.uci, move.isWhite, move.opening).id!!)
         }
 
         for (i in 0..24) {
@@ -334,7 +336,7 @@ class MoveServiceTest {
             assertEquals(move.fenBefore, returnedMove.fenBefore)
             assertEquals(move.uci, returnedMove.uci)
             assertEquals(move.san, returnedMove.san)
-            assertEquals(move.fenAfter, returnedMove.fenAfter)
+            assertEquals(move.opening, returnedMove.opening)
         }
     }
 

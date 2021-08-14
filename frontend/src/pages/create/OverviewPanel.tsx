@@ -119,7 +119,6 @@ const OverviewPanel: FC = () => {
     try {
       const data = await request('/api/v1/graphql', query, {
         fenBefore: history[halfMoveCount - 1],
-        fenAfter: history[halfMoveCount],
         san: lastMove.san,
         uci: lastMove.uci,
         isWhite: history.length % 2 === 0,

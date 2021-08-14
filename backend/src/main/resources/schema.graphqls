@@ -4,7 +4,6 @@ type Move {
     fenBefore: String!
     san: String!
     uci: String!
-    fenAfter: String!
     isWhite: Boolean!
     lastReviewed: String!
     timeCreated: String!
@@ -96,7 +95,7 @@ type Query {
 }
 
 type Mutation {
-    createMove(fenBefore: String!, san: String!, uci: String!, fenAfter: String!, isWhite: Boolean!, opening: String!): Move
+    createMove(fenBefore: String!, san: String!, uci: String!, isWhite: Boolean!, opening: String!): Move
     reviewMove(id: String!, success: Boolean!): Move!
     deleteMove(id: String!): Move!
 }

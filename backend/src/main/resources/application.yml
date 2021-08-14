@@ -4,8 +4,6 @@ app:
     username: ${POSTGRES_USERNAME} # PostgreSQL username
     password: ${POSTGRES_PASSWORD} # PostgreSQL password
     pool-size: 30
-  auth:
-    token-secret: ${CHESSRS_JWT_SECRET_KEY}
 spring:
   flyway:
     baseline-on-migrate: true
@@ -28,9 +26,11 @@ graphql:
   servlet:
     mapping: /api/v1/graphql
     exception-handlers-enabled: true
-graphiql:
-  endpoint:
-    graphql: /api/v1/graphql
+    websocket:
+      enabled: false
+    graphiql:
+      endpoint:
+        graphql: /api/v1/graphql
 logging:
   level:
     notprivacysafe:

@@ -10,8 +10,8 @@ import java.util.*
 @Service
 class MoveMutationResolver(val moveService: MoveService) : GraphQLMutationResolver {
 
-    fun createMove(fenBefore: String, san: String, uci: String, fenAfter: String, isWhite: Boolean, opening: String): MoveResponse {
-        return moveService.createMove(fenBefore, san, uci, fenAfter, isWhite, opening).toResponse()
+    fun createMove(fenBefore: String, san: String, uci: String, isWhite: Boolean, opening: String): MoveResponse {
+        return moveService.createMove(fenBefore, san, uci, isWhite, opening).toResponse()
     }
 
     fun reviewMove(id: String, success: Boolean): MoveResponse {

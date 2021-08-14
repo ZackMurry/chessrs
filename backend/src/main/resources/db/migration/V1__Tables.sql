@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS move (
     fen_before VARCHAR(90) NOT NULL UNIQUE, -- fen before move is played. can't just reference another move because of transpositions
     san VARCHAR(7) NOT NULL, -- Standard Algebraic Notation of the move
     uci CHAR(4) NOT NULL, -- UCI Notation of the move
-    fen_after VARCHAR(90) NOT NULL, -- fen after move is played. todo: remove
     last_reviewed BIGINT NOT NULL, -- last reviewed using SRS
     time_created BIGINT NOT NULL,
     num_reviews INT NOT NULL DEFAULT 0,
