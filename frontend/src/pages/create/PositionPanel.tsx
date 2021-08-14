@@ -12,6 +12,7 @@ import ImportGameFromLichess from 'components/ImportGameFromLichess'
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 // todo: add lichess cloud eval when available for greater depth
+// todo: skip to end and beginning of PGN
 const PositionPanel: FC = () => {
   const { pgn, halfMoveCount, historySize, moveHistory, fen } = useAppSelector(state => ({
     pgn: state.board.pgn,
@@ -24,6 +25,8 @@ const PositionPanel: FC = () => {
   const [bestMove, setBestMove] = useState('...')
   const [depth, setDepth] = useState(0)
   const [isLoading, setLoading] = useState(true)
+  const [isForcedMate, setForcedMate] = useState(false)
+
   const uciMoves = useMemo(
     () =>
       moveHistory
@@ -55,10 +58,16 @@ const PositionPanel: FC = () => {
     setDepth(d)
     setBestMove(matchingMoves[0].san)
   }
-  const onEvaluation = (cp: number) => {
+  const onEvaluation = (cp: number, mate: number) => {
     // todo: mate in ...
-    console.log('onEvaluation: ', cp)
-    setEvaluation(cp / 100)
+    if (mate) {
+      setForcedMate(true)
+      setEvaluation(mate)
+    } else {
+      console.log('onEvaluation: ', cp)
+      setForcedMate(false)
+      setEvaluation(cp / 100)
+    }
   }
   const onReady = () => {
     console.log('onReady')
@@ -89,9 +98,19 @@ const PositionPanel: FC = () => {
     setBestMove('...')
     setDepth(0)
     setLoading(true)
+    if (new Chess(fen).in_checkmate()) {
+      if (halfMoveCount % 2 === 0) {
+        setEvaluation(Number.NEGATIVE_INFINITY)
+      } else {
+        setEvaluation(Number.POSITIVE_INFINITY)
+      }
+      setForcedMate(true)
+      setBestMove('')
+      setLoading(false)
+      return
+    }
     stockfish.analyzePosition(uciMoves, 5)
-    return
-  }, [stockfish, uciMoves])
+  }, [stockfish, uciMoves, fen, setEvaluation, halfMoveCount])
   const dispatch = useAppDispatch()
 
   const whitePerspectiveEvaluation = evaluation * (halfMoveCount % 2 === 0 ? 1 : -1)
@@ -151,7 +170,10 @@ const PositionPanel: FC = () => {
           Analysis
         </Text>
         <Text fontSize='16px' color='whiteText' mb='3px'>
-          Evaluation: {isLoading ? `${-whitePerspectiveEvaluation}...` : whitePerspectiveEvaluation}
+          Evaluation:{' '}
+          {isLoading
+            ? `${isForcedMate ? '#' : ''}${-whitePerspectiveEvaluation}...`
+            : `${isForcedMate ? '#' : ''}${whitePerspectiveEvaluation}`}
         </Text>
         <Text fontSize='16px' color='whiteText' mb='3px'>
           Best move: {bestMove}

@@ -1,4 +1,7 @@
+import ChessJS from 'chess.js'
 import parseUCIStringToObject from './parseUCIStringToObject'
+
+const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 export interface Analysis {
   depth?: number
@@ -6,7 +9,6 @@ export interface Analysis {
   score?: number
 }
 
-//depth 15 seldepth 20 multipv 1 score cp 103 nodes 383038 nps 870540 time 440 pv e2e4 e7e6 c2c4 c7c5 g1f3 d8c7 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6 bmc 0.16214
 export interface InfoObject {
   depth: number
   seldepth: number
@@ -17,11 +19,9 @@ export interface InfoObject {
   time: number
   pv: string
   bmc: number
+  mate?: number
 }
 
-// rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1
-
-// todo: currently, messages from old positions are still sent and registered for a bit after the position has changed
 export default class Stockfish {
   worker: Worker
   counter = 0
@@ -33,7 +33,7 @@ export default class Stockfish {
   constructor(
     public onAnalysis: (sf: Stockfish, bestMove: string, depth: number) => void,
     public onReady: () => void,
-    public onEvaluation: (cp: number) => void
+    public onEvaluation: (cp: number, mate: number) => void
   ) {
     this.worker = new Worker('/stockfish.js')
     this.worker.postMessage('isready')
@@ -46,9 +46,12 @@ export default class Stockfish {
       const msg = data as string
       if (msg.startsWith('info')) {
         const hasBound = msg.includes('bound')
-        const { depth, cp } = parseUCIStringToObject(msg.substring('info '.length), 18 + (hasBound ? 1 : 0)) as InfoObject
+        const { depth, cp, mate } = parseUCIStringToObject(
+          msg.substring('info '.length),
+          18 + (hasBound ? 1 : 0)
+        ) as InfoObject
         if (this.depth === depth && this.onEvaluation) {
-          this.onEvaluation(cp)
+          this.onEvaluation(cp, mate)
         }
       } else if (msg.startsWith('bestmove')) {
         if (!this.onAnalysis) {
