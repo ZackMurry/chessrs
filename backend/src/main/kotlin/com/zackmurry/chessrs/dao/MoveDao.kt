@@ -17,6 +17,9 @@ interface MoveDao : JpaRepository<Move, UUID> {
     @Query("SELECT * FROM move WHERE user_id = :userId AND fen_before = :fenBefore", nativeQuery = true)
     fun findByFenBefore(@Param("userId") userId: UUID, @Param("fenBefore") fen: String): Optional<Move>
 
+    @Query("SELECT * FROM move WHERE user_id = :userId AND clean_fen = :cleanFen", nativeQuery = true)
+    fun findByCleanFen(@Param("userId") userId: UUID, @Param("cleanFen") cleanFen: String): Optional<Move>
+
     @Query("SELECT * FROM move WHERE user_id = :userId AND due <= :time ORDER BY due LIMIT :limit", nativeQuery = true)
     fun getDue(
         @Param("userId") userId: UUID,

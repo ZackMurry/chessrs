@@ -22,10 +22,11 @@ data class Move(
     var timeCreated: Long? = null,
     var numReviews: Int? = null,
     var due: Long? = null,
-    var opening: String? = null
+    var opening: String? = null,
+    var cleanFen: String? = null
 ) {
     fun toResponse(): MoveResponse {
-        if (fenBefore == null || san == null || isWhite == null || id == null || userId == null || lastReviewed == null || timeCreated == null || numReviews == null || due == null || opening == null) {
+        if (fenBefore == null || san == null || isWhite == null || id == null || userId == null || lastReviewed == null || timeCreated == null || numReviews == null || due == null || opening == null || cleanFen == null) {
             logger.warn("Found null in Move")
             throw InternalServerException()
         }
@@ -40,7 +41,8 @@ data class Move(
             timeCreated!!,
             numReviews!!,
             due!!,
-            opening!!
+            opening!!,
+            cleanFen!!
         )
     }
 }

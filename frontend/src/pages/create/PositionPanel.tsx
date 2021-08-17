@@ -137,7 +137,7 @@ const PositionPanel: FC = () => {
     dispatch(resetBoard())
     dispatch(loadMoves(moveStr))
     if (opening) {
-      updateOpening(opening)
+      dispatch(updateOpening(opening))
     }
     if (!isWhite) {
       dispatch(flipBoard())

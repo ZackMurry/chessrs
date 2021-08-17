@@ -323,7 +323,7 @@ class MoveServiceTest {
         for (id in moveIds) {
             val move = moveService.getMoveById(id).orElse(null)
             assertNotNull(move?.fenBefore)
-            val fenMove = moveService.getMoveByFen(move.fenBefore!!)
+            val fenMove = moveService.getMoveByCleanFen(move.fenBefore!!)
             assertEquals(
                 move,
                 fenMove.orElse(null),
@@ -333,7 +333,7 @@ class MoveServiceTest {
 
         for (i in 1..10) {
             assertNull(
-                moveService.getMoveByFen(RandomStringUtils.randomAlphanumeric(30, 89)).orElse(null),
+                moveService.getMoveByCleanFen(RandomStringUtils.randomAlphanumeric(30, 89)).orElse(null),
                 "Getting a move that doesn't exist by FEN should produce a NoContentException"
             )
         }

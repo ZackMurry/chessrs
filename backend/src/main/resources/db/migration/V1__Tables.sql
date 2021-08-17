@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS move
     last_reviewed BIGINT       NOT NULL,        -- last reviewed using SRS
     time_created  BIGINT       NOT NULL,
     num_reviews   INT          NOT NULL DEFAULT 0,
-    is_white      BOOLEAN      NOT NULL DEFAULT TRUE,
+    is_white      BOOLEAN      NOT NULL DEFAULT TRUE, -- todo: this can be found from the fen
     due           BIGINT       NOT NULL,        -- Time that the move is next due to review
-    opening       VARCHAR(256) NOT NULL
-    -- todo: add fen before without e.p. and 50 move rule indicators
+    opening       VARCHAR(256) NOT NULL,
+    clean_fen     VARCHAR(90)  NOT NULL -- FEN without en passant square, half move clock, and full move number (used for searching from a position)
 );

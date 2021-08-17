@@ -48,7 +48,7 @@ const PracticeMainPanel: FC = () => {
         duration: TOAST_DURATION,
         isClosable: true,
         render: options => (
-          <ErrorToast description={`Error getting move data: ${e.response.errors[0].message}`} onClose={options.onClose} />
+          <ErrorToast description={`Error getting move data: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
         )
       })
       dispatch(disableBoard())

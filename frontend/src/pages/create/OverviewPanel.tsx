@@ -125,7 +125,7 @@ const OverviewPanel: FC = () => {
         duration: TOAST_DURATION,
         isClosable: true,
         render: options => (
-          <ErrorToast description={`Error creating move: ${e.response.errors[0].message}`} onClose={options.onClose} />
+          <ErrorToast description={`Error creating move: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
         )
       })
     }

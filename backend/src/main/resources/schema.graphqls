@@ -10,6 +10,7 @@ type Move {
     numReviews: Int!,
     due: String!
     opening: String!
+    cleanFen: String!
 }
 
 type UserPerf {

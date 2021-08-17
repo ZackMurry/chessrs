@@ -54,7 +54,7 @@ const StudyMainPanel: FC = () => {
         isClosable: true,
         render: options => (
           <ErrorToast
-            description={`Error getting moves to review: ${e.response.errors[0].message}`}
+            description={`Error getting moves to review: ${e.response?.errors[0]?.message}`}
             onClose={options.onClose}
           />
         )
@@ -79,7 +79,7 @@ const StudyMainPanel: FC = () => {
           isClosable: true,
           render: options => (
             <ErrorToast
-              description={`Error sending review data: ${e.response.errors[0].message}`}
+              description={`Error sending review data: ${e.response?.errors[0]?.message}`}
               onClose={options.onClose}
             />
           )

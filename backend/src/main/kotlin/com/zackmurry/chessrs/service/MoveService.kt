@@ -7,12 +7,13 @@ import com.zackmurry.chessrs.exception.ForbiddenException
 import com.zackmurry.chessrs.exception.InternalServerException
 import com.zackmurry.chessrs.exception.NotFoundException
 import com.zackmurry.chessrs.security.UserPrincipal
+import com.zackmurry.chessrs.util.FenCleaner
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class MoveService(private val moveDao: MoveDao, private val spacedRepetitionService: SpacedRepetitionService) {
+class MoveService(private val moveDao: MoveDao, private val spacedRepetitionService: SpacedRepetitionService, private val fenCleaner: FenCleaner) {
 
     private fun getUserId(): UUID {
         return (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).getId()
@@ -29,7 +30,7 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
         }
         val currTime = System.currentTimeMillis()
         val move =
-            Move(fenBefore, san, uci, isWhite, UUID.randomUUID(), getUserId(), currTime, currTime, 0, currTime, opening)
+            Move(fenBefore, san, uci, isWhite, UUID.randomUUID(), getUserId(), currTime, currTime, 0, currTime, opening, fenCleaner.cleanFen(fenBefore))
         moveDao.save(move)
         return move
     }
@@ -42,6 +43,11 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
 
     fun getMoveByFen(fen: String): Optional<Move> {
         return moveDao.findByFenBefore(getUserId(), fen)
+    }
+
+    fun getMoveByCleanFen(fenBefore: String): Optional<Move> {
+        // todo: this doesn't handle transpositions with en passant very well
+        return moveDao.findByCleanFen(getUserId(), fenCleaner.cleanFen(fenBefore))
     }
 
     fun studyMove(id: UUID, success: Boolean) {

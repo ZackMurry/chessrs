@@ -13,7 +13,8 @@ class MoveResponse(
     _timeCreated: Long,
     val numReviews: Int,
     _due: Long,
-    val opening: String
+    val opening: String,
+    val cleanFen: String
 ) {
     val id = _id.toString()
     val userId = _userId.toString()

@@ -94,7 +94,11 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
           game={game}
           onClick={() => {
             hideSelector()
-            onImport(game.moves, game.players.black.user.name !== username, game.opening)
+            onImport(
+              game.moves,
+              game.players.black.user.name !== username,
+              game.opening ? { name: game.opening.name, eco: game.opening.eco } : null
+            )
           }}
         />
       ))}
