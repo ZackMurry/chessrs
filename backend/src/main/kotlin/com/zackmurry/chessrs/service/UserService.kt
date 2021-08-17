@@ -48,4 +48,8 @@ class UserService(private val userDao: UserDao) : UserDetailsService {
         userDao.updateEaseFactor(getUserId(), easeFactor)
     }
 
+    fun updateScalingFactor(scalingFactor: Float) {
+        userDao.updateScalingFactor(getUserId(), scalingFactor)
+    }
+
 }

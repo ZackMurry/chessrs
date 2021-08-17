@@ -21,4 +21,8 @@ interface UserDao : JpaRepository<ChessrsUser, UUID> {
     @Query("UPDATE chessrs_user SET ease_factor = :easeFactor WHERE id = :id", nativeQuery = true)
     fun updateEaseFactor(@Param("id") id: UUID, @Param("easeFactor") easeFactor: Float)
 
+    @Modifying
+    @Query("UPDATE chessrs_user SET scaling_factor = :scalingFactor WHERE id = :id", nativeQuery = true)
+    fun updateScalingFactor(@Param("id") id: UUID, @Param("scalingFactor") scalingFactor: Float)
+
 }

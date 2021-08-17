@@ -11,11 +11,15 @@ import org.springframework.stereotype.Service
 @Service
 class AccountMutationResolver(val userService: UserService) : GraphQLMutationResolver {
 
-    fun updateSettings(easeFactor: Float?): UserPrincipalResponse {
+    fun updateSettings(easeFactor: Float?, scalingFactor: Float?): UserPrincipalResponse {
         val user = (SecurityContextHolder.getContext().authentication.principal as UserPrincipal)
         if (easeFactor != null) {
             userService.updateEaseFactor(easeFactor)
             user.setEaseFactor(easeFactor)
+        }
+        if (scalingFactor != null) {
+            userService.updateScalingFactor(scalingFactor)
+            user.setScalingFactor(scalingFactor)
         }
         SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(user, null, user.authorities)
         return user.toResponse()

@@ -76,6 +76,7 @@ export interface UserData {
   authorities: Authority[]
   attributes: Attributes
   easeFactor: number
+  scalingFactor: number
   enabled: boolean
   password: null
   accountNonLocked: boolean

@@ -19,6 +19,7 @@ const AccountManager: FC = () => {
             username
             name
             easeFactor
+            scalingFactor
           }
         }
       `

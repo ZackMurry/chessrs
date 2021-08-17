@@ -15,16 +15,17 @@ class UserPrincipal(
     private var id: UUID,
     private var authorities: MutableCollection<out GrantedAuthority>,
     private var attributes: MutableMap<String, Any>,
-    private var easeFactor: Float
+    private var easeFactor: Float,
+    private var scalingFactor: Float
 ) : OAuth2User, UserDetails {
 
     companion object {
         fun create(user: ChessrsUser): UserPrincipal {
-            if (user.username == null || user.id == null || user.easeFactor == null) {
+            if (user.username == null || user.id == null || user.easeFactor == null || user.scalingFactor == null) {
                 throw InternalServerException()
             }
             val grantedAuthorities = Collections.singletonList(SimpleGrantedAuthority("ROLE_USER"))
-            return UserPrincipal(user.username!!, user.id!!, grantedAuthorities, HashMap(), user.easeFactor)
+            return UserPrincipal(user.username!!, user.id!!, grantedAuthorities, HashMap(), user.easeFactor!!, user.scalingFactor!!)
         }
 
         fun create(user: ChessrsUser, attributes: MutableMap<String, Any>): UserPrincipal {
@@ -82,6 +83,14 @@ class UserPrincipal(
         this.easeFactor = easeFactor
     }
 
+    fun getScalingFactor(): Float {
+        return this.scalingFactor
+    }
+
+    fun setScalingFactor(scalingFactor: Float) {
+        this.scalingFactor = scalingFactor
+    }
+
     fun toResponse(): UserPrincipalResponse {
         return UserPrincipalResponse(
             username,
@@ -89,6 +98,7 @@ class UserPrincipal(
             authorities,
             attributes,
             easeFactor,
+            scalingFactor,
             isEnabled,
             isAccountNonLocked,
             isAccountNonExpired,

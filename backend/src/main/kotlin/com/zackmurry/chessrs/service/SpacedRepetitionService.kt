@@ -5,8 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import kotlin.math.pow
 
-// todo: allow scaling factor to be configured
-const val SCALING_FACTOR = 2.0
+const val DEFAULT_SCALING = 2f
 const val DEFAULT_EASE = 3f
 
 @Service
@@ -19,7 +18,8 @@ class SpacedRepetitionService {
      */
     fun calculateNextDueInterval(numReviews: Int): Long {
         val easeFactor = (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).getEaseFactor()
-        return (easeFactor * SCALING_FACTOR.pow(numReviews) * 1000 * 60).toLong()
+        val scalingFactor = (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).getScalingFactor()
+        return (easeFactor * scalingFactor.pow(numReviews) * 1000 * 60).toLong()
     }
 
 }

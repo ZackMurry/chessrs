@@ -77,6 +77,7 @@ type Account {
     authorities: [Authority]!
     attributes: Attributes!
     easeFactor: Float!
+    scalingFactor: Float!
     enabled: Boolean!
     accountNonLocked: Boolean!
     accountNonExpired: Boolean!
@@ -99,5 +100,5 @@ type Mutation {
     createMove(fenBefore: String!, san: String!, uci: String!, isWhite: Boolean!, opening: String!): Move
     reviewMove(id: String!, success: Boolean!): Move!
     deleteMove(id: String!): Move!
-    updateSettings(easeFactor: Float): Account!
+    updateSettings(easeFactor: Float, scalingFactor: Float): Account!
 }

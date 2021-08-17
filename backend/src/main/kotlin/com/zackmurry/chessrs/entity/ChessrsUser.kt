@@ -9,5 +9,6 @@ data class ChessrsUser(
     var username: String? = null,
     @Id var id: UUID? = null,
     var provider: String? = null,
-    val easeFactor: Float? = null
+    var easeFactor: Float? = null,
+    var scalingFactor: Float? = null
 )

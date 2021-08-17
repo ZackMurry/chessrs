@@ -19,16 +19,24 @@ import { setAccount } from 'store/userSlice'
 import { TOAST_DURATION } from 'theme'
 import { useEffect } from 'react'
 
+const DEFAULT_EASE_FACTOR = 3
+const DEFAULT_SCALING_FACTOR = 2
+
 const AccountPage: FC = () => {
   const account = useAppSelector(state => state.user?.account)
-  const [easeFactor, setEaseFactor] = useState(String(account?.easeFactor ?? 3))
-  const [isEaseFactorLoading, setEaseFactorLoading] = useState(false)
+  const [easeFactor, setEaseFactor] = useState(String(account?.easeFactor ?? DEFAULT_EASE_FACTOR))
+  const [scalingFactor, setScalingFactor] = useState(String(account?.scalingFactor ?? DEFAULT_SCALING_FACTOR))
+  const [isLoading, setLoading] = useState(false)
   const dispatch = useAppDispatch()
   const toast = useToast()
 
   useEffect(() => {
-    setEaseFactor(String(account?.easeFactor ?? 3))
+    setEaseFactor(String(account?.easeFactor ?? DEFAULT_EASE_FACTOR))
   }, [account?.easeFactor, setEaseFactor])
+
+  useEffect(() => {
+    setScalingFactor(String(account?.scalingFactor ?? DEFAULT_SCALING_FACTOR))
+  }, [account?.scalingFactor, setScalingFactor])
 
   if (account === null) {
     return <Box />
@@ -36,7 +44,7 @@ const AccountPage: FC = () => {
 
   const onSubmitEaseFactor = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setEaseFactorLoading(true)
+    setLoading(true)
     try {
       const query = gql`
         mutation UpdateEaseFactor($easeFactor: Float!) {
@@ -45,6 +53,7 @@ const AccountPage: FC = () => {
             username
             name
             easeFactor
+            scalingFactor
           }
         }
       `
@@ -57,13 +66,46 @@ const AccountPage: FC = () => {
         isClosable: true,
         render: options => (
           <ErrorToast
-            description={`Error getting current move for position: ${e.response.errors[0].message}`}
+            description={`Error updating ease factor: ${e.response?.errors[0]?.message}`}
             onClose={options.onClose}
           />
         )
       })
     }
-    setEaseFactorLoading(false)
+    setLoading(false)
+  }
+
+  const onSubmitScalingFactor = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      const query = gql`
+        mutation UpdateScalingFactor($scalingFactor: Float!) {
+          updateSettings(scalingFactor: $scalingFactor) {
+            id
+            username
+            name
+            easeFactor
+            scalingFactor
+          }
+        }
+      `
+      const data = await request('/api/v1/graphql', query, { scalingFactor })
+      console.log(data)
+      dispatch(setAccount(data.updateSettings))
+    } catch (e) {
+      toast({
+        duration: TOAST_DURATION,
+        isClosable: true,
+        render: options => (
+          <ErrorToast
+            description={`Error updating scalingFactor: ${e.response?.errors[0]?.message}`}
+            onClose={options.onClose}
+          />
+        )
+      })
+    }
+    setLoading(false)
   }
 
   return (
@@ -106,7 +148,37 @@ const AccountPage: FC = () => {
           </NumberInputStepper>
         </NumberInput>
         <SlideFade in={Number(easeFactor) !== account.easeFactor}>
-          <Button type='submit' size='sm' isLoading={isEaseFactorLoading} mt='10px'>
+          <Button type='submit' size='sm' isLoading={isLoading} mt='10px'>
+            Save
+          </Button>
+        </SlideFade>
+      </form>
+      <form onSubmit={onSubmitScalingFactor}>
+        <Heading as='h6' fontSize='2xl' color='whiteText' mt='25px'>
+          Scaling Factor
+        </Heading>
+        <Text color='whiteText' fontSize='lg' mt='5px'>
+          Your scaling factor controls how fast the interval between reviews grows. For example, with a scaling factor of 2,
+          the time between reviews will double after each review.
+        </Text>
+        <NumberInput
+          w='sm'
+          min={0.1}
+          max={1000}
+          precision={2}
+          step={0.25}
+          value={scalingFactor}
+          onChange={setScalingFactor}
+          mt='5px'
+        >
+          <NumberInputField _focus={{ borderColor: '#757575' }} />
+          <NumberInputStepper>
+            <NumberIncrementStepper />
+            <NumberDecrementStepper />
+          </NumberInputStepper>
+        </NumberInput>
+        <SlideFade in={Number(scalingFactor) !== account.scalingFactor}>
+          <Button type='submit' size='sm' isLoading={isLoading} mt='10px'>
             Save
           </Button>
         </SlideFade>
