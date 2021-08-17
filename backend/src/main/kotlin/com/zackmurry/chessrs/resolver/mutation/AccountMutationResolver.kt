@@ -25,4 +25,11 @@ class AccountMutationResolver(val userService: UserService) : GraphQLMutationRes
         return user.toResponse()
     }
 
+    fun deleteAccount(): UserPrincipalResponse {
+        userService.deleteByUsername((SecurityContextHolder.getContext().authentication.principal as UserPrincipal).username)
+        val user = (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).toResponse()
+        SecurityContextHolder.getContext().authentication = null
+        return user
+    }
+
 }

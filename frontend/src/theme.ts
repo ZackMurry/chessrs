@@ -10,6 +10,7 @@ const config: ThemeOverride = {
     btnBorder: '#454442',
     elevated: '#2e3133',
     error: '#b73331',
+    success: '#2e7d28',
     grayBtn: '#767a7c'
   },
   styles: {

@@ -40,7 +40,7 @@ class UserService(private val userDao: UserDao) : UserDetailsService {
         return userDao.findByUsername(username).orElse(null)
     }
 
-    fun delete(username: String) {
+    fun deleteByUsername(username: String) {
         return userDao.deleteByUsername(username)
     }
 

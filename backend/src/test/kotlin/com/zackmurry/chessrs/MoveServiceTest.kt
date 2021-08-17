@@ -47,7 +47,7 @@ class MoveServiceTest {
 
     @AfterEach
     fun deleteTestUser() {
-        userService.delete(testUsername)
+        userService.deleteByUsername(testUsername)
     }
 
     @DisplayName("Create move")

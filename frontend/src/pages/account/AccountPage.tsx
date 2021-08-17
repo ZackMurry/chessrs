@@ -9,6 +9,7 @@ import {
   NumberInputStepper,
   SlideFade,
   Text,
+  useBoolean,
   useToast
 } from '@chakra-ui/react'
 import ErrorToast from 'components/ErrorToast'
@@ -18,6 +19,8 @@ import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import { setAccount } from 'store/userSlice'
 import { TOAST_DURATION } from 'theme'
 import { useEffect } from 'react'
+import ConfirmationDialog from 'components/ConfirmationDialog'
+import SuccessToast from 'components/SuccessToast'
 
 const DEFAULT_EASE_FACTOR = 3
 const DEFAULT_SCALING_FACTOR = 2
@@ -27,6 +30,7 @@ const AccountPage: FC = () => {
   const [easeFactor, setEaseFactor] = useState(String(account?.easeFactor ?? DEFAULT_EASE_FACTOR))
   const [scalingFactor, setScalingFactor] = useState(String(account?.scalingFactor ?? DEFAULT_SCALING_FACTOR))
   const [isLoading, setLoading] = useState(false)
+  const [isDeleteAccountDialogOpen, { on: openDeleteAccountDialog, off: closeDeleteAccountDialog }] = useBoolean(false)
   const dispatch = useAppDispatch()
   const toast = useToast()
 
@@ -58,7 +62,6 @@ const AccountPage: FC = () => {
         }
       `
       const data = await request('/api/v1/graphql', query, { easeFactor })
-      console.log(data)
       dispatch(setAccount(data.updateSettings))
     } catch (e) {
       toast({
@@ -91,7 +94,6 @@ const AccountPage: FC = () => {
         }
       `
       const data = await request('/api/v1/graphql', query, { scalingFactor })
-      console.log(data)
       dispatch(setAccount(data.updateSettings))
     } catch (e) {
       toast({
@@ -102,6 +104,35 @@ const AccountPage: FC = () => {
             description={`Error updating scalingFactor: ${e.response?.errors[0]?.message}`}
             onClose={options.onClose}
           />
+        )
+      })
+    }
+    setLoading(false)
+  }
+
+  const onDeleteAccount = async () => {
+    setLoading(true)
+    try {
+      const query = gql`
+        mutation DeleteAccount {
+          deleteAccount {
+            username
+          }
+        }
+      `
+      await request('/api/v1/graphql', query)
+      dispatch(setAccount(null))
+      toast({
+        duration: TOAST_DURATION,
+        isClosable: true,
+        render: options => <SuccessToast description='Account deleted' onClose={options.onClose} />
+      })
+    } catch (e) {
+      toast({
+        duration: TOAST_DURATION,
+        isClosable: true,
+        render: options => (
+          <ErrorToast description={`Error deleting account: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
         )
       })
     }
@@ -183,6 +214,15 @@ const AccountPage: FC = () => {
           </Button>
         </SlideFade>
       </form>
+      <Button onClick={openDeleteAccountDialog}>Delete account</Button>
+      <ConfirmationDialog
+        open={isDeleteAccountDialogOpen}
+        onConfirm={onDeleteAccount}
+        onCancel={closeDeleteAccountDialog}
+        isLoading={isLoading}
+        title='Delete account?'
+        body='This will permanently delete all data associated with your account. It is recommended that you export your moves before you continue'
+      />
     </Box>
   )
 }

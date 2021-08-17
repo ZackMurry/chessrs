@@ -1,4 +1,4 @@
-import { WarningIcon } from '@chakra-ui/icons'
+import { CheckIcon } from '@chakra-ui/icons'
 import { Box, Text, Flex, CloseButton } from '@chakra-ui/react'
 import { FC } from 'react'
 
@@ -7,11 +7,11 @@ interface Props {
   description: string
 }
 
-const ErrorToast: FC<Props> = ({ description, onClose }) => (
-  <Box bg='error' borderRadius='5px' p='10px'>
+const SuccessToast: FC<Props> = ({ description, onClose }) => (
+  <Box bg='success' borderRadius='5px' p='10px'>
     <Flex justifyContent='space-between' alignItems='center'>
       <Flex alignItems='center'>
-        <WarningIcon color='whiteText' fontSize='30px' pr='10px' />
+        <CheckIcon color='whiteText' fontSize='30px' pr='10px' />
         <Text color='whiteText' fontSize='14px'>
           {description}
         </Text>
@@ -21,4 +21,4 @@ const ErrorToast: FC<Props> = ({ description, onClose }) => (
   </Box>
 )
 
-export default ErrorToast
+export default SuccessToast

@@ -101,4 +101,5 @@ type Mutation {
     reviewMove(id: String!, success: Boolean!): Move!
     deleteMove(id: String!): Move!
     updateSettings(easeFactor: Float, scalingFactor: Float): Account!
+    deleteAccount: Account!
 }
