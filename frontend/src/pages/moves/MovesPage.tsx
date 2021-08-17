@@ -1,11 +1,27 @@
-import { ExternalLinkIcon } from '@chakra-ui/icons'
-import { Box, Button, Flex, Link as ChakraLink, Table, Tbody, Td, Text, Th, Thead, Tr, useToast } from '@chakra-ui/react'
+import { DownloadIcon, ExternalLinkIcon } from '@chakra-ui/icons'
+import {
+  Box,
+  Button,
+  Flex,
+  IconButton,
+  Link as ChakraLink,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  useToast
+} from '@chakra-ui/react'
+import DarkTooltip from 'components/DarkTooltip'
 import ErrorToast from 'components/ErrorToast'
 import { gql, request } from 'graphql-request'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import { FC } from 'react'
 import { TOAST_DURATION } from 'theme'
+import { MoveEntity } from 'types'
 
 const MovesPage: FC = () => {
   const [moves, setMoves] = useState<
@@ -76,13 +92,62 @@ const MovesPage: FC = () => {
     }
   }
 
+  const onExportMoves = async () => {
+    // From https://stackoverflow.com/a/60377870/14044362
+
+    let allMoves: MoveEntity[] = []
+    try {
+      const query = gql`
+        query GetMoves {
+          moves(limit: -1) {
+            fenBefore
+            san
+            uci
+            opening
+            isWhite
+            numReviews
+            lastReviewed
+            timeCreated
+          }
+        }
+      `
+      const data = await request('/api/v1/graphql', query)
+      allMoves = data.moves
+    } catch (e) {
+      toast({
+        duration: TOAST_DURATION,
+        isClosable: true,
+        render: options => (
+          <ErrorToast description={`Error fetching moves: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
+        )
+      })
+    }
+
+    allMoves.forEach(move => {
+      move.lastReviewed = Number(move.lastReviewed)
+      move.timeCreated = Number(move.timeCreated)
+    })
+
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(allMoves, null, 2).concat('\n')], { type: 'text/plain' }))
+    a.setAttribute('download', 'chessrs_moves.json')
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
+
   // todo: searching and filtering
   // todo: deleting moves from this page
   return (
     <Box p='15px 1vw'>
-      <Text fontSize='18px' fontWeight='bold' mb='15px' ml='20px'>
-        {numberOfMoves} moves
-      </Text>
+      <Flex justifyContent='space-between' mb='15px' mx='20px'>
+        <Text fontSize='18px' fontWeight='bold'>
+          {numberOfMoves} moves
+        </Text>
+        <DarkTooltip label='Export moves'>
+          <IconButton onClick={onExportMoves} aria-label='Export moves' icon={<DownloadIcon />} />
+        </DarkTooltip>
+      </Flex>
       <Table variant='striped' colorScheme='chessrs'>
         <Thead>
           <Tr>
