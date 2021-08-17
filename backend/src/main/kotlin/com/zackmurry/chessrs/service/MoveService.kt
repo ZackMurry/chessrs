@@ -6,18 +6,17 @@ import com.zackmurry.chessrs.exception.BadRequestException
 import com.zackmurry.chessrs.exception.ForbiddenException
 import com.zackmurry.chessrs.exception.InternalServerException
 import com.zackmurry.chessrs.exception.NotFoundException
-import com.zackmurry.chessrs.security.UserPrincipal
+import com.zackmurry.chessrs.service.UserService.Companion.getUserId
 import com.zackmurry.chessrs.util.FenCleaner
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class MoveService(private val moveDao: MoveDao, private val spacedRepetitionService: SpacedRepetitionService, private val fenCleaner: FenCleaner) {
-
-    private fun getUserId(): UUID {
-        return (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).getId()
-    }
+class MoveService(
+    private val moveDao: MoveDao,
+    private val spacedRepetitionService: SpacedRepetitionService,
+    private val fenCleaner: FenCleaner
+) {
 
     fun createMove(fenBefore: String, san: String, uci: String, isWhite: Boolean, opening: String): Move {
         // todo: check if a position already has the same before_fen
@@ -30,7 +29,20 @@ class MoveService(private val moveDao: MoveDao, private val spacedRepetitionServ
         }
         val currTime = System.currentTimeMillis()
         val move =
-            Move(fenBefore, san, uci, isWhite, UUID.randomUUID(), getUserId(), currTime, currTime, 0, currTime, opening, fenCleaner.cleanFen(fenBefore))
+            Move(
+                fenBefore,
+                san,
+                uci,
+                isWhite,
+                UUID.randomUUID(),
+                getUserId(),
+                currTime,
+                currTime,
+                0,
+                currTime,
+                opening,
+                fenCleaner.cleanFen(fenBefore)
+            )
         moveDao.save(move)
         return move
     }

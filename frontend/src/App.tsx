@@ -13,6 +13,7 @@ import AccountManager from 'components/AccountManager'
 import Navbar from 'components/Navbar'
 import DashboardPage from 'pages/dash/DashboardPage'
 import MovesPage from 'pages/moves/MovesPage'
+import AccountPage from 'pages/account/AccountPage'
 
 function App() {
   return (
@@ -37,6 +38,9 @@ function App() {
               </Route>
               <Route path='/moves' exact>
                 <MovesPage />
+              </Route>
+              <Route path='/account' exact>
+                <AccountPage />
               </Route>
             </Switch>
           </Router>

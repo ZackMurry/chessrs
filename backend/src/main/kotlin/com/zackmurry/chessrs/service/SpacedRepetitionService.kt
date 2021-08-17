@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import kotlin.math.pow
 
+// todo: allow scaling factor to be configured
 const val SCALING_FACTOR = 2.0
 const val DEFAULT_EASE = 3f
 

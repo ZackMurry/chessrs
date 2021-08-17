@@ -126,7 +126,7 @@ class UserPrincipalResponse(
     uuid: UUID,
     authoritiesMap: MutableCollection<out GrantedAuthority>,
     attributesMap: MutableMap<String, Any>,
-    val easeFactor: Float,
+    var easeFactor: Float,
     val enabled: Boolean,
     val accountNonLocked: Boolean,
     val accountNonExpired: Boolean,

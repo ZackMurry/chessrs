@@ -4,13 +4,21 @@ import com.zackmurry.chessrs.dao.UserDao
 import com.zackmurry.chessrs.entity.ChessrsUser
 import com.zackmurry.chessrs.exception.NotFoundException
 import com.zackmurry.chessrs.security.UserPrincipal
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class UserService(private val userDao: UserDao) : UserDetailsService {
+
+    companion object {
+        fun getUserId(): UUID {
+            return (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).getId()
+        }
+    }
 
     override fun loadUserByUsername(username: String?): UserDetails {
         if (username == null) {
@@ -34,6 +42,10 @@ class UserService(private val userDao: UserDao) : UserDetailsService {
 
     fun delete(username: String) {
         return userDao.deleteByUsername(username)
+    }
+
+    fun updateEaseFactor(easeFactor: Float) {
+        userDao.updateEaseFactor(getUserId(), easeFactor)
     }
 
 }

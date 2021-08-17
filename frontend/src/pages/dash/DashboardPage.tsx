@@ -14,15 +14,9 @@ const DashboardPage: FC = () => {
         <GridItem>
           <DashboardMoveData />
         </GridItem>
-        <GridItem>
-          <DashboardMoveData />
-        </GridItem>
-        <GridItem>
-          <DashboardMoveData />
-        </GridItem>
-        <GridItem>
-          <DashboardMoveData />
-        </GridItem>
+        <GridItem />
+        <GridItem />
+        <GridItem />
       </Grid>
     </Box>
   )

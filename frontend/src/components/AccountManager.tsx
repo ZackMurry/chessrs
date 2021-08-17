@@ -18,6 +18,7 @@ const AccountManager: FC = () => {
             id
             username
             name
+            easeFactor
           }
         }
       `

@@ -78,6 +78,10 @@ class UserPrincipal(
         return this.easeFactor
     }
 
+    fun setEaseFactor(easeFactor: Float) {
+        this.easeFactor = easeFactor
+    }
+
     fun toResponse(): UserPrincipalResponse {
         return UserPrincipalResponse(
             username,
