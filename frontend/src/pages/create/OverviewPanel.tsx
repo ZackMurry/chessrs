@@ -62,7 +62,7 @@ const OverviewPanel: FC = () => {
         isClosable: true,
         render: options => (
           <ErrorToast
-            description={`Error getting current move for position: ${e.response.errors[0].message}`}
+            description={`Error getting current move for position: ${e.response?.errors[0]?.message}`}
             onClose={options.onClose}
           />
         )
@@ -162,7 +162,7 @@ const OverviewPanel: FC = () => {
         duration: TOAST_DURATION,
         isClosable: true,
         render: options => (
-          <ErrorToast description={`Error deleting move: ${e.response.errors[0].message}`} onClose={options.onClose} />
+          <ErrorToast description={`Error deleting move: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
         )
       })
     }

@@ -30,7 +30,6 @@ import { useBreakpointValue } from '@chakra-ui/react'
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 // todo: add lichess cloud eval when available for greater depth
-// todo: skip to end and beginning of PGN
 const PositionPanel: FC = () => {
   const { pgn, halfMoveCount, moveHistory, fen } = useAppSelector(state => ({
     pgn: state.board.pgn,
@@ -58,7 +57,6 @@ const PositionPanel: FC = () => {
       console.log('not ready')
       return
     }
-    console.log('onAnalysis')
     if (isLoading && d !== 5) {
       return
     }
@@ -77,12 +75,10 @@ const PositionPanel: FC = () => {
     setBestMove(matchingMoves[0].san)
   }
   const onEvaluation = (cp: number, mate: number) => {
-    // todo: mate in ...
     if (mate) {
       setForcedMate(true)
       setEvaluation(mate)
     } else {
-      console.log('onEvaluation: ', cp)
       setForcedMate(false)
       setEvaluation(cp / 100)
     }
@@ -97,7 +93,6 @@ const PositionPanel: FC = () => {
 
   useEffect(
     () => () => {
-      console.log('unload: ', new Date().getTime())
       stockfish.onAnalysis = null
       stockfish.onEvaluation = null
       stockfish.onReady = null
@@ -110,7 +105,6 @@ const PositionPanel: FC = () => {
     if (!stockfish.isReady) {
       return
     }
-    console.log('analyzing...')
     stockfish.quit()
     stockfish.createNewGame()
     setBestMove('...')

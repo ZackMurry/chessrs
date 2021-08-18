@@ -82,7 +82,6 @@ export default class Stockfish {
     this.counter++
     this.depth = depth
     console.log(`analyzing ${moves} at depth ${depth}`)
-    // this.worker.postMessage('eval')
     this.worker.postMessage(`position startpos moves ${moves}`)
     this.worker.postMessage(`go depth ${depth}`)
   }

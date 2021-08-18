@@ -19,12 +19,10 @@ class MoveService(
 ) {
 
     fun createMove(fenBefore: String, san: String, uci: String, isWhite: Boolean, opening: String): Move {
-        // todo: check if a position already has the same before_fen
-
-        // todo: strip en passant number and 50 move rule number from pgn to help with transpositions
-        // For example, 1. d4 e6 2. c4 d5 is treated as a different position than 1. d4 d5 2. c4 e6
-
         if (fenBefore.length > 90 || san.length > 7 || uci.length > 4 || opening.length > 256) {
+            throw BadRequestException()
+        }
+        if (getMoveByCleanFen(fenBefore).isPresent) {
             throw BadRequestException()
         }
         val currTime = System.currentTimeMillis()
