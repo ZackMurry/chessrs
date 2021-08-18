@@ -18,7 +18,8 @@ class SpacedRepetitionService {
      */
     fun calculateNextDueInterval(numReviews: Int): Long {
         val easeFactor = (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).getEaseFactor()
-        val scalingFactor = (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).getScalingFactor()
+        val scalingFactor =
+            (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).getScalingFactor()
         return (easeFactor * scalingFactor.pow(numReviews) * 1000 * 60).toLong()
     }
 

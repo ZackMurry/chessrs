@@ -35,3 +35,5 @@ logging:
   level:
     notprivacysafe:
       graphql: ERROR # Disable logging for service exceptions unless explicitly logged in the exception handler
+  file:
+    name: backend.log

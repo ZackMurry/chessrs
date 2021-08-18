@@ -25,7 +25,14 @@ class UserPrincipal(
                 throw InternalServerException()
             }
             val grantedAuthorities = Collections.singletonList(SimpleGrantedAuthority("ROLE_USER"))
-            return UserPrincipal(user.username!!, user.id!!, grantedAuthorities, HashMap(), user.easeFactor!!, user.scalingFactor!!)
+            return UserPrincipal(
+                user.username!!,
+                user.id!!,
+                grantedAuthorities,
+                HashMap(),
+                user.easeFactor!!,
+                user.scalingFactor!!
+            )
         }
 
         fun create(user: ChessrsUser, attributes: MutableMap<String, Any>): UserPrincipal {

@@ -2,11 +2,11 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS chessrs_user
 (
-    id          UUID        NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
-    username    VARCHAR(20) NOT NULL,
-    provider    VARCHAR(32) NOT NULL,
-    ease_factor FLOAT       NOT NULL DEFAULT 3.0,
-    scaling_factor FLOAT NOT NULL DEFAULT 2.0
+    id             UUID        NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+    username       VARCHAR(20) NOT NULL,
+    provider       VARCHAR(32) NOT NULL,
+    ease_factor    FLOAT       NOT NULL DEFAULT 3.0,
+    scaling_factor FLOAT       NOT NULL DEFAULT 2.0
 );
 
 CREATE TABLE IF NOT EXISTS move

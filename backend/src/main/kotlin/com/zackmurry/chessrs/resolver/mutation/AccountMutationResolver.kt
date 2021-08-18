@@ -21,7 +21,8 @@ class AccountMutationResolver(val userService: UserService) : GraphQLMutationRes
             userService.updateScalingFactor(scalingFactor)
             user.setScalingFactor(scalingFactor)
         }
-        SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(user, null, user.authorities)
+        SecurityContextHolder.getContext().authentication =
+            UsernamePasswordAuthenticationToken(user, null, user.authorities)
         return user.toResponse()
     }
 
