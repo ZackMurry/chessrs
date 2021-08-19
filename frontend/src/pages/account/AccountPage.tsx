@@ -25,6 +25,7 @@ import SuccessToast from 'components/SuccessToast'
 const DEFAULT_EASE_FACTOR = 3
 const DEFAULT_SCALING_FACTOR = 2
 
+// todo: log out
 const AccountPage: FC = () => {
   const account = useAppSelector(state => state.user?.account)
   const [easeFactor, setEaseFactor] = useState(String(account?.easeFactor ?? DEFAULT_EASE_FACTOR))

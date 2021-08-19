@@ -7,6 +7,7 @@ import com.zackmurry.chessrs.model.MoveCreateRequest
 import com.zackmurry.chessrs.security.AuthProvider
 import com.zackmurry.chessrs.security.UserPrincipal
 import com.zackmurry.chessrs.service.DEFAULT_EASE
+import com.zackmurry.chessrs.service.DEFAULT_SCALING
 import com.zackmurry.chessrs.service.MoveService
 import com.zackmurry.chessrs.service.UserService
 import org.apache.commons.lang3.RandomStringUtils
@@ -37,7 +38,7 @@ class MoveServiceTest {
         if (userService.accountExists(testUsername)) {
             createTestUser()
         } else {
-            val user = ChessrsUser(testUsername, UUID.randomUUID(), AuthProvider.LICHESS.toString(), DEFAULT_EASE)
+            val user = ChessrsUser(testUsername, UUID.randomUUID(), AuthProvider.LICHESS.toString(), DEFAULT_EASE, DEFAULT_SCALING)
             userService.createUser(user)
             val userPrincipal = UserPrincipal.create(user)
             val token = UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.authorities)

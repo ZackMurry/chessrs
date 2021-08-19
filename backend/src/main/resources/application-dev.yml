@@ -1,0 +1,44 @@
+app:
+  datasource:
+    jdbc-url: jdbc:postgresql://localhost:5432/chessrs
+    username: ${POSTGRES_USERNAME} # PostgreSQL username
+    password: ${POSTGRES_PASSWORD} # PostgreSQL password
+    pool-size: 30
+spring:
+  flyway:
+    baseline-on-migrate: true
+  security:
+    oauth2:
+      client:
+        registration:
+          lichess:
+            client-id: chessrs.zackmurry.com
+            redirect-uri: http://localhost/api/v1/oauth2/callback/lichess
+            authorization-grant-type: authorization_code
+            client-authentication-method: none
+        provider:
+          lichess:
+            authorization-uri: https://oauth.lichess.org/oauth
+            token-uri: https://lichess.org/api/token
+            user-info-uri: https://lichess.org/api/account
+            user-name-attribute: username
+  application:
+    name: ChesSRS Development Server
+  banner:
+    location: classpath:static/banner-dev.txt
+graphql:
+  servlet:
+    mapping: /api/v1/graphql
+    exception-handlers-enabled: true
+    websocket:
+      enabled: false
+    graphiql:
+      endpoint:
+        graphql: /api/v1/graphql
+logging:
+  level:
+    notprivacysafe:
+      graphql: ERROR # Disable logging for service exceptions unless explicitly logged in the exception handler
+    org:
+      springframework:
+        security: DEBUG
