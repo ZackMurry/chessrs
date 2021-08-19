@@ -1,9 +1,9 @@
 package com.zackmurry.chessrs
 
 import com.zackmurry.chessrs.entity.ChessrsUser
+import com.zackmurry.chessrs.entity.Move
 import com.zackmurry.chessrs.exception.BadRequestException
 import com.zackmurry.chessrs.exception.NotFoundException
-import com.zackmurry.chessrs.model.MoveCreateRequest
 import com.zackmurry.chessrs.security.AuthProvider
 import com.zackmurry.chessrs.security.UserPrincipal
 import com.zackmurry.chessrs.service.DEFAULT_EASE
@@ -55,23 +55,21 @@ class MoveServiceTest {
     @Test
     fun testCreateMove() {
         for (i in 1..100) {
-            val move = MoveCreateRequest(
-                RandomStringUtils.randomAlphanumeric(30, 90),
-                RandomStringUtils.randomAlphanumeric(3, 5),
-                RandomStringUtils.randomAlphanumeric(4),
-                i % 2 == 0,
-                RandomStringUtils.randomAlphanumeric(0, 256),
-            )
-            val id = moveService.createMove(move.fenBefore, move.san, move.uci, move.isWhite, move.opening).id
+            val fenBefore = RandomStringUtils.randomAlphanumeric(30, 90)
+            val san = RandomStringUtils.randomAlphanumeric(3, 5)
+            val uci = RandomStringUtils.randomAlphanumeric(4)
+            val isWhite = i % 2 == 0
+            val opening = RandomStringUtils.randomAlphanumeric(0, 256)
+            val id = moveService.createMove(fenBefore, san, uci, isWhite, opening).id
             assertNotNull(id)
             val createdMove = moveService.getMoveById(id!!).orElse(null)
             assertNotNull(createdMove)
             assertEquals(id, createdMove.id)
-            assertEquals(move.fenBefore, createdMove.fenBefore)
-            assertEquals(move.uci, createdMove.uci)
-            assertEquals(move.san, createdMove.san)
-            assertEquals(move.isWhite, createdMove.isWhite)
-            assertEquals(move.opening, createdMove.opening)
+            assertEquals(fenBefore, createdMove.fenBefore)
+            assertEquals(uci, createdMove.uci)
+            assertEquals(san, createdMove.san)
+            assertEquals(isWhite, createdMove.isWhite)
+            assertEquals(opening, createdMove.opening)
         }
 
         assertThrows<BadRequestException>("A move with a starting FEN with > 90 chars is invalid") {
@@ -343,26 +341,20 @@ class MoveServiceTest {
     @DisplayName("Get move by id")
     @Test
     fun testGetMoveById() {
-        val moveIds = ArrayList<UUID>()
-        val moves = ArrayList<MoveCreateRequest>()
+        val moves = ArrayList<Move>()
         for (i in 1..25) {
-            val move = MoveCreateRequest(
-                RandomStringUtils.randomAlphanumeric(30, 90),
-                RandomStringUtils.randomAlphanumeric(3, 5),
-                RandomStringUtils.randomAlphanumeric(4),
-                i % 2 == 0,
-                RandomStringUtils.randomAlphanumeric(0, 256)
-            )
-            moves.add(move)
-            moveIds.add(moveService.createMove(move.fenBefore, move.san, move.uci, move.isWhite, move.opening).id!!)
+            val id = moveService.createMove(RandomStringUtils.randomAlphanumeric(30, 90), RandomStringUtils.randomAlphanumeric(3, 7), RandomStringUtils.randomAlphanumeric(4), i % 2 == 0, RandomStringUtils.randomAlphanumeric(0, 256)).id!!
+            moves.add(moveService.getMoveById(id).orElseThrow { fail("Expected move to be found") })
         }
 
         for (i in 0..24) {
             val move = moves[i]
-            val id = moveIds[i]
-            val returnedMove = moveService.getMoveById(id).orElse(null)
+            if (move.id == null) {
+                fail<Unit>("Expected move to have an id")
+            }
+            val returnedMove = moveService.getMoveById(move.id!!).orElse(null)
             assertNotNull(returnedMove)
-            assertEquals(id, returnedMove.id)
+            assertEquals(move.id, returnedMove.id)
             assertEquals(move.fenBefore, returnedMove.fenBefore)
             assertEquals(move.uci, returnedMove.uci)
             assertEquals(move.san, returnedMove.san)

@@ -40,10 +40,10 @@ const DashboardMoveData: FC = () => {
   return (
     <Box borderRadius='3px' bg='surface' borderWidth='2px' borderStyle='solid' borderColor='surfaceBorder' h='100%' p='5%'>
       <Heading as='h6' fontSize='2xl'>
-        {numberOfMoves} Moves Learned
+        {numberOfMoves} move{numberOfMoves !== 1 ? 's' : ''} Learned
       </Heading>
       <Text fontSize='18px' mt='10px'>
-        {numberOfDueMoves} moves need review
+        {numberOfDueMoves} move{numberOfDueMoves !== 1 ? 's' : ''} need review
       </Text>
       <Link to='/moves'>
         <Text fontSize='18px' mt='10px' textDecor='underline'>

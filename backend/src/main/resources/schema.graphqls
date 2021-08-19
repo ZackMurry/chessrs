@@ -97,7 +97,7 @@ type Query {
 }
 
 type Mutation {
-    createMove(fenBefore: String!, san: String!, uci: String!, isWhite: Boolean!, opening: String!): Move
+    createMove(fenBefore: String!, san: String!, uci: String!, opening: String!): Move
     reviewMove(id: String!, success: Boolean!): Move!
     deleteMove(id: String!): Move!
     updateSettings(easeFactor: Float, scalingFactor: Float): Account!

@@ -10,7 +10,15 @@ import java.util.*
 @Service
 class MoveMutationResolver(val moveService: MoveService) : GraphQLMutationResolver {
 
-    fun createMove(fenBefore: String, san: String, uci: String, isWhite: Boolean, opening: String): MoveResponse {
+    fun createMove(fenBefore: String, san: String, uci: String, opening: String): MoveResponse {
+        val fenParts = fenBefore.split(" ")
+        if (fenParts.size < 3) {
+            throw BadRequestException()
+        }
+        val isWhite = fenParts[1] == "w"
+        if (!isWhite && fenParts[1] != "b") {
+            throw BadRequestException()
+        }
         return moveService.createMove(fenBefore, san, uci, isWhite, opening).toResponse()
     }
 
