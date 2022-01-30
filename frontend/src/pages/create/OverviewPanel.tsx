@@ -76,9 +76,8 @@ const OverviewPanel: FC = () => {
   useEffect(() => {
     console.log('fetching games')
     // todo: when skipping to the end, the opening isn't updated to the last available value
-    // todo: change back to lichess database once issue on GitHub is fixed
     fetch(
-      `https://explorer.lichess.ovh/masters?variant=standard&speeds[]=bullet&speeds[]=blitz&speeds[]=rapid&speeds[]=classical&ratings[]=1600&ratings[]=2500&moves=6&fen=${fen}`
+      `https://explorer.lichess.ovh/lichess?variant=standard&speeds[]=bullet&speeds[]=blitz&speeds[]=rapid&speeds[]=classical&ratings[]=1600&ratings[]=2500&moves=6&fen=${fen}`
     )
       .then(result => result.json())
       .then(json => {
