@@ -43,6 +43,7 @@ const OverviewPanel: FC = () => {
   }, [dispatch])
 
   const getMoveForPosition = useCallback(async () => {
+    // todo: previousMove isn't updated correctly when skipping to the end or beginning of PGNs
     setPreviousMove(currentMove)
     setCurrentMove(null)
     const query = gql`
@@ -75,8 +76,9 @@ const OverviewPanel: FC = () => {
   useEffect(() => {
     console.log('fetching games')
     // todo: when skipping to the end, the opening isn't updated to the last available value
+    // todo: change back to lichess database once issue on GitHub is fixed
     fetch(
-      `https://explorer.lichess.ovh/lichess?variant=standard&speeds[]=bullet&speeds[]=blitz&speeds[]=rapid&speeds[]=classical&ratings[]=1600&ratings[]=2500&moves=6&fen=${fen}`
+      `https://explorer.lichess.ovh/masters?variant=standard&speeds[]=bullet&speeds[]=blitz&speeds[]=rapid&speeds[]=classical&ratings[]=1600&ratings[]=2500&moves=6&fen=${fen}`
     )
       .then(result => result.json())
       .then(json => {
@@ -103,21 +105,23 @@ const OverviewPanel: FC = () => {
     setCurrentMove(null)
     console.log('adding move')
     const query = gql`
-      mutation CreateMove($san: String!, $uci: String!, $fenBefore: String!, $opening: String!) {
-        createMove(san: $san, uci: $uci, fenBefore: $fenBefore, opening: $opening) {
+      mutation CreateMove($fenBefore: String!, $san: String!, $uci: String!, $opening: String!) {
+        createMove(fenBefore: $fenBefore, san: $san, uci: $uci, opening: $opening) {
           san
           id
         }
       }
     `
     try {
+      console.log('creating move')
+      console.log(history, halfMoveCount, lastMove.san, lastMove.uci, opening)
       const data = await request('/api/v1/graphql', query, {
         fenBefore: history[halfMoveCount - 1],
         san: lastMove.san,
         uci: lastMove.uci,
-        isWhite: history.length % 2 === 0,
-        opening: opening.name
+        opening: opening?.name ?? 'Unknown'
       })
+      console.log('created move')
       console.log(data)
       setPreviousMove(data.createMove)
     } catch (e) {

@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.zackmurry"
-version = "0.1.0"
+version = "0.1.2"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {

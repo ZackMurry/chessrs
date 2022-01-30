@@ -1,0 +1,35 @@
+version: '2'
+
+services:
+  backend:
+    image: 'zackmurry/chessrs-backend:latest'
+    build:
+      context: .
+    container_name: backend
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/chessrs
+      - SPRING_DATASOURCE_USERNAME=chessrs
+      - SPRING_DATASOURCE_PASSWORD=chessrs-password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - 8080:8080
+  db:
+    image: 'postgres:13.1-alpine'
+    container_name: db
+    environment:
+      - POSTGRES_USER=chessrs
+      - POSTGRES_PASSWORD=chessrs-password
+    ports:
+      - 5432:5432
+  frontend:
+    image: 'zackmurry/chessrs-frontend:latest'
+    build:
+      context: .
+    container_name: frontend
+    depends_on:
+      - backend
+    ports:
+      - 3000:3000
+

@@ -40,7 +40,7 @@ const DashboardMoveData: FC = () => {
   return (
     <Box borderRadius='3px' bg='surface' borderWidth='2px' borderStyle='solid' borderColor='surfaceBorder' h='100%' p='5%'>
       <Heading as='h6' fontSize='2xl'>
-        {numberOfMoves} move{numberOfMoves !== 1 ? 's' : ''} Learned
+        {numberOfMoves} Move{numberOfMoves !== 1 ? 's' : ''} Learned
       </Heading>
       <Text fontSize='18px' mt='10px'>
         {numberOfDueMoves} move{numberOfDueMoves !== 1 ? 's' : ''} need review

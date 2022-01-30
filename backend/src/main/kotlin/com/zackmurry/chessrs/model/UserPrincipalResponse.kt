@@ -102,15 +102,15 @@ data class LichessAttributes(
                 map["createdAt"].toString(),
                 map["seenAt"].toString(),
                 playTime,
-                map["language"] as String,
+                (map["language"] ?: "en") as String,
                 map["url"] as String,
-                map["nbFollowing"] as Int,
-                map["nbFollowers"] as Int,
-                map["completionRate"] as Int,
-                map["followable"] as Boolean,
-                map["following"] as Boolean,
-                map["blocking"] as Boolean,
-                map["followsYou"] as Boolean
+                (map["nbFollowing"] ?: 0) as Int,
+                (map["nbFollowers"] ?: 0) as Int,
+                (map["completionRate"] ?: 1) as Int,
+                (map["followable"] ?: false) as Boolean,
+                (map["following"] ?: false) as Boolean,
+                (map["blocking"] ?: false) as Boolean,
+                (map["followsYou"] ?: false) as Boolean
             )
         }
 
