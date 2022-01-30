@@ -13,8 +13,8 @@ Learn chess openings using spaced repetition
 ## Deployment
 To run on your own machine:
 - Install NGINX and Docker
-- Run `sudo bash build.sh` to build the frontend and backend and containerize them
-- Run `sudo bash start.sh` to start the docker container and an NGINX reverse proxy
+- Run `bash build.sh` to build the frontend and backend and containerize them
+- Run `bash start.sh` to start the docker container and an NGINX reverse proxy
 - Visit `http://localhost`
 
 ## Features
