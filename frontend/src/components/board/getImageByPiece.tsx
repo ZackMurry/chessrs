@@ -9,44 +9,45 @@ import blackKingSvg from 'assets/blackKing.svg'
 import blackQueenSvg from 'assets/blackQueen.svg'
 import blackRookSvg from 'assets/blackRook.svg'
 import blackKnightSvg from 'assets/blackKnight.svg'
-import blackBishopSvg from 'assets/blackBishop.svg'
-import blackPawnSvg from 'assets/blackPawn.svg'
 
-const getImageByPiece = (type: PieceType, color: 'w' | 'b') => {
+const getPieceNameByPiece = (type: PieceType, color: 'w' | 'b') => {
   if (color === 'w') {
     if (type === 'k') {
-      return whiteKingSvg
+      return 'whiteKing'
     }
     if (type === 'q') {
-      return whiteQueenSvg
+      return 'whiteQueen'
     }
     if (type === 'r') {
-      return whiteRookSvg
+      return 'whiteRook'
     }
     if (type === 'n') {
-      return whiteKnightSvg
+      return 'whiteKnight'
     }
     if (type === 'b') {
-      return whiteBishopSvg
+      return 'whiteBishop'
     }
-    return whitePawnSvg
+    return 'whitePawn'
   }
   if (type === 'k') {
-    return blackKingSvg
+    return 'blackKing'
   }
   if (type === 'q') {
-    return blackQueenSvg
+    return 'blackQueen'
   }
   if (type === 'r') {
-    return blackRookSvg
+    return 'blackRook'
   }
   if (type === 'n') {
-    return blackKnightSvg
+    return 'blackKnight'
   }
   if (type === 'b') {
-    return blackBishopSvg
+    return 'blackBishop'
   }
-  return blackPawnSvg
+  return 'blackPawn'
 }
+
+const getImageByPiece = (type: PieceType, color: 'w' | 'b') =>
+  `/pieces/${getPieceNameByPiece(type, color)}.svg`
 
 export default getImageByPiece

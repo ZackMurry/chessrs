@@ -13,9 +13,18 @@ const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 // todo: clicking off board should unselect the currently selected piece
 // todo: arrows would be nice
 const Chessboard: FC<Props> = () => {
-  const squareLength = useBreakpointValue({ base: 11.5, md: 10, lg: 8, xl: 6, '2xl': 5.2 })
+  const squareLength = useBreakpointValue({
+    base: 11.5,
+    md: 10,
+    lg: 8,
+    xl: 6,
+    '2xl': 5.2,
+  })
   const [chess, setChess] = useState(() => new Chess())
-  const { fen, perspective } = useAppSelector(state => ({ fen: state.board.fen, perspective: state.board.perspective }))
+  const { fen, perspective } = useAppSelector((state) => ({
+    fen: state.board.fen,
+    perspective: state.board.perspective,
+  }))
 
   useEffect(() => {
     setChess(new Chess(fen))
@@ -27,10 +36,13 @@ const Chessboard: FC<Props> = () => {
       h='100%'
       justifyContent='center'
       alignItems='center'
-      flexDir={`column${perspective === 'black' ? '-reverse' : ''}`}
+      flexDir={perspective === 'black' ? 'column-reverse' : 'column'}
     >
       {chess.board().map((row, i) => (
-        <Flex flexDir={perspective === 'white' ? 'row' : 'row-reverse'} key={`board-row-${i}`}>
+        <Flex
+          flexDir={perspective === 'white' ? 'row' : 'row-reverse'}
+          key={`board-row-${i}`}
+        >
           {row.map((square, j) => (
             <BoardSquare
               x={j}

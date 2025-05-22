@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 class AccountQueryResolver : GraphQLQueryResolver {
 
     fun account(): UserPrincipalResponse {
+        println(SecurityContextHolder.getContext().authentication.principal)
         return (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).toResponse()
     }
 

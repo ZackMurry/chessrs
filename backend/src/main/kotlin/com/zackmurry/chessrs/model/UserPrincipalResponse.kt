@@ -109,10 +109,11 @@ data class LichessAttributes(
         fun fromMap(map: MutableMap<String, Any>): LichessAttributes {
             val perfs = LichessPerfs.fromMap(map["perfs"] as MutableMap<String, Any>)
             val playTime = LichessPlayTime.fromMap(map["playTime"] as MutableMap<String, Any>)
+            print(map)
             return LichessAttributes(
                 map["id"] as String,
                 map["username"] as String,
-                map["online"] as Boolean,
+                (map["online"] ?: false) as Boolean,
                 perfs,
                 map["createdAt"].toString(),
                 map["seenAt"].toString(),
