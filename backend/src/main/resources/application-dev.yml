@@ -1,8 +1,8 @@
 app:
   datasource:
     jdbc-url: jdbc:postgresql://localhost:5432/chessrs
-    username: ${POSTGRES_USERNAME} # PostgreSQL username
-    password: ${POSTGRES_PASSWORD} # PostgreSQL password
+    username: postgres #${POSTGRES_USERNAME} # PostgreSQL username
+    password: greSQLdb #${POSTGRES_PASSWORD} # PostgreSQL password
     pool-size: 30
 spring:
   flyway:
