@@ -14,23 +14,31 @@ interface Props {
   minSize: string
 }
 
-const ChessPiece: FC<Props> = ({ type, color, size, position, game, onDragStart, minSize }) => {
+const ChessPiece: FC<Props> = ({
+  type,
+  color,
+  size,
+  position,
+  game,
+  onDragStart,
+  minSize,
+}) => {
   const imageUrl = useMemo(() => getImageByPiece(type, color), [type, color])
-  const boardEnabled = useAppSelector(state => state.board.enabled)
+  const boardEnabled = useAppSelector((state) => state.board.enabled)
   const [, drag] = useDrag(
     () => ({
       type: color === 'w' ? type.toUpperCase() : type,
       item: {
         position,
         color,
-        type
+        type,
       },
       canDrag: () => {
         console.log('can drag called')
         return (color === 'w') !== (game.turn() === 'b') && boardEnabled
-      }
+      },
     }),
-    [game]
+    [game],
   )
 
   return (
@@ -42,7 +50,7 @@ const ChessPiece: FC<Props> = ({ type, color, size, position, game, onDragStart,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        transform: 'translate(0,0)'
+        transform: 'translate(0,0)',
       }}
       onDragStart={onDragStart}
     >
@@ -53,7 +61,7 @@ const ChessPiece: FC<Props> = ({ type, color, size, position, game, onDragStart,
           width: size,
           height: size,
           minWidth: minSize,
-          minHeight: minSize
+          minHeight: minSize,
         }}
       />
     </div>

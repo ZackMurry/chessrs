@@ -1,17 +1,29 @@
-import { Box, Flex, Grid, GridItem, Heading, Link as ChakraLink, Text } from '@chakra-ui/react'
+import {
+  Box,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  Link as ChakraLink,
+  Text,
+} from '@chakra-ui/react'
 import { FC } from 'react'
 import { useAppSelector } from 'utils/hooks'
-import DashboardMoveData from './DashboardMoveData'
+import DashboardMoveData from './HomePageMoveData'
 
 const DashboardPage: FC = () => {
-  const { name } = useAppSelector(state => ({
-    name: state.user?.account?.username
+  const { name } = useAppSelector((state) => ({
+    name: state.user?.account?.username,
   }))
   return (
     <>
       <Box mt='10px' p='5vw' pt='2vw'>
         <Heading mb='2vw'>Welcome back, {name}</Heading>
-        <Grid templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(2, 1fr)' }} minH='65vh' gap={6}>
+        <Grid
+          templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(2, 1fr)' }}
+          minH='65vh'
+          gap={6}
+        >
           <GridItem>
             <DashboardMoveData />
           </GridItem>
