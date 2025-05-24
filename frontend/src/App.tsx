@@ -37,9 +37,9 @@ function App() {
   return (
     <Provider store={store}>
       <ChakraProvider theme={theme}>
-        <AccountManager />
         <DndProvider backend={HTML5Backend}>
           <Router>
+            <AccountManager />
             <Layout>
               <Switch>
                 <Route path='/' exact>

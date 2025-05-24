@@ -35,6 +35,7 @@ class SecurityConfiguration(
             }
             authorizeRequests {
                 authorize("/", permitAll)
+                authorize("/home", permitAll)
                 authorize(anyRequest, authenticated)
             }
             oauth2Login {
@@ -49,6 +50,7 @@ class SecurityConfiguration(
                 authorizationEndpoint {
                     authorizationRequestRepository = httpCookieOAuth2RequestRepository
                 }
+                defaultSuccessUrl("/home", true)
             }
             cors {
                 configurationSource = corsConfigurationSource()

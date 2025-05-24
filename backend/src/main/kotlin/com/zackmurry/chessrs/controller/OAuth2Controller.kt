@@ -15,7 +15,8 @@ class OAuth2Controller {
     // This is a workaround to redirect a signed in user to the home page
     @GetMapping("/code/*")
     fun loginWithLichess(attributes: RedirectAttributes): RedirectView {
-        return RedirectView("/")
+        println("redirecting to /home")
+        return RedirectView("/home")
     }
 
 }

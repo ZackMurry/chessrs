@@ -5,7 +5,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ExternalLinkIcon,
-  RepeatIcon
+  RepeatIcon,
 } from '@chakra-ui/icons'
 import { Box, Flex, Link as ChakraLink, Text } from '@chakra-ui/layout'
 import { FC, useEffect, useMemo, useState } from 'react'
@@ -20,7 +20,7 @@ import {
   traverseForwards,
   traverseToEnd,
   traverseToStart,
-  updateOpening
+  updateOpening,
 } from 'store/boardSlice'
 import Stockfish from 'utils/analysis/Stockfish'
 import DarkTooltip from 'components/DarkTooltip'
@@ -29,13 +29,13 @@ import { useBreakpointValue } from '@chakra-ui/react'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
-// todo: add lichess cloud eval when available for greater depth
+// todo: add hosted cloud eval when available for greater depth (and lichess cached cloud)
 const PositionPanel: FC = () => {
-  const { pgn, halfMoveCount, moveHistory, fen } = useAppSelector(state => ({
+  const { pgn, halfMoveCount, moveHistory, fen } = useAppSelector((state) => ({
     pgn: state.board.pgn,
     halfMoveCount: state.board.halfMoveCount,
     moveHistory: state.board.moveHistory,
-    fen: state.board.fen
+    fen: state.board.fen,
   }))
   const [evaluation, setEvaluation] = useState(0)
   const [bestMove, setBestMove] = useState('...')
@@ -48,9 +48,9 @@ const PositionPanel: FC = () => {
     () =>
       moveHistory
         .slice(0, halfMoveCount)
-        .map(m => m.uci)
+        .map((m) => m.uci)
         .join(' '),
-    [moveHistory, halfMoveCount]
+    [moveHistory, halfMoveCount],
   )
   const onAnalysis = (sf: Stockfish, bestMove: string, d: number) => {
     if (!sf.isReady) {
@@ -62,7 +62,9 @@ const PositionPanel: FC = () => {
     }
     const from = bestMove.substr(0, 2)
     const to = bestMove.substr(2, 2)
-    const matchingMoves = new Chess(fen).moves({ verbose: true }).filter(m => m.from === from && m.to === to)
+    const matchingMoves = new Chess(fen)
+      .moves({ verbose: true })
+      .filter((m) => m.from === from && m.to === to)
     if (!matchingMoves.length) {
       // Invalid move (likely from a previous run)
       return
@@ -88,7 +90,9 @@ const PositionPanel: FC = () => {
     stockfish.createNewGame()
     stockfish.analyzePosition(uciMoves, 5)
   }
-  const [stockfish] = useState(() => new Stockfish(onAnalysis, onReady, onEvaluation))
+  const [stockfish] = useState(
+    () => new Stockfish(onAnalysis, onReady, onEvaluation),
+  )
   stockfish.onAnalysis = onAnalysis
 
   useEffect(
@@ -98,7 +102,7 @@ const PositionPanel: FC = () => {
       stockfish.onReady = null
       stockfish.terminate()
     },
-    [stockfish]
+    [stockfish],
   )
 
   useEffect(() => {
@@ -125,9 +129,14 @@ const PositionPanel: FC = () => {
   }, [stockfish, uciMoves, fen, setEvaluation, halfMoveCount])
   const dispatch = useAppDispatch()
 
-  const whitePerspectiveEvaluation = evaluation * (halfMoveCount % 2 === 0 ? 1 : -1)
+  const whitePerspectiveEvaluation =
+    evaluation * (halfMoveCount % 2 === 0 ? 1 : -1)
 
-  const onImportGame = (moveStr: string, isWhite: boolean, opening?: Opening) => {
+  const onImportGame = (
+    moveStr: string,
+    isWhite: boolean,
+    opening?: Opening,
+  ) => {
     dispatch(resetBoard())
     dispatch(loadMoves(moveStr))
     if (opening) {
@@ -153,12 +162,11 @@ const PositionPanel: FC = () => {
     >
       <Box>
         <Box maxH='40vh' overflowY='auto'>
-          <Text fontSize='1.2em' fontWeight='bold' color='whiteText' mb='10px'>
-            {pgn}
-          </Text>
+          <h3 className='text-xl font-bold text-offwhite mb-4'>{pgn}</h3>
         </Box>
         <Flex>
           {!isTraverseBarShowing && (
+            // could make this look a lot better using a different component library
             <Box mr='20px'>
               <DarkTooltip label='Start'>
                 <IconButton
@@ -197,34 +205,38 @@ const PositionPanel: FC = () => {
             </Box>
           )}
           <DarkTooltip label='Flip board'>
-            <IconButton icon={<RepeatIcon />} aria-label='Flip board' onClick={() => dispatch(flipBoard())} />
+            <IconButton
+              icon={<RepeatIcon />}
+              aria-label='Flip board'
+              onClick={() => dispatch(flipBoard())}
+            />
           </DarkTooltip>
         </Flex>
       </Box>
       <ImportGameFromLichess onImport={onImportGame} />
       <Box>
-        <Text fontSize='18px' fontWeight='bold' color='whiteText' mb='5px'>
-          Analysis
-        </Text>
-        <Text fontSize='16px' color='whiteText' mb='3px'>
+        <h3 className='text-xl font-bold text-offwhite mb-1'>Analysis</h3>
+        <h6 className='text-md text-offwhite mb-1'>
           Evaluation:{' '}
           {isLoading
             ? `${isForcedMate ? '#' : ''}${-whitePerspectiveEvaluation}...`
             : `${isForcedMate ? '#' : ''}${whitePerspectiveEvaluation}`}
-        </Text>
-        <Text fontSize='16px' color='whiteText' mb='3px'>
-          Best move: {bestMove}
-        </Text>
-        <Text fontSize='16px' color='whiteText' mb='3px'>
+        </h6>
+        <h6 className='text-md text-offwhite mb-1'>Best move: {bestMove}</h6>
+        <h6 className='text-md text-offwhite mb-1'>
           Depth: {depth}
           {/* todo: allow user to increase depth */}
-        </Text>
-        <Text fontSize='16px' color='whiteText' mb='10px' wordBreak='break-all'>
+        </h6>
+        <h6 className='text-md text-offwhite mb-1'>
           FEN:
-          <ChakraLink ml='2px' isExternal href={`https://lichess.org/analysis?fen=${encodeURIComponent(fen)}`}>
+          <ChakraLink
+            ml='2px'
+            isExternal
+            href={`https://lichess.org/analysis?fen=${encodeURIComponent(fen)}`}
+          >
             {fen} <ExternalLinkIcon ml='4px' mt='-2px' />
           </ChakraLink>
-        </Text>
+        </h6>
       </Box>
     </Flex>
   )

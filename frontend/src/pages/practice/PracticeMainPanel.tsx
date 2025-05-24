@@ -2,7 +2,14 @@ import { Flex, Text } from '@chakra-ui/layout'
 import { FC, useCallback, useEffect } from 'react'
 import { useAppSelector } from 'utils/hooks'
 import { useDispatch } from 'react-redux'
-import { disableBoard, loadPosition, makeMove, resetHalfMoveCount, wrongMove, wrongMoveReset } from 'store/boardSlice'
+import {
+  disableBoard,
+  loadPosition,
+  makeMove,
+  resetHalfMoveCount,
+  wrongMove,
+  wrongMoveReset,
+} from 'store/boardSlice'
 import { useState } from 'react'
 import { useToast } from '@chakra-ui/react'
 import { gql, request } from 'graphql-request'
@@ -10,14 +17,18 @@ import ErrorToast from 'components/ErrorToast'
 import { TOAST_DURATION } from 'theme'
 
 const PracticeMainPanel: FC = () => {
-  const { halfMoveCount, moveSAN } = useAppSelector(state => ({
+  const { halfMoveCount, moveSAN } = useAppSelector((state) => ({
     halfMoveCount: state.board.halfMoveCount,
-    moveSAN: state.board.moveHistory.length ? state.board.moveHistory[0].san : ''
+    moveSAN: state.board.moveHistory.length
+      ? state.board.moveHistory[0].san
+      : '',
   }))
   const dispatch = useDispatch()
   const toast = useToast()
 
-  const [movesInQueue, setMovesInQueue] = useState<{ fenBefore: string; isWhite: string; san: string; uci: string }[]>([])
+  const [movesInQueue, setMovesInQueue] = useState<
+    { fenBefore: string; isWhite: string; san: string; uci: string }[]
+  >([])
   const [moveWrong, setMoveWrong] = useState(false)
   const [resetTimeout, setResetTimeout] = useState<NodeJS.Timeout>(null)
 
@@ -41,15 +52,21 @@ const PracticeMainPanel: FC = () => {
       }
       console.log('loading pos from fetch')
       dispatch(
-        loadPosition({ fen: data.randomMoves[0].fenBefore, perspective: data.randomMoves[0].isWhite ? 'white' : 'black' })
+        loadPosition({
+          fen: data.randomMoves[0].fenBefore,
+          perspective: data.randomMoves[0].isWhite ? 'white' : 'black',
+        }),
       )
     } catch (e) {
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
-        render: options => (
-          <ErrorToast description={`Error getting move data: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
-        )
+        render: (options) => (
+          <ErrorToast
+            description={`Error getting move data: ${e.response?.errors[0]?.message}`}
+            onClose={options.onClose}
+          />
+        ),
       })
       dispatch(disableBoard())
     }
@@ -66,16 +83,25 @@ const PracticeMainPanel: FC = () => {
       return
     }
     console.log('move made')
-    if (moveSAN !== '' && movesInQueue.length && moveSAN !== movesInQueue[0].san) {
+    if (
+      moveSAN !== '' &&
+      movesInQueue.length &&
+      moveSAN !== movesInQueue[0].san
+    ) {
       console.warn('wrong move!')
       setMoveWrong(true)
-      dispatch(wrongMove({ fen: movesInQueue[0].fenBefore, perspective: movesInQueue[0].isWhite ? 'white' : 'black' }))
+      dispatch(
+        wrongMove({
+          fen: movesInQueue[0].fenBefore,
+          perspective: movesInQueue[0].isWhite ? 'white' : 'black',
+        }),
+      )
       dispatch(makeMove(movesInQueue[0].uci))
       setResetTimeout(
         setTimeout(() => {
           setMoveWrong(false)
           dispatch(wrongMoveReset())
-        }, 3000)
+        }, 3000),
       )
       return
     }
@@ -93,7 +119,10 @@ const PracticeMainPanel: FC = () => {
         return
       }
       dispatch(
-        loadPosition({ fen: newMovesInQueue[0].fenBefore, perspective: newMovesInQueue[0].isWhite ? 'white' : 'black' })
+        loadPosition({
+          fen: newMovesInQueue[0].fenBefore,
+          perspective: newMovesInQueue[0].isWhite ? 'white' : 'black',
+        }),
       )
     }
     return () => {
@@ -111,7 +140,7 @@ const PracticeMainPanel: FC = () => {
     moveSAN,
     resetTimeout,
     setResetTimeout,
-    fetchMoves
+    fetchMoves,
   ])
 
   // todo: delete move button
@@ -127,15 +156,9 @@ const PracticeMainPanel: FC = () => {
       h='100%'
       p='5%'
     >
-      <Text fontSize='16px' mb='5px' mt='15px' color='whiteText'>
-        Practicing is like studying, except it doesn't rely on an Spaced Repetition algorithm. Instead, you are given a
-        random move. Because of this, you can do as many practices you'd like at any time. Practice is independent from your
-        studying.
-      </Text>
-      <Text fontSize='16px' mb='5px' mt='15px' color='whiteText'>
-        All you have to do is make the move that you added on the board. When you make an incorrect move, the correct move
-        will be shown and highlighted.
-      </Text>
+      <h3 className='text-2xl font-bold text-offwhite mb-4'>Practice</h3>
+      <h6 className='text-md text-offwhite mb-1'>Total moves: 860</h6>
+      <h6 className='text-md text-offwhite mb-1'>Practiced: 112</h6>
     </Flex>
   )
 }

@@ -41,7 +41,8 @@ class OAuth2AuthenticationSuccessHandler(private val httpCookieOAuth2RequestRepo
         response: HttpServletResponse,
         authentication: Authentication?
     ): String {
-        val targetUrl = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)?.value ?: defaultTargetUrl
+        val targetUrl = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)?.value ?: "/home"
+        println("targetUrl: $targetUrl")
         if (authentication == null) {
             throw BadRequestException()
         }

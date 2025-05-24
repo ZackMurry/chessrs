@@ -5,10 +5,13 @@ import { setAccount } from 'store/userSlice'
 import { TOAST_DURATION } from 'theme'
 import { useAppDispatch } from 'utils/hooks'
 import ErrorToast from './ErrorToast'
+import { useLocation } from 'react-router-dom'
 
 const AccountManager: FC = () => {
   const dispatch = useAppDispatch()
   const toast = useToast()
+  const location = useLocation()
+  const checkAccount = location.pathname !== '/'
 
   const getUserData = useCallback(async () => {
     try {
@@ -29,12 +32,12 @@ const AccountManager: FC = () => {
         toast({
           duration: TOAST_DURATION,
           isClosable: true,
-          render: options => (
+          render: (options) => (
             <ErrorToast
               description={`Error getting account data from server: ${data.errors[0].message}`}
               onClose={options.onClose}
             />
-          )
+          ),
         })
         return
       }
@@ -44,12 +47,12 @@ const AccountManager: FC = () => {
         toast({
           duration: TOAST_DURATION,
           isClosable: true,
-          render: options => (
+          render: (options) => (
             <ErrorToast
               description={`Error getting account data from server: ${e.response.errors[0].message}`}
               onClose={options.onClose}
             />
-          )
+          ),
         })
       } else {
         // Sign in with lichess
@@ -59,8 +62,10 @@ const AccountManager: FC = () => {
   }, [dispatch, toast])
 
   useEffect(() => {
-    getUserData()
-  }, [getUserData])
+    if (checkAccount) {
+      getUserData()
+    }
+  }, [getUserData, checkAccount])
 
   return <></>
 }

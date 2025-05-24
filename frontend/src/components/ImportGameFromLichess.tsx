@@ -13,8 +13,11 @@ interface Props {
 const GAMES_LOADED_PER_FETCH = 10
 
 const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
-  const { username } = useAppSelector(state => ({ username: state.user.account?.username }))
-  const [isSelectorVisible, { on: showSelector, off: hideSelector }] = useBoolean(false)
+  const { username } = useAppSelector((state) => ({
+    username: state.user.account?.username,
+  }))
+  const [isSelectorVisible, { on: showSelector, off: hideSelector }] =
+    useBoolean(false)
   const [isLoading, { on: startLoading, off: stopLoading }] = useBoolean(false)
   const [games, setGames] = useState<LichessGame[]>([])
 
@@ -27,8 +30,8 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
       const response = await fetch(
         `https://lichess.org/api/games/user/${username}?max=${GAMES_LOADED_PER_FETCH}&pgnInJson=true&tags=false&opening=true&perfType=ultraBullet,bullet,blitz,rapid,classical,correspondence`,
         {
-          headers: { Accept: 'application/x-ndjson' }
-        }
+          headers: { Accept: 'application/x-ndjson' },
+        },
       )
       const reader = response.body.getReader()
       const gen = ndjson(reader)
@@ -58,8 +61,8 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
         games[games.length - 1].createdAt
       }`,
       {
-        headers: { Accept: 'application/x-ndjson' }
-      }
+        headers: { Accept: 'application/x-ndjson' },
+      },
     )
     const reader = response.body.getReader()
     const gen = ndjson(reader)
@@ -79,16 +82,17 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
   if (!isSelectorVisible) {
     return (
       <Box py='15px'>
-        <Button variant='ghost' onClick={showSelector}>
+        <Button variant='ghost' bg='white' onClick={showSelector}>
           Import from Lichess
         </Button>
       </Box>
     )
   }
 
+  // need to improve UI for this by a lot
   return (
     <Box maxH='15vh' overflowY='auto' py='10px'>
-      {games.map(game => (
+      {games.map((game) => (
         <LichessGamePreview
           key={game.id}
           game={game}
@@ -97,7 +101,9 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
             onImport(
               game.moves,
               game.players.black.user.name !== username,
-              game.opening ? { name: game.opening.name, eco: game.opening.eco } : null
+              game.opening
+                ? { name: game.opening.name, eco: game.opening.eco }
+                : null,
             )
           }}
         />

@@ -6,32 +6,29 @@ import MobileNavbar from './MobileNavbar'
 
 const Navbar: FC = () => {
   const isMobile = useBreakpointValue({ base: true, md: false })
-  const isAuthenticated = useAppSelector(state => state.user.account !== null)
+  const isAuthenticated = useAppSelector((state) => state.user.account !== null)
   return isMobile ? (
     <MobileNavbar />
   ) : (
     <Flex alignItems='center' pl='50px' pt='20px' color='whiteText'>
-      <Link to='/'>
-        <Heading as='h2' fontSize='32px' fontWeight='normal'>
-          ChesSRS
-        </Heading>
+      <Link to='/home'>
+        <div className='flex justify-start align-center'>
+          <img
+            src='/whitePawn.png'
+            alt='Canvas Sync for Notion logo'
+            // className='-mt-2'
+            width={48}
+            height={48}
+          />
+          <h2 className='font-redhat my-auto text-xl font-bold text-white pt-2'>
+            Chessrs
+          </h2>
+        </div>
       </Link>
-      <Link to='/create'>
-        <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
-          Create
-        </Heading>
-      </Link>
-      <Link to='/study'>
-        <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
-          Study
-        </Heading>
-      </Link>
-      <Link to='/practice'>
-        <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
-          Practice
-        </Heading>
-      </Link>
-      <Heading as='h4' fontSize='24px' fontWeight='normal' ml='25px' color='whiteText'>
+      <div className='flex justify-between align-center space-x-8 my-auto text-white text-xl ml-10 pt-2'>
+        <Link to='/create'>Create</Link>
+        <Link to='/study'>Study</Link>
+        <Link to='/practice'>Practice</Link>
         {isAuthenticated ? (
           <Link to='/account'>Account</Link>
         ) : (
@@ -39,7 +36,7 @@ const Navbar: FC = () => {
             Login
           </a>
         )}
-      </Heading>
+      </div>
     </Flex>
   )
 }
