@@ -3,14 +3,17 @@ package com.zackmurry.chessrs.resolver.mutation
 import com.zackmurry.chessrs.exception.BadRequestException
 import com.zackmurry.chessrs.model.MoveResponse
 import com.zackmurry.chessrs.service.MoveService
-import graphql.kickstart.tools.GraphQLMutationResolver
+import org.springframework.graphql.data.method.annotation.Argument
+import org.springframework.graphql.data.method.annotation.MutationMapping
+import org.springframework.stereotype.Controller
 import org.springframework.stereotype.Service
 import java.util.*
 
-@Service
-class MoveMutationResolver(val moveService: MoveService) : GraphQLMutationResolver {
+@Controller
+class MoveMutationResolver(val moveService: MoveService) {
 
-    fun createMove(fenBefore: String, san: String, uci: String, opening: String): MoveResponse {
+    @MutationMapping
+    fun createMove(@Argument fenBefore: String, @Argument san: String, @Argument uci: String, @Argument opening: String): MoveResponse {
         val fenParts = fenBefore.split(" ")
         if (fenParts.size < 3) {
             throw BadRequestException()
@@ -22,13 +25,15 @@ class MoveMutationResolver(val moveService: MoveService) : GraphQLMutationResolv
         return moveService.createMove(fenBefore, san, uci, isWhite, opening).toResponse()
     }
 
-    fun reviewMove(id: String, success: Boolean): MoveResponse {
+    @MutationMapping
+    fun reviewMove(@Argument id: String, @Argument success: Boolean): MoveResponse {
         val uuid = UUID.fromString(id)
         moveService.studyMove(uuid, success)
         return moveService.getMoveById(uuid).orElseThrow { BadRequestException() }.toResponse()
     }
 
-    fun deleteMove(id: String): MoveResponse {
+    @MutationMapping
+    fun deleteMove(@Argument id: String): MoveResponse {
         val uuid = UUID.fromString(id)
         val move = moveService.getMoveById(uuid).orElseThrow { BadRequestException() }
         moveService.deleteById(uuid)

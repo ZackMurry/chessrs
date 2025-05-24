@@ -5,8 +5,8 @@ import com.zackmurry.chessrs.util.CookieUtils
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
 import org.springframework.stereotype.Component
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 
 const val OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request"
 const val REDIRECT_URI_PARAM_COOKIE_NAME = "redirect_uri "
@@ -22,6 +22,18 @@ class HttpCookieOAuth2RequestRepository : AuthorizationRequestRepository<OAuth2A
         }
         val cookie = CookieUtils.getCookie(request, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME) ?: return null
         return CookieUtils.deserialize(cookie, OAuth2AuthorizationRequest::class.java)
+    }
+
+    override fun removeAuthorizationRequest(
+        request: HttpServletRequest?,
+        response: HttpServletResponse?
+    ): OAuth2AuthorizationRequest? {
+        if (request == null || response == null) {
+            return null
+        }
+        val authorizationRequest = loadAuthorizationRequest(request)
+        removeAuthorizationRequestCookies(request, response)
+        return authorizationRequest
     }
 
     override fun saveAuthorizationRequest(
@@ -47,12 +59,6 @@ class HttpCookieOAuth2RequestRepository : AuthorizationRequestRepository<OAuth2A
         if (StringUtils.isNotBlank(redirectUriAfterLogin)) {
             CookieUtils.addCookie(response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUriAfterLogin, cookieExpireSeconds)
         }
-    }
-
-    override fun removeAuthorizationRequest(
-        request: HttpServletRequest?
-    ): OAuth2AuthorizationRequest? {
-        return loadAuthorizationRequest(request)
     }
 
     fun removeAuthorizationRequestCookies(request: HttpServletRequest, response: HttpServletResponse) {

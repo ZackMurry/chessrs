@@ -5,8 +5,8 @@ import com.zackmurry.chessrs.model.MoveResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
-import javax.persistence.Entity
-import javax.persistence.Id
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
 
 val logger: Logger = LoggerFactory.getLogger(Move::class.java)
 

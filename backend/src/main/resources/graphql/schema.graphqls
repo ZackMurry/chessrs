@@ -85,6 +85,27 @@ type Account {
     name: String!
 }
 
+type LichessOpening {
+    eco: String
+    name: String
+}
+
+type LichessMove {
+    uci: String!
+    san: String!
+    averageRating: Int
+    white: Int
+    draws: Int
+    black: Int
+    opening: LichessOpening
+}
+
+type LichessExplorerResponse {
+    white: Int!
+    draws: Int!
+    black: Int!
+    moves: [LichessMove!]!
+}
 
 type Query {
     move(id: String, fenBefore: String): Move
@@ -94,6 +115,7 @@ type Query {
     account: Account!
     moves(page: Int, limit: Int): [Move]!
     numberOfMoves: Int!
+    positionData(fen: String): LichessExplorerResponse
 }
 
 type Mutation {

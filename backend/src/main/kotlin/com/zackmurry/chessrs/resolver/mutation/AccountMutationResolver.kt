@@ -3,15 +3,18 @@ package com.zackmurry.chessrs.resolver.mutation
 import com.zackmurry.chessrs.model.UserPrincipalResponse
 import com.zackmurry.chessrs.security.UserPrincipal
 import com.zackmurry.chessrs.service.UserService
-import graphql.kickstart.tools.GraphQLMutationResolver
+import org.springframework.graphql.data.method.annotation.Argument
+import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.stereotype.Controller
 import org.springframework.stereotype.Service
 
-@Service
-class AccountMutationResolver(val userService: UserService) : GraphQLMutationResolver {
+@Controller
+class AccountMutationResolver(val userService: UserService) {
 
-    fun updateSettings(easeFactor: Float?, scalingFactor: Float?): UserPrincipalResponse {
+    @MutationMapping
+    fun updateSettings(@Argument easeFactor: Float?, @Argument scalingFactor: Float?): UserPrincipalResponse {
         val user = (SecurityContextHolder.getContext().authentication.principal as UserPrincipal)
         if (easeFactor != null) {
             userService.updateEaseFactor(easeFactor)
@@ -26,6 +29,7 @@ class AccountMutationResolver(val userService: UserService) : GraphQLMutationRes
         return user.toResponse()
     }
 
+    @MutationMapping
     fun deleteAccount(): UserPrincipalResponse {
         userService.deleteByUsername((SecurityContextHolder.getContext().authentication.principal as UserPrincipal).username)
         val user = (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).toResponse()
