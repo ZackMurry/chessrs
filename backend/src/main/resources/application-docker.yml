@@ -26,18 +26,9 @@ spring:
     name: ChesSRS Docker Server
   banner:
     location: classpath:static/banner-docker.txt
-graphql:
-  servlet:
-    mapping: /api/v1/graphql
-    exception-handlers-enabled: true
-    websocket:
-      enabled: false
-    graphiql:
-      endpoint:
-        graphql: /api/v1/graphql
+  graphql:
+    http:
+      path: /api/v1/graphql
 logging:
-  level:
-    notprivacysafe:
-      graphql: ERROR # Disable logging for service exceptions unless explicitly logged in the exception handler
   file:
     name: backend.log

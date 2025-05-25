@@ -3,6 +3,7 @@ package com.zackmurry.chessrs.resolver.query
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.zackmurry.chessrs.model.EngineAnalysisResult
 import com.zackmurry.chessrs.model.LichessExplorerResponse
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.graphql.data.method.annotation.Argument
@@ -10,6 +11,7 @@ import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.postForEntity
 import org.springframework.web.util.UriComponentsBuilder
 
 
@@ -25,11 +27,9 @@ class PositionQueryResolver(val restTemplate: RestTemplate, val redisTemplate: R
 
         if (cached is LinkedHashMap<*,*>) {
             // Found in cache
-            println("Found in cache!")
             val typed = mapper.convertValue(cached, LichessExplorerResponse::class.java)
             return typed
         }
-        println("Not in cache!")
 
         val baseUrl = "https://explorer.lichess.ovh/lichess"
         val uriBuilder = UriComponentsBuilder.fromUriString(baseUrl)
@@ -48,8 +48,17 @@ class PositionQueryResolver(val restTemplate: RestTemplate, val redisTemplate: R
         val jsonString = response.body!!
         val result = mapper.readValue(jsonString, LichessExplorerResponse::class.java)
         redisTemplate.opsForValue().set("fen:$fen", result) // Add to cache
-        println("added $fen to cache")
         return result
+    }
+
+    fun engineAnalysis(@Argument fen: String): EngineAnalysisResult {
+        val baseUrl = "http://localhost/api/v1/engine/analyze"
+        val uriBuilder = UriComponentsBuilder.fromUriString(baseUrl)
+            .queryParam("depth", "20")
+            .queryParam("fen", fen)
+        val url = uriBuilder.build().toUriString()
+        val response: ResponseEntity<String> = restTemplate.postForEntity(url, String::class.java)
+        return EngineAnalysisResult(0f)
     }
 
 }

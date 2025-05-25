@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: chessrs-engine
+server:
+  servlet:
+    context-path: /api/v1/engine
+  port: 8081
