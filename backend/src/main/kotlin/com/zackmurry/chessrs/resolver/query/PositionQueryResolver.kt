@@ -4,21 +4,33 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.zackmurry.chessrs.model.LichessExplorerResponse
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.util.UriComponents
 import org.springframework.web.util.UriComponentsBuilder
-import java.util.*
 
 
 @Controller
-class PositionQueryResolver(val restTemplate: RestTemplate) {
+class PositionQueryResolver(val restTemplate: RestTemplate, val redisTemplate: RedisTemplate<String, Any>) {
+
+    private val mapper = ObjectMapper().registerKotlinModule()
 
     @QueryMapping
     fun positionInformation(@Argument fen: String): LichessExplorerResponse {
+        val cacheKey = "fen:$fen"
+        val cached = redisTemplate.opsForValue().get(cacheKey)
+
+        if (cached is LinkedHashMap<*,*>) {
+            // Found in cache
+            println("Found in cache!")
+            val typed = mapper.convertValue(cached, LichessExplorerResponse::class.java)
+            return typed
+        }
+        println("Not in cache!")
+
         val baseUrl = "https://explorer.lichess.ovh/lichess"
         val uriBuilder = UriComponentsBuilder.fromUriString(baseUrl)
             .queryParam("variant", "standard")
@@ -34,8 +46,10 @@ class PositionQueryResolver(val restTemplate: RestTemplate) {
         val url = uriBuilder.build().toUriString()
         val response: ResponseEntity<String> = restTemplate.getForEntity(url, String::class.java)
         val jsonString = response.body!!
-        val mapper = ObjectMapper().registerKotlinModule()
-        return mapper.readValue(jsonString, LichessExplorerResponse::class.java)
+        val result = mapper.readValue(jsonString, LichessExplorerResponse::class.java)
+        redisTemplate.opsForValue().set("fen:$fen", result) // Add to cache
+        println("added $fen to cache")
+        return result
     }
 
 }

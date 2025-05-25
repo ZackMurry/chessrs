@@ -9,4 +9,4 @@ class LichessMove (val uci: String,
     val white: Long?,
     val draws: Long?,
     val black: Long?,
-    val opening: LichessOpening)
+    val opening: LichessOpening?)

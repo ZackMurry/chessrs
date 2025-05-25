@@ -43,6 +43,7 @@ dependencies {
 	testImplementation("org.apache.commons:commons-lang3")
 	implementation("org.springframework.boot:spring-boot-starter-graphql")
 	implementation("com.graphql-java:graphql-java-extended-scalars:22.0")
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 }
 
 tasks.withType<KotlinCompile> {

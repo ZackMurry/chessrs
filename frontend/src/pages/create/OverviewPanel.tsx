@@ -119,6 +119,10 @@ const OverviewPanel: FC = () => {
               uci
               san
             }
+            opening {
+              eco
+              name
+            }
           }
         }
       `

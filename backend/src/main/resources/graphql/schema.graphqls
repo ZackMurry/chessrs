@@ -106,7 +106,8 @@ type LichessExplorerResponse {
     white: Long!
     draws: Long!
     black: Long!
-    moves: [LichessMove!]!
+    moves: [LichessMove!]
+    opening: LichessOpening
 }
 
 type Query {
