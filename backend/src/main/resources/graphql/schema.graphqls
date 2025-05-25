@@ -1,3 +1,5 @@
+scalar Long
+
 type Move {
     id: String!
     userId: String!
@@ -94,16 +96,16 @@ type LichessMove {
     uci: String!
     san: String!
     averageRating: Int
-    white: Int
-    draws: Int
-    black: Int
+    white: Long
+    draws: Long
+    black: Long
     opening: LichessOpening
 }
 
 type LichessExplorerResponse {
-    white: Int!
-    draws: Int!
-    black: Int!
+    white: Long!
+    draws: Long!
+    black: Long!
     moves: [LichessMove!]!
 }
 
@@ -115,7 +117,7 @@ type Query {
     account: Account!
     moves(page: Int, limit: Int): [Move]!
     numberOfMoves: Int!
-    positionData(fen: String): LichessExplorerResponse
+    positionInformation(fen: String): LichessExplorerResponse
 }
 
 type Mutation {

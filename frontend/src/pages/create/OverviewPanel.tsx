@@ -89,6 +89,7 @@ const OverviewPanel: FC = () => {
       const data = await request('/api/v1/graphql', query, { fen })
       setCurrentMove(data.move)
     } catch (e) {
+      console.log(e)
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
@@ -106,28 +107,40 @@ const OverviewPanel: FC = () => {
 
   useEffect(() => {
     console.log('fetching games')
-    // todo: when skipping to the end, the opening isn't updated to the last available value
-    fetch(
-      `https://explorer.lichess.ovh/lichess?variant=standard&speeds[]=bullet&speeds[]=blitz&speeds[]=rapid&speeds[]=classical&ratings[]=1600&ratings[]=2500&moves=6&fen=${fen}`,
-    )
-      .then((result) => result.json())
-      .then((json) => {
-        dispatch(updateLichessGames(json))
-        return json
-      })
-      .then((json) => dispatch(updateOpening(json.opening)))
-      .catch(() =>
+    const getPositionInformation = async () => {
+      // todo: when skipping to the end, the opening isn't updated to the last available value
+      const query = gql`
+        query GetPositionInformation($fen: String!) {
+          positionInformation(fen: $fen) {
+            white
+            draws
+            black
+            moves {
+              uci
+              san
+            }
+          }
+        }
+      `
+      try {
+        const data = await request('/api/v1/graphql', query, { fen })
+        console.log(data.positionInformation)
+        dispatch(updateLichessGames(data.positionInformation))
+        dispatch(updateOpening(data.positionInformation.opening))
+      } catch (e) {
         toast({
           duration: TOAST_DURATION,
           isClosable: true,
           render: (options) => (
             <ErrorToast
-              description='Error getting games from Lichess'
+              description={`Error getting position information: ${e.response?.errors[0]?.message}`}
               onClose={options.onClose}
             />
           ),
-        }),
-      )
+        })
+      }
+    }
+    getPositionInformation()
     getMoveForPosition()
   }, [fen, dispatch, getMoveForPosition, toast])
 
@@ -299,7 +312,7 @@ const OverviewPanel: FC = () => {
                 color='whiteText'
               >
                 <span style={{ fontWeight: 'bold' }}>Common Moves</span>{' '}
-                {commonMoves.join(', ')}
+                {commonMoves && commonMoves.join(', ')}
               </Text>
             ) : (
               <>
@@ -307,11 +320,12 @@ const OverviewPanel: FC = () => {
                   Most Common Moves
                 </h3>
                 {/* todo: show a bit more data (like number of times of name of opening) */}
-                {commonMoves.map((m) => (
-                  <h6 className='text-lg mb-1 text-offwhite' key={m}>
-                    {m}
-                  </h6>
-                ))}
+                {commonMoves &&
+                  commonMoves.map((m) => (
+                    <h6 className='text-lg mb-1 text-offwhite' key={m}>
+                      {m}
+                    </h6>
+                  ))}
               </>
             )}
           </>
