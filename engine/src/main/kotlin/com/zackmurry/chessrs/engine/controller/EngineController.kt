@@ -13,7 +13,7 @@ class EngineController {
 
     @GetMapping("/analyze")
     fun analyze(@RequestParam fen: String, @RequestParam depth: Int = 15): AnalysisResponse {
-        if (depth <= 0) {
+        if (depth <= 0 || depth > 35) {
             throw BadRequestException("Bad depth")
         }
         val fenParts = fen.split(' ')

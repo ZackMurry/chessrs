@@ -15,6 +15,10 @@ import org.springframework.web.client.postForEntity
 import org.springframework.web.util.UriComponentsBuilder
 
 
+val LICHESS_OPENING_EXPLORER_URL = "https://explorer.lichess.ovh/lichess"
+val LICHESS_CLOUD_ANALYSIS_URL = "https://lichess.org/api/cloud-eval"
+val CHESSRS_CLOUD_ENGINE_URL = "http://localhost:8081/api/v1/engine/analyze"
+
 @Controller
 class PositionQueryResolver(val restTemplate: RestTemplate, val redisTemplate: RedisTemplate<String, Any>) {
 
@@ -31,8 +35,7 @@ class PositionQueryResolver(val restTemplate: RestTemplate, val redisTemplate: R
             return typed
         }
 
-        val baseUrl = "https://explorer.lichess.ovh/lichess"
-        val uriBuilder = UriComponentsBuilder.fromUriString(baseUrl)
+        val uriBuilder = UriComponentsBuilder.fromUriString(LICHESS_OPENING_EXPLORER_URL)
             .queryParam("variant", "standard")
             .queryParam("speeds[]", "bullet")
             .queryParam("speeds[]", "blitz")
@@ -52,13 +55,22 @@ class PositionQueryResolver(val restTemplate: RestTemplate, val redisTemplate: R
     }
 
     fun engineAnalysis(@Argument fen: String): EngineAnalysisResult {
-        val baseUrl = "http://localhost/api/v1/engine/analyze"
-        val uriBuilder = UriComponentsBuilder.fromUriString(baseUrl)
+        val lichessUriBuilder = UriComponentsBuilder.fromUriString(LICHESS_CLOUD_ANALYSIS_URL)
+            .queryParam("fen", fen)
+        val lichessUrl = lichessUriBuilder.build().toUriString()
+        val lichessResponse: ResponseEntity<String> = restTemplate.getForEntity(lichessUrl, String::class.java)
+        val lichessJson = lichessResponse.body!!
+        val result = mapper.readValue(jsonString, LichessExplorerResponse::class.java)
+
+
+
+        val uriBuilder = UriComponentsBuilder.fromUriString(CHESSRS_CLOUD_ENGINE_URL)
             .queryParam("depth", "20")
             .queryParam("fen", fen)
         val url = uriBuilder.build().toUriString()
         val response: ResponseEntity<String> = restTemplate.postForEntity(url, String::class.java)
-        return EngineAnalysisResult(0f)
+        val jsonString = response.body!!
+        return mapper.readValue(jsonString, EngineAnalysisResult::class.java)
     }
 
 }
