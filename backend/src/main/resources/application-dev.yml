@@ -31,6 +31,6 @@ spring:
       path: /api/v1/graphql
 logging:
   level:
-    org:
-      springframework:
-        security: DEBUG
+    com:
+      zackmurry:
+        chessrs: DEBUG

@@ -7,7 +7,7 @@ import com.zackmurry.chessrs.exception.ForbiddenException
 import com.zackmurry.chessrs.exception.InternalServerException
 import com.zackmurry.chessrs.exception.NotFoundException
 import com.zackmurry.chessrs.service.UserService.Companion.getUserId
-import com.zackmurry.chessrs.util.FenCleaner
+import com.zackmurry.chessrs.util.FenManager
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -15,7 +15,7 @@ import java.util.*
 class MoveService(
     private val moveDao: MoveDao,
     private val spacedRepetitionService: SpacedRepetitionService,
-    private val fenCleaner: FenCleaner
+    private val fenManager: FenManager
 ) {
 
     fun createMove(fenBefore: String, san: String, uci: String, isWhite: Boolean, opening: String): Move {
@@ -39,7 +39,7 @@ class MoveService(
                 0,
                 currTime,
                 opening,
-                fenCleaner.cleanFen(fenBefore)
+                fenManager.cleanFen(fenBefore)
             )
         moveDao.save(move)
         return move
@@ -57,7 +57,7 @@ class MoveService(
 
     fun getMoveByCleanFen(fenBefore: String): Optional<Move> {
         // todo: this doesn't handle transpositions with en passant very well
-        return moveDao.findByCleanFen(getUserId(), fenCleaner.cleanFen(fenBefore))
+        return moveDao.findByCleanFen(getUserId(), fenManager.cleanFen(fenBefore))
     }
 
     fun studyMove(id: UUID, success: Boolean) {

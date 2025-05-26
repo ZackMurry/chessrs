@@ -110,6 +110,14 @@ type LichessExplorerResponse {
     opening: LichessOpening
 }
 
+type EngineAnalysisResult {
+    fen: String!
+    depth: Int!
+    eval: Float!
+    mainLine: String
+    provider: String!
+}
+
 type Query {
     move(id: String, fenBefore: String): Move
     dueMoves(limit: Int): [Move]!
@@ -118,7 +126,8 @@ type Query {
     account: Account!
     moves(page: Int, limit: Int): [Move]!
     numberOfMoves: Int!
-    positionInformation(fen: String): LichessExplorerResponse
+    positionInformation(fen: String): LichessExplorerResponse!
+    engineAnalysis(fen: String): EngineAnalysisResult!
 }
 
 type Mutation {
