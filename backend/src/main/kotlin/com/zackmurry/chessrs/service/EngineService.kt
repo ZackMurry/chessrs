@@ -15,7 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder
 
 const val LICHESS_CLOUD_ANALYSIS_URL = "https://lichess.org/api/cloud-eval"
 const val CHESSRS_CLOUD_ENGINE_URL = "http://localhost:8081/api/v1/engine/analyze"
-const val CHESSRS_ENGINE_DEPTH = 20
+const val CHESSRS_ENGINE_DEPTH = 30
 
 private val logger = LoggerFactory.getLogger(EngineService::class.java)
 
