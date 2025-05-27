@@ -54,9 +54,6 @@ const PositionPanel: FC = () => {
   const [depth, setDepth] = useState(0)
   const [isLoading, setLoading] = useState(true)
   const [isForcedMate, setForcedMate] = useState(false)
-  const [engine, setEngine] = useState<'BROWSER' | 'LICHESS' | 'CHESSRS'>(
-    'BROWSER',
-  )
   const [engineEval, setEngineEval] = useState<EngineEvaluation | null>(null)
   const isTraverseBarShowing = useBreakpointValue({ base: true, lg: false })
   const toast = useToast()
@@ -74,7 +71,7 @@ const PositionPanel: FC = () => {
       console.log('not ready')
       return
     }
-    if ((isLoading && d !== 5) || engine !== 'BROWSER') {
+    if (isLoading && d !== 5) {
       return
     }
     const from = bestMove.substr(0, 2)
@@ -94,9 +91,6 @@ const PositionPanel: FC = () => {
     setBestMove(matchingMoves[0].san)
   }
   const onEvaluation = (cp: number, mate: number) => {
-    if (engine !== 'BROWSER') {
-      return
-    }
     if (mate) {
       setForcedMate(true)
       setEvaluation(mate)
@@ -126,7 +120,6 @@ const PositionPanel: FC = () => {
   )
 
   useEffect(() => {
-    setEngine('BROWSER')
     if (!stockfish.isReady) {
       return
     }
@@ -151,21 +144,27 @@ const PositionPanel: FC = () => {
   }, [stockfish, uciMoves, fen, setEvaluation, halfMoveCount])
   const dispatch = useAppDispatch()
 
-  const evalScore =
-    engine === 'BROWSER' || !engineEval
-      ? halfMoveCount % 2 === 0
-        ? evaluation
-        : -evaluation
-      : engineEval?.eval
-  const engDepth =
-    engine === 'BROWSER' || !engineEval ? depth : engineEval.depth
+  const browserEngine = !engineEval || engineEval.fen !== fen
+  const evalScore = browserEngine
+    ? halfMoveCount % 2 === 0
+      ? evaluation
+      : -evaluation
+    : engineEval?.eval
+  const engDepth = browserEngine ? depth : engineEval?.depth
+  const engine = browserEngine ? 'BROWSER' : engineEval?.provider
+  const depthText =
+    engine === 'BROWSER'
+      ? 'Use cloud engine analysis'
+      : `Engine analysis provided by ${
+          engine.charAt(0).toLocaleUpperCase() +
+          engine.substr(1).toLocaleLowerCase()
+        }`
 
   const onImportGame = (
     moveStr: string,
     isWhite: boolean,
     opening?: Opening,
   ) => {
-    setEngine('BROWSER')
     dispatch(resetBoard())
     dispatch(loadMoves(moveStr))
     if (opening) {
@@ -177,10 +176,9 @@ const PositionPanel: FC = () => {
   }
 
   const showCloudAnalysis = async () => {
-    setEngine('CHESSRS')
     setLoading(true)
-    stockfish.stop()
-    stockfish.quit()
+    // stockfish.stop()
+    // stockfish.quit()
     const query = gql`
       query CloudEngineAnalysis($fen: String!) {
         engineAnalysis(fen: $fen) {
@@ -194,20 +192,36 @@ const PositionPanel: FC = () => {
     `
     try {
       const data = await request('/api/v1/graphql', query, { fen })
-      if (data.engineAnalysis?.eval && data.engineAnalysis?.depth) {
-        // setEvaluation(data.engineAnalysis.eval)
-        // setDepth(data.engineAnalysis.depth)
-        if (data.engineAnalysis.provider) {
-          setEngine(data.engineAnalysis.provider)
+      console.log('updating eval')
+      if (
+        data.engineAnalysis?.eval &&
+        data.engineAnalysis?.depth &&
+        data.engineAnalysis.fen
+      ) {
+        const firstMove = data.engineAnalysis.mainLine.split(' ')[0] // todo: make API return SAN
+        const from = firstMove.substr(0, 2)
+        const to = firstMove.substr(2, 2)
+        console.log(data.engineAnalysis.fen)
+        const matchingMoves = new Chess(data.engineAnalysis.fen as string)
+          .moves({ verbose: true })
+          .filter((m) => m.from === from && m.to === to)
+        console.log(matchingMoves)
+        if (!matchingMoves.length) {
+          // Invalid move (likely from a previous run)
+          setLoading(false)
+          setEngineEval(null)
+          return
         }
         setEngineEval({
           depth: data.engineAnalysis.depth as number,
           eval: data.engineAnalysis.eval as number,
-          bestMove: data.engineAnalysis.mainLine.split(' ')[0],
+          // bestMove: data.engineAnalysis.mainLine.split(' ')[0], // todo: make API return SAN
+          bestMove: matchingMoves[0].san,
           fen: data.engineAnalysis.fen as string,
           provider: data.engineAnalysis.provider as 'LICHESS' | 'CHESSRS',
         })
       }
+      console.log('updated eval')
     } catch (e) {
       toast({
         duration: TOAST_DURATION,
@@ -298,52 +312,46 @@ const PositionPanel: FC = () => {
             ? `${isForcedMate ? '#' : ''}${evalScore}...`
             : `${isForcedMate ? '#' : ''}${evalScore}`}
         </h6>
-        <h6 className='text-md text-offwhite mb-1'>Best move: {bestMove}</h6>
+        <h6 className='text-md text-offwhite mb-1'>
+          Best move: {engine === 'BROWSER' ? bestMove : engineEval.bestMove}
+        </h6>
         <h6 className='text-md text-offwhite mb-1 flex justify-start items-center'>
           Depth: {engDepth}
           {isLoading && '...'}
-          {engine === 'BROWSER' && !isLoading && (
-            <DarkTooltip label='Use cloud engine analysis' openDelay={700}>
-              <IconButton
-                icon={<CirclePlus size='18' color='white' />}
-                aria-label='Increase depth'
-                className='!ring-none !shadow-none ml-1'
-                variant='ghost'
-                borderRadius='3xl'
-                padding='0'
-                size='xs'
-                // className='hover:!bg-none'
-                _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-                // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-                _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-                onClick={showCloudAnalysis}
-              />
-            </DarkTooltip>
-          )}
-          {engine === 'CHESSRS' && !isLoading && (
-            <DarkTooltip
-              label='Engine analysis provided by Chessrs'
-              openDelay={700}
-            >
-              <Cloud color='white' size='18' fill='white' className='ml-2' />
-            </DarkTooltip>
-          )}
-          {engine === 'LICHESS' && (
-            // <Cloud color='red' size='18' />
-            <DarkTooltip
-              label='Engine analysis provided by Lichess'
-              openDelay={700}
-            >
-              <img
-                src='lichess-logo-inverted.png'
-                width={18}
-                height={18}
-                className='ml-2'
-                alt='Lichess logo'
-              />
-            </DarkTooltip>
-          )}
-          {/* todo: allow user to increase depth */}
+          {/* todo: need to fix tooltip popup settings */}
+          <DarkTooltip label={depthText} openDelay={700}>
+            <div>
+              {engine === 'BROWSER' && !isLoading && (
+                <IconButton
+                  icon={<CirclePlus size='18' color='white' />}
+                  aria-label='Increase depth'
+                  className='!ring-none !shadow-none ml-1'
+                  variant='ghost'
+                  borderRadius='3xl'
+                  padding='0'
+                  size='xs'
+                  // className='hover:!bg-none'
+                  _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                  _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                  onClick={showCloudAnalysis}
+                />
+              )}
+              {engine === 'CHESSRS' && !isLoading && (
+                <Cloud color='white' size='18' fill='white' className='ml-2' />
+              )}
+              {engine === 'LICHESS' && (
+                // <Cloud color='red' size='18' />
+                <img
+                  src='lichess-logo-inverted.png'
+                  width={18}
+                  height={18}
+                  className='ml-2'
+                  alt='Lichess logo'
+                />
+              )}
+            </div>
+          </DarkTooltip>
         </h6>
         <h6 className='text-md text-offwhite mb-1'>
           FEN:
