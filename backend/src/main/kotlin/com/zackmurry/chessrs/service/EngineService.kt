@@ -37,7 +37,6 @@ class EngineService(private val restTemplate: RestTemplate, val fenManager: FenM
             logger.debug("Cache hit")
             return typed
         }
-        // todo: use redis to cache all analyses
         val lichessUriBuilder = UriComponentsBuilder.fromUriString(LICHESS_CLOUD_ANALYSIS_URL)
             .queryParam("fen", fen)
         val lichessUrl = lichessUriBuilder.build().toUriString()
@@ -46,8 +45,12 @@ class EngineService(private val restTemplate: RestTemplate, val fenManager: FenM
             if (lichessResponse.statusCode.is2xxSuccessful) {
                 val lichessJson = lichessResponse.body!!
                 val lichessResult = mapper.readValue(lichessJson, LichessAnalysisResponse::class.java)
-                val engResult = EngineAnalysisResult(fen, lichessResult.depth, lichessResult.pvs[0].cp / 100f,
-                    lichessResult.pvs[0].moves, EngineAnalysisProvider.LICHESS)
+                if (lichessResult.pvs.isEmpty()) {
+                    throw InternalServerException()
+                }
+                val bestMove = lichessResult.pvs[0]
+                val engResult = EngineAnalysisResult(fen, lichessResult.depth, bestMove.cp / 100f,
+                    bestMove.mate, lichessResult.pvs[0].moves, EngineAnalysisProvider.LICHESS)
                 redisTemplate.opsForValue().set("engine:$fen", engResult) // Add to cache
                 logger.debug("Lichess hit")
                 return engResult
@@ -64,7 +67,7 @@ class EngineService(private val restTemplate: RestTemplate, val fenManager: FenM
         if (response.statusCode.is2xxSuccessful) {
             val jsonString = response.body!!
             val result = mapper.readValue(jsonString, ChessrsAnalysisResponse::class.java)
-            val engResult = EngineAnalysisResult(fen, CHESSRS_ENGINE_DEPTH, result.eval, result.bestmove, EngineAnalysisProvider.CHESSRS)
+            val engResult = EngineAnalysisResult(fen, CHESSRS_ENGINE_DEPTH, result.eval, result.mate, result.bestmove, EngineAnalysisProvider.CHESSRS)
             redisTemplate.opsForValue().set("engine:$fen", engResult) // Add to cache
             logger.debug("Local engine hit")
             return engResult

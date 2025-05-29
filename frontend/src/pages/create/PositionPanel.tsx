@@ -35,7 +35,8 @@ const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 interface EngineEvaluation {
   depth: number
-  eval: number
+  eval?: number
+  forcedMate: boolean
   bestMove: string
   fen: string
   provider: 'LICHESS' | 'CHESSRS'
@@ -145,6 +146,7 @@ const PositionPanel: FC = () => {
   const dispatch = useAppDispatch()
 
   const browserEngine = !engineEval || engineEval.fen !== fen
+  console.log(engineEval)
   const evalScore = browserEngine
     ? halfMoveCount % 2 === 0
       ? evaluation
@@ -152,6 +154,7 @@ const PositionPanel: FC = () => {
     : engineEval?.eval
   const engDepth = browserEngine ? depth : engineEval?.depth
   const engine = browserEngine ? 'BROWSER' : engineEval?.provider
+  const forcedMate = engine === 'BROWSER' ? isForcedMate : engineEval.forcedMate
   const depthText =
     engine === 'BROWSER'
       ? 'Use cloud engine analysis'
@@ -185,6 +188,7 @@ const PositionPanel: FC = () => {
           fen
           depth
           eval
+          mate
           provider
           mainLine
         }
@@ -194,7 +198,8 @@ const PositionPanel: FC = () => {
       const data = await request('/api/v1/graphql', query, { fen })
       console.log('updating eval')
       if (
-        data.engineAnalysis?.eval &&
+        (data.engineAnalysis?.eval !== undefined ||
+          data.engineAnalysis?.mate !== undefined) &&
         data.engineAnalysis?.depth &&
         data.engineAnalysis.fen
       ) {
@@ -214,8 +219,9 @@ const PositionPanel: FC = () => {
         }
         setEngineEval({
           depth: data.engineAnalysis.depth as number,
-          eval: data.engineAnalysis.eval as number,
-          // bestMove: data.engineAnalysis.mainLine.split(' ')[0], // todo: make API return SAN
+          eval:
+            data.engineAnalysis.mate ?? (data.engineAnalysis.eval as number),
+          forcedMate: data.engineAnalysis.mate !== null,
           bestMove: matchingMoves[0].san,
           fen: data.engineAnalysis.fen as string,
           provider: data.engineAnalysis.provider as 'LICHESS' | 'CHESSRS',
@@ -228,7 +234,7 @@ const PositionPanel: FC = () => {
         isClosable: true,
         render: (options) => (
           <ErrorToast
-            description={`Error getting position information: ${e.response?.errors[0]?.message}`}
+            description={`Error getting position information: ${e}`}
             onClose={options.onClose}
           />
         ),
@@ -309,8 +315,8 @@ const PositionPanel: FC = () => {
         <h6 className='text-md text-offwhite mb-1'>
           Evaluation:{' '}
           {isLoading
-            ? `${isForcedMate ? '#' : ''}${evalScore}...`
-            : `${isForcedMate ? '#' : ''}${evalScore}`}
+            ? `${forcedMate ? '#' : ''}${evalScore}...`
+            : `${forcedMate ? '#' : ''}${evalScore}`}
         </h6>
         <h6 className='text-md text-offwhite mb-1'>
           Best move: {engine === 'BROWSER' ? bestMove : engineEval.bestMove}

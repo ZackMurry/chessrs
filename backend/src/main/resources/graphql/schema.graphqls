@@ -113,7 +113,8 @@ type LichessExplorerResponse {
 type EngineAnalysisResult {
     fen: String!
     depth: Int!
-    eval: Float!
+    eval: Float
+    mate: Int
     mainLine: String
     provider: String!
 }

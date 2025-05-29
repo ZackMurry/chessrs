@@ -30,23 +30,38 @@ class EngineService {
         writer.write("go depth $depth\n")
         writer.flush()
 
-        var cp = 0
+        var cp: Int? = null
+        var mate: Int? = null
         while (true) {
             val line = reader.readLine() ?: break
+            println(line)
             logger.debug(line)
             if (line.startsWith("bestmove")) {
                 bestMove = line.split(" ")[1]
                 break
             } else if (line.startsWith("info")) {
                 val map = parseInfoLine(line)
-                if (map.containsKey("score cp") && map["score cp"] is Int) {
+                val temp = map.keys
+                println(temp)
+                if (map.containsKey("score mate") && map["score mate"] is Int) {
+                    cp = null
+                    mate = map["score mate"] as Int
+                } else if (map.containsKey("score cp") && map["score cp"] is Int) {
                     cp = map["score cp"] as Int
                 }
             }
         }
-        val eval = (cp / 100f) * (if (toMove == "w") 1 else -1)
+        stockfish.destroy()
+        writer.flush()
+        writer.close()
+        reader.close()
+        val sign = if (toMove == "w") 1 else -1
+        val eval = cp?.let {
+            sign * (cp / 100f)
+        }
+        mate = if (mate != null) sign * mate else null
         println("eval: $eval")
-        return AnalysisResponse(eval, bestMove)
+        return AnalysisResponse(eval, mate, bestMove)
     }
 
     fun parseInfoLine(line: String): Map<String, Any> {
