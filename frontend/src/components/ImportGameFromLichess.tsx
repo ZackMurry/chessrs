@@ -16,11 +16,13 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
   const { username } = useAppSelector((state) => ({
     username: state.user.account?.username,
   }))
-  const [isSelectorVisible, { on: showSelector, off: hideSelector }] =
+  const [isDescriptionVisible, { on: showDescription, off: hideDescription }] =
     useBoolean(false)
   const [isLoading, { on: startLoading, off: stopLoading }] = useBoolean(false)
   const [games, setGames] = useState<LichessGame[]>([])
+  const [gameIdx, setGameIdx] = useState(0)
 
+  // is this running before the user even clicks the button?
   useEffect(() => {
     const fetchGames = async () => {
       if (!username) {
@@ -79,20 +81,68 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
     stopLoading()
   }
 
-  if (!isSelectorVisible) {
+  const showFirstGame = () => {
+    const firstGame = games[0]
+    if (!firstGame) {
+      setTimeout(showFirstGame, 1000)
+      return
+    }
+    onImport(
+      firstGame.moves,
+      firstGame.players.black.user.name !== username,
+      firstGame.opening
+        ? { name: firstGame.opening.name, eco: firstGame.opening.eco }
+        : null,
+    )
+    showDescription()
+  }
+
+  if (!isDescriptionVisible || !games.length) {
     return (
       <Box py='15px'>
-        <Button variant='ghost' bg='white' onClick={showSelector}>
+        <Button variant='ghost' bg='white' onClick={showFirstGame}>
           Import from Lichess
         </Button>
       </Box>
     )
   }
 
-  // need to improve UI for this by a lot
+  const game = games[gameIdx]
+  console.log(game)
+  const gameTime = new Date(game.lastMoveAt)
+  const isWhite = game.players.black.user.name !== username
+  const opponent = game.players[isWhite ? 'black' : 'white']
+
+  // todo: arrows for next/previous
   return (
     <Box maxH='15vh' overflowY='auto' py='10px'>
-      {games.map((game) => (
+      <div className='text-offwhite'>
+        <h3 className='text-lg font-bold'>
+          Lichess Game on {gameTime.getMonth() + 1}/{gameTime.getDate()}/
+          {gameTime.getFullYear()}
+        </h3>
+        {game.speed.charAt(0).toUpperCase() + game.speed.substr(1)}:{' '}
+        {game.opening?.name ?? ''}
+        {opponent && (
+          <div>
+            Opponent:{' '}
+            <a
+              className='underline'
+              href={`https://lichess.org/@/${opponent.user.name}`}
+              rel='noopener noreferrer'
+              target='_blank'
+            >
+              {opponent.user.name}
+            </a>{' '}
+            ({opponent.rating}
+            {opponent.provisional && '?'})
+          </div>
+        )}
+        {/* todo: draws */}
+        Result: {game.winner === 'white' ? '1-0' : '0-1'} (
+        {isWhite === (game.winner === 'white') ? 'Win' : 'Loss'})
+      </div>
+      {/* {games.map((game) => (
         <LichessGamePreview
           key={game.id}
           game={game}
@@ -107,32 +157,7 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
             )
           }}
         />
-      ))}
-      <Flex justifyContent='center'>
-        <Button
-          variant='outline'
-          bg='btnBg'
-          borderColor='btnBorder'
-          onClick={onLoadMore}
-          size='xs'
-          isLoading={isLoading}
-          overflowWrap='break-word'
-          mr='5px'
-        >
-          More
-        </Button>
-        <Button
-          ml='5px'
-          variant='outline'
-          bg='btnBg'
-          borderColor='btnBorder'
-          onClick={hideSelector}
-          size='xs'
-          overflowWrap='break-word'
-        >
-          Close
-        </Button>
-      </Flex>
+      ))} */}
     </Box>
   )
 }

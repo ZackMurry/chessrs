@@ -25,7 +25,7 @@ import {
 import Stockfish from 'utils/analysis/Stockfish'
 import DarkTooltip from 'components/DarkTooltip'
 import ImportGameFromLichess from 'components/ImportGameFromLichess'
-import { useBreakpointValue, useToast } from '@chakra-ui/react'
+import { useBreakpointValue, useToast, Spinner } from '@chakra-ui/react'
 import { CirclePlus, Cloud } from 'lucide-react'
 import request, { gql } from 'graphql-request'
 import { TOAST_DURATION } from 'theme'
@@ -42,7 +42,6 @@ interface EngineEvaluation {
   provider: 'LICHESS' | 'CHESSRS'
 }
 
-// todo: add hosted cloud eval when available for greater depth (and lichess cached cloud)
 const PositionPanel: FC = () => {
   const { pgn, halfMoveCount, moveHistory, fen } = useAppSelector((state) => ({
     pgn: state.board.pgn,
@@ -56,6 +55,7 @@ const PositionPanel: FC = () => {
   const [isLoading, setLoading] = useState(true)
   const [isForcedMate, setForcedMate] = useState(false)
   const [engineEval, setEngineEval] = useState<EngineEvaluation | null>(null)
+  const [isCloudLoading, setCloudLoading] = useState(false)
   const isTraverseBarShowing = useBreakpointValue({ base: true, lg: false })
   const toast = useToast()
 
@@ -93,6 +93,7 @@ const PositionPanel: FC = () => {
   }
   const onEvaluation = (cp: number, mate: number) => {
     if (mate) {
+      console.warn('found mate!')
       setForcedMate(true)
       setEvaluation(mate)
     } else {
@@ -122,25 +123,26 @@ const PositionPanel: FC = () => {
 
   useEffect(() => {
     if (!stockfish.isReady) {
+      console.warn('sf not ready!')
       return
     }
     console.log('Rerunning stockfish in useeffect (onReady)')
     stockfish.quit()
+    if (new Chess(fen).in_checkmate()) {
+      if (halfMoveCount % 2 === 0) {
+        setEvaluation(0)
+      } else {
+        setEvaluation(0)
+      }
+      setForcedMate(true)
+      setBestMove('N/A')
+      setLoading(false)
+      return
+    }
     stockfish.createNewGame()
     setBestMove('...')
     setDepth(0)
     setLoading(true)
-    if (new Chess(fen).in_checkmate()) {
-      if (halfMoveCount % 2 === 0) {
-        setEvaluation(Number.NEGATIVE_INFINITY)
-      } else {
-        setEvaluation(Number.POSITIVE_INFINITY)
-      }
-      setForcedMate(true)
-      setBestMove('')
-      setLoading(false)
-      return
-    }
     stockfish.analyzePosition(uciMoves, 5)
   }, [stockfish, uciMoves, fen, setEvaluation, halfMoveCount])
   const dispatch = useAppDispatch()
@@ -180,6 +182,7 @@ const PositionPanel: FC = () => {
 
   const showCloudAnalysis = async () => {
     setLoading(true)
+    setCloudLoading(true)
     // stockfish.stop()
     // stockfish.quit()
     const query = gql`
@@ -241,6 +244,7 @@ const PositionPanel: FC = () => {
       })
     }
     setLoading(false)
+    setCloudLoading(false)
   }
 
   return (
@@ -258,6 +262,8 @@ const PositionPanel: FC = () => {
     >
       <Box>
         <Box maxH='40vh' overflowY='auto'>
+          {/* todo: highlight current move (esp for lichess import) */}
+          {/* todo: click on move to jump */}
           <h3 className='text-xl font-bold text-offwhite mb-4'>{pgn}</h3>
         </Box>
         <Flex>
@@ -322,18 +328,27 @@ const PositionPanel: FC = () => {
           Best move: {engine === 'BROWSER' ? bestMove : engineEval.bestMove}
         </h6>
         <h6 className='text-md text-offwhite mb-1 flex justify-start items-center'>
-          Depth: {engDepth}
-          {isLoading && '...'}
+          <div className='min-w-[80px]'>
+            Depth: {engDepth}
+            {isLoading && '...'}
+          </div>
           {/* todo: need to fix tooltip popup settings */}
-          <DarkTooltip label={depthText} openDelay={700}>
+          <DarkTooltip
+            key={depthText}
+            label={depthText}
+            openDelay={1000}
+            closeOnClick={true}
+          >
             <div>
-              {engine === 'BROWSER' && !isLoading && (
+              {engine === 'BROWSER' && (
                 <IconButton
                   icon={<CirclePlus size='18' color='white' />}
                   aria-label='Increase depth'
                   className='!ring-none !shadow-none ml-1'
                   variant='ghost'
                   borderRadius='3xl'
+                  isLoading={isCloudLoading}
+                  spinner={<Spinner size='48' />}
                   padding='0'
                   size='xs'
                   // className='hover:!bg-none'

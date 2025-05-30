@@ -29,22 +29,24 @@ export default class Stockfish {
   constructor(
     public onAnalysis: (sf: Stockfish, bestMove: string, depth: number) => void,
     public onReady: () => void,
-    public onEvaluation: (cp: number, mate: number) => void
+    public onEvaluation: (cp: number, mate: number) => void,
   ) {
+    console.warn('running stockfish')
     this.worker = new Worker('/stockfish.js')
     this.worker.postMessage('isready')
-    this.worker.onmessage = event => {
+    this.worker.onmessage = (event) => {
       const { data } = event
       if (!data) {
         console.error('data is null')
         return
       }
       const msg = data as string
+      console.log(msg)
       if (msg.startsWith('info')) {
         const hasBound = msg.includes('bound')
         const { depth, cp, mate } = parseUCIStringToObject(
           msg.substring('info '.length),
-          18 + (hasBound ? 1 : 0)
+          18 + (hasBound ? 1 : 0),
         ) as InfoObject
         if (this.depth === depth && this.onEvaluation) {
           this.onEvaluation(cp, mate)
