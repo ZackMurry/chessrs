@@ -42,6 +42,7 @@ interface EngineEvaluation {
   provider: 'LICHESS' | 'CHESSRS'
 }
 
+// todo: way to play top move on the board
 const PositionPanel: FC = () => {
   const { pgn, halfMoveCount, moveHistory, fen } = useAppSelector((state) => ({
     pgn: state.board.pgn,
@@ -126,8 +127,9 @@ const PositionPanel: FC = () => {
       console.warn('sf not ready!')
       return
     }
+    setEvaluation(0)
+    setLoading(true)
     console.log('Rerunning stockfish in useeffect (onReady)')
-    stockfish.quit()
     if (new Chess(fen).in_checkmate()) {
       if (halfMoveCount % 2 === 0) {
         setEvaluation(0)
@@ -142,7 +144,6 @@ const PositionPanel: FC = () => {
     stockfish.createNewGame()
     setBestMove('...')
     setDepth(0)
-    setLoading(true)
     stockfish.analyzePosition(uciMoves, 5)
   }, [stockfish, uciMoves, fen, setEvaluation, halfMoveCount])
   const dispatch = useAppDispatch()

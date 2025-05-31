@@ -42,6 +42,7 @@ class OpeningService(val restTemplate: RestTemplate, val redisTemplate: RedisTem
             .queryParam("fen", fen)
 
         val url = uriBuilder.build().toUriString()
+        println("Fetching $url")
         val response: ResponseEntity<String> = restTemplate.getForEntity(url, String::class.java)
         val jsonString = response.body!!
         val result = mapper.readValue(jsonString, LichessExplorerResponse::class.java)

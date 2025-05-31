@@ -53,11 +53,13 @@ export default class Stockfish {
         }
       } else if (msg.startsWith('bestmove')) {
         if (!this.onAnalysis) {
+          console.warn('!onAnalysis')
           return
         }
         console.log(msg)
         const bestMove = msg.substring('bestmove '.length).substr(0, 4)
         this.onAnalysis(this, bestMove, this.depth)
+        this.isReady = true
         // this.stop()
       } else if (msg.startsWith('readyok')) {
         this.isReady = true

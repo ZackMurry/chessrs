@@ -275,33 +275,18 @@ const OverviewPanel: FC = () => {
           Add {lastMove?.san || 'Move'}
           {!isMobile ? ' (Space)' : ''}
         </Button>
-        {opening ? (
-          <Text
-            fontSize={{ base: '1.1em', sm: '1.4em' }}
-            fontWeight='bold'
-            mt='20px'
-            color='whiteText'
-          >
-            {opening.name}{' '}
-            <span style={{ fontWeight: 'normal' }}>{opening.eco}</span>
-          </Text>
-        ) : halfMoveCount === 0 ? (
-          <Text
-            fontSize={{ base: '1.1em', sm: '1.4em' }}
-            mt='20px'
-            color='whiteText'
-          >
-            Starting position
-          </Text>
-        ) : (
-          <Text
-            fontSize={{ base: '1.1em', sm: '1.4em' }}
-            mt='20px'
-            color='whiteText'
-          >
-            Unknown opening
-          </Text>
-        )}
+        <h1 className='text-xl font-bold mt-[20px] text-offwhite'>
+          {opening ? (
+            <>
+              {opening.name}{' '}
+              <span style={{ fontWeight: 'normal' }}>{opening.eco}</span>
+            </>
+          ) : halfMoveCount === 0 ? (
+            'Starting position'
+          ) : (
+            'Unknown opening'
+          )}
+        </h1>
         <p className='text-offwhite text-lg mt-3'>
           Lichess games: {lichessGamesInPosition.toLocaleString()}
         </p>
@@ -309,15 +294,10 @@ const OverviewPanel: FC = () => {
           <>
             {/* todo: show some stats about the moves */}
             {isMobile ? (
-              <Text
-                fontSize={{ base: '1.1em', sm: '1.4em' }}
-                mb='1px'
-                mt='0.7em'
-                color='whiteText'
-              >
-                <span style={{ fontWeight: 'bold' }}>Common Moves</span>{' '}
+              <h3 className='text-lg mb-[1px] mt-[0.7em] text-offwhite'>
+                <span style={{ fontWeight: 'bold' }}>Most Common Moves</span>{' '}
                 {commonMoves && commonMoves.join(', ')}
-              </Text>
+              </h3>
             ) : (
               <>
                 <h3 className='text-xl font-bold mb-1 mt-4 text-offwhite'>

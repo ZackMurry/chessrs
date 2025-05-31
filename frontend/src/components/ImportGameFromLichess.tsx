@@ -2,7 +2,6 @@ import { FC, useEffect, useState } from 'react'
 import ndjson from 'fetch-ndjson'
 import { useAppSelector } from 'utils/hooks'
 import { LichessGame } from 'types'
-import LichessGamePreview from './LichessGamePreview'
 import { Box, Button, Flex, useBoolean } from '@chakra-ui/react'
 import { Opening } from 'store/boardSlice'
 
@@ -121,10 +120,12 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
           Lichess Game on {gameTime.getMonth() + 1}/{gameTime.getDate()}/
           {gameTime.getFullYear()}
         </h3>
-        {game.speed.charAt(0).toUpperCase() + game.speed.substr(1)}:{' '}
-        {game.opening?.name ?? ''}
+        <p className='text-md'>
+          {game.speed.charAt(0).toUpperCase() + game.speed.substr(1)}:{' '}
+          {game.opening?.name ?? ''}
+        </p>
         {opponent && (
-          <div>
+          <p className='text-md'>
             Opponent:{' '}
             <a
               className='underline'
@@ -136,11 +137,14 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
             </a>{' '}
             ({opponent.rating}
             {opponent.provisional && '?'})
-          </div>
+          </p>
         )}
-        {/* todo: draws */}
-        Result: {game.winner === 'white' ? '1-0' : '0-1'} (
-        {isWhite === (game.winner === 'white') ? 'Win' : 'Loss'})
+
+        <p className='text-md'>
+          {/* todo: draws */}
+          Result: {game.winner === 'white' ? '1-0' : '0-1'} (
+          {isWhite === (game.winner === 'white') ? 'Win' : 'Loss'})
+        </p>
       </div>
       {/* {games.map((game) => (
         <LichessGamePreview
