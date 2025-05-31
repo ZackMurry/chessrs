@@ -1,20 +1,21 @@
 import { FC, useEffect, useState } from 'react'
 import ndjson from 'fetch-ndjson'
-import { useAppSelector } from 'utils/hooks'
+import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import { LichessGame } from 'types'
 import { Box, Button, Flex, IconButton, useBoolean } from '@chakra-ui/react'
-import { Opening } from 'store/boardSlice'
+import {
+  flipBoard,
+  loadMoves,
+  Opening,
+  resetBoard,
+  updateOpening,
+} from 'store/boardSlice'
 import { ArrowLeft, ArrowRight, RefreshCcw, X } from 'lucide-react'
 import DarkTooltip from 'components/DarkTooltip'
 
-interface Props {
-  onImport: (moves: string, isWhite: boolean, opening?: Opening) => void
-  onExit: () => void
-}
-
 const GAMES_LOADED_PER_FETCH = 10
 
-const ImportGameFromLichess: FC<Props> = ({ onImport, onExit }) => {
+const ImportGameFromLichess: FC = () => {
   const { username } = useAppSelector((state) => ({
     username: state.user.account?.username,
   }))
@@ -23,6 +24,7 @@ const ImportGameFromLichess: FC<Props> = ({ onImport, onExit }) => {
   const [isLoading, { on: startLoading, off: stopLoading }] = useBoolean(false)
   const [games, setGames] = useState<LichessGame[]>([])
   const [gameIdx, setGameIdx] = useState(0)
+  const dispatch = useAppDispatch()
 
   // is this running before the user even clicks the button?
   useEffect(() => {
@@ -55,6 +57,8 @@ const ImportGameFromLichess: FC<Props> = ({ onImport, onExit }) => {
     fetchGames()
   }, [username, setGames, startLoading, stopLoading])
 
+  const onExit = () => dispatch(resetBoard())
+
   const onLoadMore = async () => {
     if (!username || games.length === 0) {
       return
@@ -85,9 +89,21 @@ const ImportGameFromLichess: FC<Props> = ({ onImport, onExit }) => {
     return newGames
   }
 
+  const importGame = (moveStr: string, isWhite: boolean, opening?: Opening) => {
+    // todo: this clears analysis for starting position, which should be fixed once board and analysis slices are separated
+    dispatch(resetBoard())
+    dispatch(loadMoves(moveStr))
+    if (opening) {
+      dispatch(updateOpening(opening))
+    }
+    if (!isWhite) {
+      dispatch(flipBoard())
+    }
+  }
+
   const loadGame = (g: LichessGame) => {
     if (!g) return
-    onImport(
+    importGame(
       g.moves,
       g.players.black.user.name !== username,
       g.opening ? { name: g.opening.name, eco: g.opening.eco } : null,
@@ -100,7 +116,7 @@ const ImportGameFromLichess: FC<Props> = ({ onImport, onExit }) => {
       setTimeout(showFirstGame, 1000)
       return
     }
-    onImport(
+    importGame(
       firstGame.moves,
       firstGame.players.black.user.name !== username,
       firstGame.opening
@@ -268,22 +284,6 @@ const ImportGameFromLichess: FC<Props> = ({ onImport, onExit }) => {
           </DarkTooltip>
         </div>
       </div>
-      {/* {games.map((game) => (
-        <LichessGamePreview
-          key={game.id}
-          game={game}
-          onClick={() => {
-            hideSelector()
-            onImport(
-              game.moves,
-              game.players.black.user.name !== username,
-              game.opening
-                ? { name: game.opening.name, eco: game.opening.eco }
-                : null,
-            )
-          }}
-        />
-      ))} */}
     </Box>
   )
 }

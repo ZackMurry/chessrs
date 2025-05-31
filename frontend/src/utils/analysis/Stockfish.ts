@@ -29,14 +29,10 @@ export default class Stockfish {
   depth = SF_DEPTH
   lastDepth = 0
   fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+  started = false
 
   constructor(
-    public onAnalysis: (
-      sf: Stockfish,
-      bestMove: string,
-      depth: number,
-      sfFen,
-    ) => void,
+    public onAnalysis: (bestMove: string, sfFen) => void,
     public onReady: () => void,
     public onEvaluation: (
       cp: number,
@@ -69,7 +65,7 @@ export default class Stockfish {
           //   `calling onEvaluation(${cp}, ${mate}, ${pv}, ${depth}, ${this.fen})`,
           // )
           this.lastDepth = depth
-          this.onEvaluation(cp, mate, pv, depth, this.fen)
+          this.onEvaluation(cp, mate ?? null, pv, depth, this.fen)
         }
       } else if (msg.startsWith('bestmove')) {
         if (!this.onAnalysis) {
@@ -78,13 +74,23 @@ export default class Stockfish {
         }
         // console.log(msg)
         const bestMove = msg.substring('bestmove '.length).substr(0, 4)
-        this.onAnalysis(this, bestMove, this.depth, this.fen)
-        this.isReady = true
+        console.error('onAnalysis!')
+        this.onAnalysis(bestMove, this.fen)
+        // console.warn('creating new game')
+        this.createNewGame()
+        // console.warn('asking isready')
+        this.worker.postMessage('isready')
+        // this.isReady = true
         // this.stop()
       } else if (msg.startsWith('readyok')) {
         this.isReady = true
+        if (!this.started) {
+          this.createNewGame()
+          this.started = true
+        }
         if (this.onReady) {
           this.onReady()
+          this.onReady = null
         }
       }
     }
@@ -99,12 +105,21 @@ export default class Stockfish {
     if (depth > SF_DEPTH) {
       return
     }
-    if (!this.isReady) {
-      console.log('not ready')
+    if (!this.isReady && this.started) {
+      // console.log('not ready')
+      // console.error('Stopping!')
+      this.stop()
+      this.createNewGame()
+      this.worker.postMessage('isready')
+      return
+    } else if (!this.isReady) {
       return
     }
+    this.isReady = false
+    this.onReady = null
     this.fen = fen
-    this.counter++
+    // this.counter++
+    // console.error('ANALYZING POSITION')
     this.lastDepth = 0
     this.depth = depth
     console.log(`analyzing ${moves} at depth ${depth}`)
@@ -113,8 +128,9 @@ export default class Stockfish {
   }
 
   stop(): void {
+    console.warn('Interrupting Stockfish!')
     this.worker.postMessage('stop')
-    this.counter--
+    // this.counter--
   }
 
   quit(): void {

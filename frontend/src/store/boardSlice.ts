@@ -36,6 +36,20 @@ interface Move {
   san: string
 }
 
+interface PositionAnalysis {
+  bestMove: Move
+  eval: number
+  mate: number
+  depth: number
+  engine: 'BROWSER' | 'LICHESS' | 'CHESSRS'
+  fen: string
+}
+
+interface AnalysisLoading {
+  local: boolean
+  cloud: boolean
+}
+
 interface BoardState {
   fen: string
   pgn: string
@@ -49,6 +63,9 @@ interface BoardState {
   }
   perspective: 'white' | 'black'
   enabled: boolean
+  cloudAnalysis: PositionAnalysis | null
+  localAnalysis: PositionAnalysis | null
+  loadingAnalysis: AnalysisLoading
 }
 
 interface PositionLoad {
@@ -76,6 +93,14 @@ const initialState = {
   },
   perspective: 'white',
   enabled: true,
+  // todo: analysis should be in another slice
+  // todo: maybe store analysis history like moveHistory (Map from FEN to analysis?)
+  cloudAnalysis: null,
+  localAnalysis: null,
+  loadingAnalysis: {
+    cloud: false,
+    local: true,
+  },
 } as BoardState
 
 export const boardSlice = createSlice({
@@ -299,6 +324,49 @@ export const boardSlice = createSlice({
         pgn: game.pgn(),
       }
     },
+    updateLocalAnalysis: (state, action: PayloadAction<PositionAnalysis>) => {
+      return {
+        ...state,
+        localAnalysis: action.payload,
+      }
+    },
+    updateLocalBestMove: (state, action: PayloadAction<Move>) => {
+      return {
+        ...state,
+        localAnalysis: {
+          ...state.localAnalysis,
+          bestMove: action.payload,
+        },
+      }
+    },
+    clearLocalAnalysis: (state) => ({
+      ...state,
+      localAnalysis: null,
+    }),
+    updateCloudAnalysis: (state, action: PayloadAction<PositionAnalysis>) => {
+      return {
+        ...state,
+        cloudAnalysis: action.payload,
+      }
+    },
+    clearCloudAnalysis: (state) => ({
+      ...state,
+      cloudAnalysis: null,
+    }),
+    setLocalAnalysisLoading: (state, action: PayloadAction<boolean>) => ({
+      ...state,
+      loadingAnalysis: {
+        ...state.loadingAnalysis,
+        local: action.payload,
+      },
+    }),
+    setCloudAnalysisLoading: (state, action: PayloadAction<boolean>) => ({
+      ...state,
+      loadingAnalysis: {
+        ...state.loadingAnalysis,
+        cloud: action.payload,
+      },
+    }),
   },
 })
 
@@ -323,6 +391,13 @@ export const {
   disableBoard,
   clearMetaData,
   clearLichessGames,
+  updateLocalAnalysis,
+  updateLocalBestMove,
+  clearLocalAnalysis,
+  updateCloudAnalysis,
+  clearCloudAnalysis,
+  setLocalAnalysisLoading,
+  setCloudAnalysisLoading,
 } = boardSlice.actions
 
 export default boardSlice.reducer

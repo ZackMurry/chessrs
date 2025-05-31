@@ -5,8 +5,9 @@ import userReducer from './userSlice'
 const store = configureStore({
   reducer: {
     board: boardReducer,
-    user: userReducer
-  }
+    user: userReducer,
+  },
+  devTools: true,
 })
 
 export type RootState = ReturnType<typeof store.getState>
