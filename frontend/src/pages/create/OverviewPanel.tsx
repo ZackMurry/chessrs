@@ -15,8 +15,11 @@ import { FC, useCallback, useEffect, useState } from 'react'
 import { GlobalHotKeys, configure } from 'react-hotkeys'
 import { useDispatch } from 'react-redux'
 import {
+  flipBoard,
   traverseBackwards,
   traverseForwards,
+  traverseToEnd,
+  traverseToStart,
   updateLichessGames,
   updateOpening,
 } from 'store/boardSlice'
@@ -71,6 +74,18 @@ const OverviewPanel: FC = () => {
 
   const handleTraverseBackwards = useCallback(() => {
     dispatch(traverseBackwards())
+  }, [dispatch])
+
+  const handleTraverseStart = useCallback(() => {
+    dispatch(traverseToStart())
+  }, [dispatch])
+
+  const handleTraverseEnd = useCallback(() => {
+    dispatch(traverseToEnd())
+  }, [dispatch])
+
+  const handleFlipBoard = useCallback(() => {
+    dispatch(flipBoard())
   }, [dispatch])
 
   const getMoveForPosition = useCallback(async () => {
@@ -243,6 +258,9 @@ const OverviewPanel: FC = () => {
   const handlers = {
     TRAVERSE_FORWARDS: handleTraverseForwards,
     TRAVERSE_BACKWARDS: handleTraverseBackwards,
+    TRAVERSE_START: handleTraverseStart,
+    TRAVERSE_END: handleTraverseEnd,
+    FLIP_BOARD: handleFlipBoard,
     ADD_MOVE: onAddMove,
   }
 
@@ -250,6 +268,9 @@ const OverviewPanel: FC = () => {
   const keyMap = {
     TRAVERSE_FORWARDS: ['right', 'd'],
     TRAVERSE_BACKWARDS: ['left', 'a'],
+    TRAVERSE_START: ['s'],
+    TRAVERSE_END: ['e'],
+    FLIP_BOARD: ['f'],
     ADD_MOVE: 'space',
   }
 

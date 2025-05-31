@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import {
   flipBoard,
   loadMoves,
+  makeMove,
   Opening,
   resetBoard,
   traverseBackwards,
@@ -26,7 +27,7 @@ import Stockfish from 'utils/analysis/Stockfish'
 import DarkTooltip from 'components/DarkTooltip'
 import ImportGameFromLichess from 'components/ImportGameFromLichess'
 import { useBreakpointValue, useToast, Spinner } from '@chakra-ui/react'
-import { CirclePlus, Cloud } from 'lucide-react'
+import { CirclePlus, Cloud, Eye, View } from 'lucide-react'
 import request, { gql } from 'graphql-request'
 import { TOAST_DURATION } from 'theme'
 import ErrorToast from 'components/ErrorToast'
@@ -40,6 +41,7 @@ interface EngineEvaluation {
   bestMove: string
   fen: string
   provider: 'LICHESS' | 'CHESSRS'
+  bestMoveUCI: string
 }
 
 // todo: way to play top move on the board
@@ -51,7 +53,11 @@ const PositionPanel: FC = () => {
     fen: state.board.fen,
   }))
   const [evaluation, setEvaluation] = useState(0)
-  const [bestMove, setBestMove] = useState('...')
+  const [bestMove, setBestMove] = useState({
+    uci: '',
+    san: '',
+    loading: true,
+  })
   const [depth, setDepth] = useState(0)
   const [isLoading, setLoading] = useState(true)
   const [isForcedMate, setForcedMate] = useState(false)
@@ -94,7 +100,7 @@ const PositionPanel: FC = () => {
     sf.quit()
     setLoading(false)
     setDepth(d)
-    setBestMove(matchingMoves[0].san)
+    setBestMove({ san: matchingMoves[0].san, uci: bestMove, loading: false })
   }
   const onReady = () => {
     console.log('onReady')
@@ -126,7 +132,7 @@ const PositionPanel: FC = () => {
       // Invalid move (likely from a previous run)
       return
     }
-    setBestMove(matchingMoves[0].san)
+    setBestMove({ san: matchingMoves[0].san, uci: bestMove, loading: false })
     setDepth(d)
   }
   const [stockfish] = useState(
@@ -159,13 +165,13 @@ const PositionPanel: FC = () => {
         setEvaluation(0)
       }
       setForcedMate(true)
-      setBestMove('N/A')
+      setBestMove({ uci: '', san: '', loading: false })
       setLoading(false)
       return
     }
     stockfish.onEvaluation = onEvaluation
     stockfish.createNewGame()
-    setBestMove('...')
+    setBestMove({ uci: '', san: '', loading: true })
     setDepth(0)
     stockfish.analyzePosition(uciMoves, 22, fen)
   }, [stockfish, uciMoves, fen, setEvaluation, halfMoveCount])
@@ -251,6 +257,7 @@ const PositionPanel: FC = () => {
           bestMove: matchingMoves[0].san,
           fen: data.engineAnalysis.fen as string,
           provider: data.engineAnalysis.provider as 'LICHESS' | 'CHESSRS',
+          bestMoveUCI: firstMove,
         })
       }
       console.log('updated eval')
@@ -270,9 +277,15 @@ const PositionPanel: FC = () => {
     setCloudLoading(false)
   }
 
+  const viewMoveOnBoard = (uci: string) => {
+    dispatch(makeMove(uci))
+  }
+
   const onLichessExit = () => {
     dispatch(resetBoard())
   }
+
+  const evalString = evalScore.toFixed(2)
 
   return (
     <Flex
@@ -292,7 +305,7 @@ const PositionPanel: FC = () => {
           {!isTraverseBarShowing && (
             // could make this look a lot better using a different component library
             <Box mr='20px'>
-              <DarkTooltip label='Start'>
+              <DarkTooltip label='Start (s)'>
                 <IconButton
                   icon={<ArrowLeftIcon />}
                   aria-label='Start'
@@ -318,7 +331,7 @@ const PositionPanel: FC = () => {
                   fontSize='4xl'
                 />
               </DarkTooltip>
-              <DarkTooltip label='End'>
+              <DarkTooltip label='End (e)'>
                 <IconButton
                   icon={<ArrowRightIcon />}
                   aria-label='End'
@@ -328,7 +341,7 @@ const PositionPanel: FC = () => {
               </DarkTooltip>
             </Box>
           )}
-          <DarkTooltip label='Flip board'>
+          <DarkTooltip label='Flip board (f)'>
             <IconButton
               icon={<RepeatIcon />}
               aria-label='Flip board'
@@ -347,14 +360,45 @@ const PositionPanel: FC = () => {
         <Box>
           <h3 className='text-xl font-bold text-offwhite mb-1'>Analysis</h3>
           <h6 className='text-md text-offwhite mb-1'>
-            Evaluation:{' '}
-            {isLoading
-              ? `${forcedMate ? '#' : ''}${evalScore}...`
-              : `${forcedMate ? '#' : ''}${evalScore}`}
+            Evaluation: {forcedMate ? '#' : ''}
+            {evalString}
+            {isLoading ? '...' : ''}
           </h6>
-          <h6 className='text-md text-offwhite mb-1'>
-            Best move: {engine === 'BROWSER' ? bestMove : engineEval.bestMove}
-          </h6>
+          <div className='flex justify-start items-center mb-1'>
+            <h6 className='text-md text-offwhite min-w-[110px]'>
+              Best move:{' '}
+              {engine === 'BROWSER'
+                ? bestMove.loading
+                  ? '...'
+                  : bestMove.san
+                : engineEval.bestMove}
+            </h6>
+            {!bestMove.loading && (
+              <DarkTooltip label='View move on board' key='view-move-tooltip'>
+                <IconButton
+                  icon={<Eye color='white' size='18' />}
+                  aria-label='View move on board'
+                  className='!ring-none !shadow-none ml-1'
+                  variant='ghost'
+                  borderRadius='3xl'
+                  spinner={<Spinner size='48' />}
+                  padding='0'
+                  size='xs'
+                  // className='hover:!bg-none'
+                  _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                  _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                  onClick={() =>
+                    viewMoveOnBoard(
+                      engine === 'BROWSER'
+                        ? bestMove.uci
+                        : engineEval.bestMoveUCI,
+                    )
+                  }
+                />
+              </DarkTooltip>
+            )}
+          </div>
           <h6 className='text-md text-offwhite mb-1 flex justify-start items-center'>
             <div className='min-w-[80px]'>Depth: {engDepth}</div>
             {/* todo: need to fix tooltip popup settings */}
