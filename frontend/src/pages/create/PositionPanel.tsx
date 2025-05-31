@@ -354,7 +354,7 @@ const PositionPanel: FC = () => {
             />
           </DarkTooltip>
         </Flex>
-        <PGNDisplay pgn={pgn} halfMoveCount={halfMoveCount} />
+        <PGNDisplay />
       </Box>
       <div>
         <ImportGameFromLichess onImport={onImportGame} onExit={onLichessExit} />

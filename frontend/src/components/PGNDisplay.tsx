@@ -1,13 +1,16 @@
-import { FC, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Box } from '@chakra-ui/react'
+import { useAppDispatch, useAppSelector } from 'utils/hooks'
+import { traverseToMove } from 'store/boardSlice'
 
-interface Props {
-  pgn: string
-  halfMoveCount: number
-}
-
-const PGNDisplay: FC<Props> = ({ pgn, halfMoveCount }) => {
-  // todo: can I use moveHistory here?
+const PGNDisplay = () => {
+  const { pgn, halfMoveCount } = useAppSelector((state) => ({
+    pgn: state.board.pgn,
+    halfMoveCount: state.board.halfMoveCount,
+    moveHistory: state.board.moveHistory,
+    fen: state.board.fen,
+  }))
+  const dispatch = useAppDispatch()
   const moves = useMemo(
     () =>
       pgn
@@ -17,27 +20,30 @@ const PGNDisplay: FC<Props> = ({ pgn, halfMoveCount }) => {
         .map(([white, black]) => ({ white, black })),
     [pgn],
   )
-  // console.log(pgn)
-  // console.log(moves)
+
+  const onJumpToMove = (moveIdx: number) => {
+    dispatch(traverseToMove(moveIdx))
+  }
 
   return (
     <Box h='40vh' overflowY='auto'>
-      {/* todo: click on move to jump */}
       <h3 className='text-xl font-bold text-offwhite mt-4'>
         {moves.map(({ white, black }, idx) => (
           <span key={`${white}-${black}-${idx}`}>
             {idx + 1}.{' '}
             <span
-              className={
+              className={`cursor-pointer ${
                 halfMoveCount === idx * 2 + 1 ? 'bg-[#fde04740]' : undefined
-              }
+              }`}
+              onClick={() => onJumpToMove(idx * 2)}
             >
               {white}
             </span>{' '}
             <span
-              className={
+              className={`cursor-pointer ${
                 halfMoveCount === idx * 2 + 2 ? 'bg-[#fde04740]' : undefined
-              }
+              }`}
+              onClick={() => onJumpToMove(idx * 2 + 1)}
             >
               {black ?? ''}
             </span>{' '}

@@ -169,6 +169,16 @@ export const boardSlice = createSlice({
         fen: state.history[state.history.length - 1],
       }
     },
+    traverseToMove: (state, action: PayloadAction<number>) => {
+      if (action.payload >= state.moveHistory.length || action.payload < 0) {
+        return state
+      }
+      return {
+        ...state,
+        halfMoveCount: action.payload + 1,
+        fen: state.history[action.payload + 1],
+      }
+    },
     updateLichessGames: (state, action: PayloadAction<LichessGames>) => {
       return {
         ...state,
@@ -300,6 +310,7 @@ export const {
   traverseForwards,
   traverseToStart,
   traverseToEnd,
+  traverseToMove,
   updateLichessGames,
   updateOpening,
   flipBoard,
