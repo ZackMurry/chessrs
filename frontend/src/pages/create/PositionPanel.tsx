@@ -68,17 +68,22 @@ const PositionPanel: FC = () => {
         .join(' '),
     [moveHistory, halfMoveCount],
   )
-  const onAnalysis = (sf: Stockfish, bestMove: string, d: number) => {
+  const onAnalysis = (
+    sf: Stockfish,
+    bestMove: string,
+    d: number,
+    sfFen: string,
+  ) => {
     if (!sf.isReady) {
       console.log('not ready')
       return
     }
-    if (isLoading && d !== 5) {
-      return
-    }
+    // if (isLoading && d !== 5) {
+    //   return
+    // }
     const from = bestMove.substr(0, 2)
     const to = bestMove.substr(2, 2)
-    const matchingMoves = new Chess(fen)
+    const matchingMoves = new Chess(sfFen)
       .moves({ verbose: true })
       .filter((m) => m.from === from && m.to === to)
     if (!matchingMoves.length) {
@@ -87,12 +92,22 @@ const PositionPanel: FC = () => {
     }
     sf.stop()
     sf.quit()
-    sf.analyzePosition(uciMoves, d + 1)
     setLoading(false)
     setDepth(d)
     setBestMove(matchingMoves[0].san)
   }
-  const onEvaluation = (cp: number, mate: number) => {
+  const onReady = () => {
+    console.log('onReady')
+    stockfish.createNewGame()
+    stockfish.analyzePosition(uciMoves, 22, fen)
+  }
+  const onEvaluation = (
+    cp: number,
+    mate: number,
+    bestMove: string,
+    d: number,
+    sfFen: string,
+  ) => {
     if (mate) {
       console.warn('found mate!')
       setForcedMate(true)
@@ -101,11 +116,18 @@ const PositionPanel: FC = () => {
       setForcedMate(false)
       setEvaluation(cp / 100)
     }
-  }
-  const onReady = () => {
-    console.log('onReady')
-    stockfish.createNewGame()
-    stockfish.analyzePosition(uciMoves, 5)
+    const from = bestMove.substr(0, 2)
+    const to = bestMove.substr(2, 2)
+    const matchingMoves = new Chess(sfFen)
+      .moves({ verbose: true })
+      .filter((m) => m.from === from && m.to === to)
+    if (!matchingMoves.length) {
+      console.error('Moves dont match')
+      // Invalid move (likely from a previous run)
+      return
+    }
+    setBestMove(matchingMoves[0].san)
+    setDepth(d)
   }
   const [stockfish] = useState(
     () => new Stockfish(onAnalysis, onReady, onEvaluation),
@@ -141,10 +163,11 @@ const PositionPanel: FC = () => {
       setLoading(false)
       return
     }
+    stockfish.onEvaluation = onEvaluation
     stockfish.createNewGame()
     setBestMove('...')
     setDepth(0)
-    stockfish.analyzePosition(uciMoves, 5)
+    stockfish.analyzePosition(uciMoves, 22, fen)
   }, [stockfish, uciMoves, fen, setEvaluation, halfMoveCount])
   const dispatch = useAppDispatch()
 
@@ -329,10 +352,7 @@ const PositionPanel: FC = () => {
           Best move: {engine === 'BROWSER' ? bestMove : engineEval.bestMove}
         </h6>
         <h6 className='text-md text-offwhite mb-1 flex justify-start items-center'>
-          <div className='min-w-[80px]'>
-            Depth: {engDepth}
-            {isLoading && '...'}
-          </div>
+          <div className='min-w-[80px]'>Depth: {engDepth}</div>
           {/* todo: need to fix tooltip popup settings */}
           <DarkTooltip
             key={depthText}
