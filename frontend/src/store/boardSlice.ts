@@ -92,21 +92,29 @@ export const boardSlice = createSlice({
       }
       const fen = game.fen()
       let newHistory = [...state.history]
-      let newPgn: string
       let newMoveHistory = [...state.moveHistory]
       // If history is being overwritten
       console.log('HERE: ', state.halfMoveCount, state.history.length)
       if (state.history.length - 1 > state.halfMoveCount) {
         console.warn('overwriting')
         newHistory = newHistory.slice(0, state.halfMoveCount + 1)
-        const subPgn = getFirstMovesOfPgn(state.pgn, state.halfMoveCount)
-        newPgn = appendMoveToPgn(subPgn, move.san, state.halfMoveCount)
         newMoveHistory = newMoveHistory.slice(0, state.halfMoveCount)
-      } else {
-        newPgn = appendMoveToPgn(state.pgn, move.san, state.halfMoveCount)
       }
       newMoveHistory.push({ san: move.san, uci: action.payload })
       console.log('new: ', newMoveHistory)
+      const newPgn = newMoveHistory
+        .reduce((acc, move, index) => {
+          if (index % 2 === 0) {
+            // White's move: start a new turn
+            const moveNumber = Math.floor(index / 2) + 1
+            acc.push(`${moveNumber}. ${move.san}`)
+          } else {
+            // Black's move: append to last turn
+            acc[acc.length - 1] += ` ${move.san}`
+          }
+          return acc
+        }, [])
+        .join(' ')
       return {
         ...state,
         fen,

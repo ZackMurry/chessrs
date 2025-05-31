@@ -31,6 +31,8 @@ const PracticeMainPanel: FC = () => {
   >([])
   const [moveWrong, setMoveWrong] = useState(false)
   const [resetTimeout, setResetTimeout] = useState<NodeJS.Timeout>(null)
+  const [totalMoves, setTotalMoves] = useState(0)
+  const [practicedMoves, setPracticedMoves] = useState(0)
 
   const fetchMoves = useCallback(async () => {
     const query = gql`
@@ -41,6 +43,7 @@ const PracticeMainPanel: FC = () => {
           san
           uci
         }
+        numberOfMoves
       }
     `
     try {
@@ -49,6 +52,9 @@ const PracticeMainPanel: FC = () => {
       if (!data.randomMoves?.length) {
         console.log('no moves')
         return
+      }
+      if (data.numberOfMoves) {
+        setTotalMoves(data.numberOfMoves)
       }
       console.log('loading pos from fetch')
       dispatch(
@@ -83,6 +89,7 @@ const PracticeMainPanel: FC = () => {
       return
     }
     console.log('move made')
+    setPracticedMoves((p) => p + 1)
     if (
       moveSAN !== '' &&
       movesInQueue.length &&
@@ -157,8 +164,10 @@ const PracticeMainPanel: FC = () => {
       p='5%'
     >
       <h3 className='text-2xl font-bold text-offwhite mb-4'>Practice</h3>
-      <h6 className='text-md text-offwhite mb-1'>Total moves: 860</h6>
-      <h6 className='text-md text-offwhite mb-1'>Practiced: 112</h6>
+      <h6 className='text-md text-offwhite mb-1'>Total moves: {totalMoves}</h6>
+      <h6 className='text-md text-offwhite mb-1'>
+        Practiced: {practicedMoves}
+      </h6>
     </Flex>
   )
 }

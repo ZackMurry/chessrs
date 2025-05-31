@@ -23,7 +23,7 @@ import {
   traverseToStart,
   updateOpening,
 } from 'store/boardSlice'
-import Stockfish from 'utils/analysis/Stockfish'
+import Stockfish, { SF_DEPTH } from 'utils/analysis/Stockfish'
 import DarkTooltip from 'components/DarkTooltip'
 import ImportGameFromLichess from 'components/ImportGameFromLichess'
 import { useBreakpointValue, useToast, Spinner } from '@chakra-ui/react'
@@ -31,6 +31,7 @@ import { CirclePlus, Cloud, Eye, View } from 'lucide-react'
 import request, { gql } from 'graphql-request'
 import { TOAST_DURATION } from 'theme'
 import ErrorToast from 'components/ErrorToast'
+import PGNDisplay from 'components/PGNDisplay'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
@@ -44,7 +45,6 @@ interface EngineEvaluation {
   bestMoveUCI: string
 }
 
-// todo: way to play top move on the board
 const PositionPanel: FC = () => {
   const { pgn, halfMoveCount, moveHistory, fen } = useAppSelector((state) => ({
     pgn: state.board.pgn,
@@ -97,7 +97,7 @@ const PositionPanel: FC = () => {
       return
     }
     sf.stop()
-    sf.quit()
+    // sf.quit()
     setLoading(false)
     setDepth(d)
     setBestMove({ san: matchingMoves[0].san, uci: bestMove, loading: false })
@@ -105,7 +105,7 @@ const PositionPanel: FC = () => {
   const onReady = () => {
     console.log('onReady')
     stockfish.createNewGame()
-    stockfish.analyzePosition(uciMoves, 22, fen)
+    stockfish.analyzePosition(uciMoves, SF_DEPTH, fen)
   }
   const onEvaluation = (
     cp: number,
@@ -151,12 +151,16 @@ const PositionPanel: FC = () => {
   )
 
   useEffect(() => {
-    if (!stockfish.isReady) {
-      console.warn('sf not ready!')
-      return
+    const runStockfish = () => {
+      stockfish.onEvaluation = onEvaluation
+      stockfish.createNewGame()
+      setBestMove({ uci: '', san: '', loading: true })
+      setDepth(0)
+      stockfish.analyzePosition(uciMoves, SF_DEPTH, fen)
     }
     setEvaluation(0)
     setLoading(true)
+    setBestMove({ uci: '', san: '', loading: true })
     console.log('Rerunning stockfish in useeffect (onReady)')
     if (new Chess(fen).in_checkmate()) {
       if (halfMoveCount % 2 === 0) {
@@ -169,11 +173,12 @@ const PositionPanel: FC = () => {
       setLoading(false)
       return
     }
-    stockfish.onEvaluation = onEvaluation
-    stockfish.createNewGame()
-    setBestMove({ uci: '', san: '', loading: true })
-    setDepth(0)
-    stockfish.analyzePosition(uciMoves, 22, fen)
+    if (!stockfish.isReady) {
+      console.warn('sf not ready!')
+      stockfish.onReady = runStockfish
+      return
+    }
+    runStockfish()
   }, [stockfish, uciMoves, fen, setEvaluation, halfMoveCount])
   const dispatch = useAppDispatch()
 
@@ -285,7 +290,7 @@ const PositionPanel: FC = () => {
     dispatch(resetBoard())
   }
 
-  const evalString = evalScore.toFixed(2)
+  const evalString = forcedMate ? evalScore : evalScore.toFixed(2)
 
   return (
     <Flex
@@ -349,11 +354,7 @@ const PositionPanel: FC = () => {
             />
           </DarkTooltip>
         </Flex>
-        <Box h='40vh' overflowY='auto'>
-          {/* todo: highlight current move (esp for lichess import) */}
-          {/* todo: click on move to jump */}
-          <h3 className='text-xl font-bold text-offwhite mt-4'>{pgn}</h3>
-        </Box>
+        <PGNDisplay pgn={pgn} halfMoveCount={halfMoveCount} />
       </Box>
       <div>
         <ImportGameFromLichess onImport={onImportGame} onExit={onLichessExit} />
@@ -401,7 +402,6 @@ const PositionPanel: FC = () => {
           </div>
           <h6 className='text-md text-offwhite mb-1 flex justify-start items-center'>
             <div className='min-w-[80px]'>Depth: {engDepth}</div>
-            {/* todo: need to fix tooltip popup settings */}
             <DarkTooltip
               key={depthText}
               label={depthText}
@@ -417,7 +417,7 @@ const PositionPanel: FC = () => {
                     variant='ghost'
                     borderRadius='3xl'
                     isLoading={isCloudLoading}
-                    spinner={<Spinner size='48' />}
+                    spinner={<Spinner size='sm' />}
                     padding='0'
                     size='xs'
                     // className='hover:!bg-none'

@@ -148,7 +148,15 @@ const ImportGameFromLichess: FC<Props> = ({ onImport, onExit }) => {
   if (!isDescriptionVisible || !games.length) {
     return (
       <Box py='15px'>
-        <Button variant='ghost' bg='white' onClick={showFirstGame}>
+        <Button
+          variant='outline'
+          color='whiteText'
+          colorScheme='gray'
+          _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+          // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+          _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+          onClick={showFirstGame}
+        >
           Import from Lichess
         </Button>
       </Box>

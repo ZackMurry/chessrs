@@ -19,12 +19,14 @@ export interface InfoObject {
   mate?: number
 }
 
+export const SF_DEPTH = 20
+
 export default class Stockfish {
   worker: Worker
   counter = 0
   interval: NodeJS.Timeout
   public isReady = false
-  depth = 22
+  depth = SF_DEPTH
   lastDepth = 0
   fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
 
@@ -89,13 +91,12 @@ export default class Stockfish {
   }
 
   createNewGame(): void {
-    this.stop()
     this.worker.postMessage('ucinewgame')
   }
 
   analyzePosition(moves: string, depth: number, fen: string): void {
-    // Depth > 22 takes too long to finish, so moves aren't analyzed immediately. Lichess also caps at 22
-    if (depth > 22) {
+    // Depth > 20 takes too long to finish, so moves aren't analyzed immediately. Lichess also caps at 22
+    if (depth > SF_DEPTH) {
       return
     }
     if (!this.isReady) {
