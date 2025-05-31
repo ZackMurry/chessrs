@@ -128,7 +128,6 @@ const OverviewPanel: FC = () => {
       `
       try {
         const data = await request('/api/v1/graphql', query, { fen })
-        console.log(data.positionInformation)
         dispatch(updateLichessGames(data.positionInformation))
         dispatch(updateOpening(data.positionInformation.opening))
       } catch (e) {

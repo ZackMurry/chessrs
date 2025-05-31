@@ -9,8 +9,12 @@ import com.zackmurry.chessrs.util.FenManager
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Service
 class OpeningService(val restTemplate: RestTemplate, val redisTemplate: RedisTemplate<String, Any>, val fenManager: FenManager) {
@@ -43,7 +47,20 @@ class OpeningService(val restTemplate: RestTemplate, val redisTemplate: RedisTem
 
         val url = uriBuilder.build().toUriString()
         println("Fetching $url")
-        val response: ResponseEntity<String> = restTemplate.getForEntity(url, String::class.java)
+        val response: ResponseEntity<String>
+        try {
+            response = restTemplate.getForEntity(url, String::class.java)
+        } catch (ex: HttpClientErrorException) {
+            val statusCode = ex.statusCode
+            println("Client error with status: $statusCode")
+            println("Error body: ${ex.responseBodyAsString}")
+            throw ex
+        } catch (ex: HttpServerErrorException) {
+            val statusCode = ex.statusCode
+            println("Server error with status: $statusCode")
+            println("Error body: ${ex.responseBodyAsString}")
+            throw ex
+        }
         val jsonString = response.body!!
         val result = mapper.readValue(jsonString, LichessExplorerResponse::class.java)
         redisTemplate.opsForValue().set("fen:$fen", result) // Add to cache

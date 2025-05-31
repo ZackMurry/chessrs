@@ -68,10 +68,9 @@ const initialState = {
   // todo: games should probably be stored in a different slice
   games: {
     lichess: {
-      // todo: probably want to have a caching system for at least some of the data
-      white: 19598901,
-      draws: 1843985,
-      black: 18101922,
+      white: 3309965389,
+      draws: 261081391,
+      black: 3079018680,
       moves: [],
     },
   },

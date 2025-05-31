@@ -25,6 +25,7 @@ export default class Stockfish {
   interval: NodeJS.Timeout
   public isReady = false
   depth = 22
+  lastDepth = 0
   fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
 
   constructor(
@@ -56,14 +57,16 @@ export default class Stockfish {
       console.log(msg)
       if (msg.startsWith('info')) {
         const hasBound = msg.includes('bound')
+        if (hasBound) return
         const { depth, cp, mate, pv } = parseUCIStringToObject(
           msg.substring('info '.length),
           18 + (hasBound ? 1 : 0),
         ) as InfoObject
-        if (this.onEvaluation) {
-          console.warn(
-            `calling onEvaluation(${cp}, ${mate}, ${pv}, ${depth}, ${this.fen})`,
-          )
+        if (this.onEvaluation && this.lastDepth + 1 === depth) {
+          // console.warn(
+          //   `calling onEvaluation(${cp}, ${mate}, ${pv}, ${depth}, ${this.fen})`,
+          // )
+          this.lastDepth = depth
           this.onEvaluation(cp, mate, pv, depth, this.fen)
         }
       } else if (msg.startsWith('bestmove')) {
@@ -71,7 +74,7 @@ export default class Stockfish {
           console.warn('!onAnalysis')
           return
         }
-        console.log(msg)
+        // console.log(msg)
         const bestMove = msg.substring('bestmove '.length).substr(0, 4)
         this.onAnalysis(this, bestMove, this.depth, this.fen)
         this.isReady = true
@@ -86,6 +89,7 @@ export default class Stockfish {
   }
 
   createNewGame(): void {
+    this.stop()
     this.worker.postMessage('ucinewgame')
   }
 
@@ -100,6 +104,7 @@ export default class Stockfish {
     }
     this.fen = fen
     this.counter++
+    this.lastDepth = 0
     this.depth = depth
     console.log(`analyzing ${moves} at depth ${depth}`)
     this.worker.postMessage(`position startpos moves ${moves}`)

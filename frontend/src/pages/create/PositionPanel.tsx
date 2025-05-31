@@ -122,7 +122,7 @@ const PositionPanel: FC = () => {
       .moves({ verbose: true })
       .filter((m) => m.from === from && m.to === to)
     if (!matchingMoves.length) {
-      console.error('Moves dont match')
+      console.error('Moves dont match', sfFen, bestMove)
       // Invalid move (likely from a previous run)
       return
     }
@@ -172,7 +172,6 @@ const PositionPanel: FC = () => {
   const dispatch = useAppDispatch()
 
   const browserEngine = !engineEval || engineEval.fen !== fen
-  console.log(engineEval)
   const evalScore = browserEngine
     ? halfMoveCount % 2 === 0
       ? evaluation
@@ -271,6 +270,10 @@ const PositionPanel: FC = () => {
     setCloudLoading(false)
   }
 
+  const onLichessExit = () => {
+    dispatch(resetBoard())
+  }
+
   return (
     <Flex
       flexDir='column'
@@ -285,11 +288,6 @@ const PositionPanel: FC = () => {
       p='5%'
     >
       <Box>
-        <Box maxH='40vh' overflowY='auto'>
-          {/* todo: highlight current move (esp for lichess import) */}
-          {/* todo: click on move to jump */}
-          <h3 className='text-xl font-bold text-offwhite mb-4'>{pgn}</h3>
-        </Box>
         <Flex>
           {!isTraverseBarShowing && (
             // could make this look a lot better using a different component library
@@ -302,7 +300,7 @@ const PositionPanel: FC = () => {
                   disabled={halfMoveCount <= 0}
                 />
               </DarkTooltip>
-              <DarkTooltip label='Back'>
+              <DarkTooltip label='Back (←)'>
                 <IconButton
                   icon={<ChevronLeftIcon />}
                   aria-label='Back'
@@ -311,7 +309,7 @@ const PositionPanel: FC = () => {
                   fontSize='4xl'
                 />
               </DarkTooltip>
-              <DarkTooltip label='Forward'>
+              <DarkTooltip label='Forward (→)'>
                 <IconButton
                   icon={<ChevronRightIcon />}
                   aria-label='Forward'
@@ -338,74 +336,88 @@ const PositionPanel: FC = () => {
             />
           </DarkTooltip>
         </Flex>
+        <Box h='40vh' overflowY='auto'>
+          {/* todo: highlight current move (esp for lichess import) */}
+          {/* todo: click on move to jump */}
+          <h3 className='text-xl font-bold text-offwhite mt-4'>{pgn}</h3>
+        </Box>
       </Box>
-      <ImportGameFromLichess onImport={onImportGame} />
-      <Box>
-        <h3 className='text-xl font-bold text-offwhite mb-1'>Analysis</h3>
-        <h6 className='text-md text-offwhite mb-1'>
-          Evaluation:{' '}
-          {isLoading
-            ? `${forcedMate ? '#' : ''}${evalScore}...`
-            : `${forcedMate ? '#' : ''}${evalScore}`}
-        </h6>
-        <h6 className='text-md text-offwhite mb-1'>
-          Best move: {engine === 'BROWSER' ? bestMove : engineEval.bestMove}
-        </h6>
-        <h6 className='text-md text-offwhite mb-1 flex justify-start items-center'>
-          <div className='min-w-[80px]'>Depth: {engDepth}</div>
-          {/* todo: need to fix tooltip popup settings */}
-          <DarkTooltip
-            key={depthText}
-            label={depthText}
-            openDelay={1000}
-            closeOnClick={true}
-          >
-            <div>
-              {engine === 'BROWSER' && (
-                <IconButton
-                  icon={<CirclePlus size='18' color='white' />}
-                  aria-label='Increase depth'
-                  className='!ring-none !shadow-none ml-1'
-                  variant='ghost'
-                  borderRadius='3xl'
-                  isLoading={isCloudLoading}
-                  spinner={<Spinner size='48' />}
-                  padding='0'
-                  size='xs'
-                  // className='hover:!bg-none'
-                  _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-                  // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-                  _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-                  onClick={showCloudAnalysis}
-                />
-              )}
-              {engine === 'CHESSRS' && !isLoading && (
-                <Cloud color='white' size='18' fill='white' className='ml-2' />
-              )}
-              {engine === 'LICHESS' && (
-                // <Cloud color='red' size='18' />
-                <img
-                  src='lichess-logo-inverted.png'
-                  width={18}
-                  height={18}
-                  className='ml-2'
-                  alt='Lichess logo'
-                />
-              )}
-            </div>
-          </DarkTooltip>
-        </h6>
-        <h6 className='text-md text-offwhite mb-1'>
-          FEN:
-          <ChakraLink
-            ml='2px'
-            isExternal
-            href={`https://lichess.org/analysis?fen=${encodeURIComponent(fen)}`}
-          >
-            {fen} <ExternalLinkIcon ml='4px' mt='-2px' />
-          </ChakraLink>
-        </h6>
-      </Box>
+      <div>
+        <ImportGameFromLichess onImport={onImportGame} onExit={onLichessExit} />
+        <Box>
+          <h3 className='text-xl font-bold text-offwhite mb-1'>Analysis</h3>
+          <h6 className='text-md text-offwhite mb-1'>
+            Evaluation:{' '}
+            {isLoading
+              ? `${forcedMate ? '#' : ''}${evalScore}...`
+              : `${forcedMate ? '#' : ''}${evalScore}`}
+          </h6>
+          <h6 className='text-md text-offwhite mb-1'>
+            Best move: {engine === 'BROWSER' ? bestMove : engineEval.bestMove}
+          </h6>
+          <h6 className='text-md text-offwhite mb-1 flex justify-start items-center'>
+            <div className='min-w-[80px]'>Depth: {engDepth}</div>
+            {/* todo: need to fix tooltip popup settings */}
+            <DarkTooltip
+              key={depthText}
+              label={depthText}
+              openDelay={1000}
+              closeOnClick={true}
+            >
+              <div>
+                {engine === 'BROWSER' && (
+                  <IconButton
+                    icon={<CirclePlus size='18' color='white' />}
+                    aria-label='Increase depth'
+                    className='!ring-none !shadow-none ml-1'
+                    variant='ghost'
+                    borderRadius='3xl'
+                    isLoading={isCloudLoading}
+                    spinner={<Spinner size='48' />}
+                    padding='0'
+                    size='xs'
+                    // className='hover:!bg-none'
+                    _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                    // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                    _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                    onClick={showCloudAnalysis}
+                  />
+                )}
+                {engine === 'CHESSRS' && !isLoading && (
+                  <Cloud
+                    color='white'
+                    size='18'
+                    fill='white'
+                    className='ml-2'
+                  />
+                )}
+                {engine === 'LICHESS' && (
+                  // <Cloud color='red' size='18' />
+                  <img
+                    src='lichess-logo-inverted.png'
+                    width={18}
+                    height={18}
+                    className='ml-2'
+                    alt='Lichess logo'
+                  />
+                )}
+              </div>
+            </DarkTooltip>
+          </h6>
+          <h6 className='text-md text-offwhite mb-1'>
+            FEN:
+            <ChakraLink
+              ml='2px'
+              isExternal
+              href={`https://lichess.org/analysis?fen=${encodeURIComponent(
+                fen,
+              )}`}
+            >
+              {fen} <ExternalLinkIcon ml='4px' mt='-2px' />
+            </ChakraLink>
+          </h6>
+        </Box>
+      </div>
     </Flex>
   )
 }

@@ -32,7 +32,11 @@ const Navbar: FC = () => {
         {isAuthenticated ? (
           <Link to='/account'>Account</Link>
         ) : (
-          <a href='/api/v1/oauth2/code/lichess' rel='noreferrer noopener'>
+          <a
+            href='/api/v1/oauth2/code/lichess'
+            rel='noreferrer noopener'
+            target='_blank'
+          >
             Login
           </a>
         )}

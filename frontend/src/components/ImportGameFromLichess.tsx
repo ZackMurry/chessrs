@@ -2,16 +2,19 @@ import { FC, useEffect, useState } from 'react'
 import ndjson from 'fetch-ndjson'
 import { useAppSelector } from 'utils/hooks'
 import { LichessGame } from 'types'
-import { Box, Button, Flex, useBoolean } from '@chakra-ui/react'
+import { Box, Button, Flex, IconButton, useBoolean } from '@chakra-ui/react'
 import { Opening } from 'store/boardSlice'
+import { ArrowLeft, ArrowRight, RefreshCcw, X } from 'lucide-react'
+import DarkTooltip from 'components/DarkTooltip'
 
 interface Props {
   onImport: (moves: string, isWhite: boolean, opening?: Opening) => void
+  onExit: () => void
 }
 
 const GAMES_LOADED_PER_FETCH = 10
 
-const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
+const ImportGameFromLichess: FC<Props> = ({ onImport, onExit }) => {
   const { username } = useAppSelector((state) => ({
     username: state.user.account?.username,
   }))
@@ -24,7 +27,7 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
   // is this running before the user even clicks the button?
   useEffect(() => {
     const fetchGames = async () => {
-      if (!username) {
+      if (!username || games?.length) {
         return
       }
       startLoading()
@@ -76,8 +79,19 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
         data.push(value)
       }
     }
-    setGames([...games, ...data])
+    const newGames = [...games, ...data]
+    setGames(newGames)
     stopLoading()
+    return newGames
+  }
+
+  const loadGame = (g: LichessGame) => {
+    if (!g) return
+    onImport(
+      g.moves,
+      g.players.black.user.name !== username,
+      g.opening ? { name: g.opening.name, eco: g.opening.eco } : null,
+    )
   }
 
   const showFirstGame = () => {
@@ -96,6 +110,41 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
     showDescription()
   }
 
+  const previousGame = () => {
+    if (gameIdx <= 0) {
+      hideDescription()
+      onExit()
+      return
+    }
+    const prevGame = games[gameIdx - 1]
+    loadGame(prevGame)
+    setGameIdx((gidx) => gidx - 1)
+  }
+
+  const nextGame = async () => {
+    let nextGame = games[gameIdx + 1]
+    if (!nextGame) {
+      const newGames = await onLoadMore()
+      nextGame = newGames[gameIdx + 1]
+      if (!nextGame) {
+        return
+      }
+    }
+    loadGame(nextGame)
+    setGameIdx((gidx) => gidx + 1)
+  }
+
+  const reloadGame = () => {
+    const g = games[gameIdx]
+    loadGame(g)
+  }
+
+  const exitLichessAnalysis = () => {
+    setGameIdx(0)
+    hideDescription()
+    onExit()
+  }
+
   if (!isDescriptionVisible || !games.length) {
     return (
       <Box py='15px'>
@@ -107,14 +156,13 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
   }
 
   const game = games[gameIdx]
-  console.log(game)
   const gameTime = new Date(game.lastMoveAt)
   const isWhite = game.players.black.user.name !== username
   const opponent = game.players[isWhite ? 'black' : 'white']
 
   // todo: arrows for next/previous
   return (
-    <Box maxH='15vh' overflowY='auto' py='10px'>
+    <Box py='10px'>
       <div className='text-offwhite'>
         <h3 className='text-lg font-bold'>
           Lichess Game on {gameTime.getMonth() + 1}/{gameTime.getDate()}/
@@ -145,6 +193,72 @@ const ImportGameFromLichess: FC<Props> = ({ onImport }) => {
           Result: {game.winner === 'white' ? '1-0' : '0-1'} (
           {isWhite === (game.winner === 'white') ? 'Win' : 'Loss'})
         </p>
+        <div className='flex justify-start items-center mt-1'>
+          <DarkTooltip label='Previous game' openDelay={1000}>
+            <IconButton
+              icon={<ArrowLeft />}
+              aria-label='Previous game'
+              className='!ring-none !shadow-none ml-1'
+              variant='ghost'
+              borderRadius='xl'
+              padding='0'
+              size='xs'
+              // className='hover:!bg-none'
+              _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+              // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+              _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+              onClick={previousGame}
+            />
+          </DarkTooltip>
+          <DarkTooltip label='Reload game' openDelay={1000}>
+            <IconButton
+              icon={<RefreshCcw size='18' />}
+              aria-label='Reload game'
+              className='!ring-none !shadow-none ml-1'
+              variant='ghost'
+              borderRadius='xl'
+              padding='0'
+              size='xs'
+              // className='hover:!bg-none'
+              _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+              // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+              _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+              onClick={reloadGame}
+            />
+          </DarkTooltip>
+          <DarkTooltip label='Exit Lichess analysis' openDelay={1000}>
+            <IconButton
+              icon={<X />}
+              aria-label='Exit Lichess analysis'
+              className='!ring-none !shadow-none ml-1'
+              variant='ghost'
+              borderRadius='xl'
+              padding='0'
+              size='xs'
+              // className='hover:!bg-none'
+              _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+              // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+              _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+              onClick={exitLichessAnalysis}
+            />
+          </DarkTooltip>
+          <DarkTooltip label='Next game' openDelay={1000}>
+            <IconButton
+              icon={<ArrowRight />}
+              aria-label='Next game'
+              className='!ring-none !shadow-none ml-1'
+              variant='ghost'
+              borderRadius='xl'
+              padding='0'
+              size='xs'
+              // className='hover:!bg-none'
+              _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+              // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+              _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+              onClick={nextGame}
+            />
+          </DarkTooltip>
+        </div>
       </div>
       {/* {games.map((game) => (
         <LichessGamePreview
