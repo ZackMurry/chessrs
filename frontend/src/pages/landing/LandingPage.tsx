@@ -37,11 +37,21 @@ const LandingPage: FC = () => (
             schedule reviews accordingly.
           </h3>
           <div className='w-full flex justify-center my-7'>
-            <LichessSignInButton />
+            <div>
+              <LichessSignInButton />
+              <p className='text-gray-400 text-center mt-2 text-sm underline'>
+                <a href='/api/v1/oauth2/demo'>Or use a temporary account</a>
+              </p>
+            </div>
           </div>
         </div>
       </section>
     </div>
+    <img
+      src='/create-page.png'
+      alt='Create page screenshot'
+      className='scale-[0.6]'
+    />
   </div>
 )
 

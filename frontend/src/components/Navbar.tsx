@@ -1,4 +1,4 @@
-import { Flex, Heading, useBreakpointValue } from '@chakra-ui/react'
+import { Flex, useBreakpointValue } from '@chakra-ui/react'
 import { FC } from 'react'
 import { Link } from 'react-router-dom'
 import { useAppSelector } from 'utils/hooks'

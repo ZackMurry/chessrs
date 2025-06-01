@@ -1,4 +1,4 @@
-import { Flex, Text } from '@chakra-ui/layout'
+import { Flex } from '@chakra-ui/layout'
 import { FC, useEffect, useCallback } from 'react'
 import { useAppSelector } from 'utils/hooks'
 import { useDispatch } from 'react-redux'

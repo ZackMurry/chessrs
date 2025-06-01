@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react'
 import ndjson from 'fetch-ndjson'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import { LichessGame } from 'types'
-import { Box, Button, Flex, IconButton, useBoolean } from '@chakra-ui/react'
+import { Box, Button, IconButton, useBoolean } from '@chakra-ui/react'
 import {
   flipBoard,
   loadMoves,
