@@ -1,9 +1,6 @@
-import { DeleteIcon } from '@chakra-ui/icons'
-import { Text } from '@chakra-ui/layout'
 import {
   Box,
   Button,
-  Flex,
   IconButton,
   useBreakpointValue,
   useToast,
@@ -11,6 +8,7 @@ import {
 import DarkTooltip from 'components/DarkTooltip'
 import ErrorToast from 'components/ErrorToast'
 import { gql, request } from 'graphql-request'
+import { Trash2 } from 'lucide-react'
 import { FC, useCallback, useEffect, useState } from 'react'
 import { GlobalHotKeys, configure } from 'react-hotkeys'
 import { useDispatch } from 'react-redux'
@@ -101,7 +99,7 @@ const OverviewPanel: FC = () => {
       }
     `
     try {
-      const data = await request('/api/v1/graphql', query, { fen })
+      const data = (await request('/api/v1/graphql', query, { fen })) as any
       setCurrentMove(data.move)
     } catch (e) {
       console.log(e)
@@ -142,7 +140,7 @@ const OverviewPanel: FC = () => {
         }
       `
       try {
-        const data = await request('/api/v1/graphql', query, { fen })
+        const data = (await request('/api/v1/graphql', query, { fen })) as any
         dispatch(updateLichessGames(data.positionInformation))
         dispatch(updateOpening(data.positionInformation.opening))
       } catch (e) {
@@ -191,12 +189,12 @@ const OverviewPanel: FC = () => {
     try {
       console.log('creating move')
       console.log(history, halfMoveCount, lastMove.san, lastMove.uci, opening)
-      const data = await request('/api/v1/graphql', query, {
+      const data = (await request('/api/v1/graphql', query, {
         fenBefore: history[halfMoveCount - 1],
         san: lastMove.san,
         uci: lastMove.uci,
         opening: opening?.name ?? 'Unknown',
-      })
+      })) as any
       console.log('created move')
       console.log(data)
       setPreviousMove(data.createMove)
@@ -351,7 +349,7 @@ const OverviewPanel: FC = () => {
                 onClick={onDeleteMove}
                 isLoading={isDeleteLoading}
               >
-                <DeleteIcon />
+                <Trash2 />
               </IconButton>
             </DarkTooltip>
           </div>

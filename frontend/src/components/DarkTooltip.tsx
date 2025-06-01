@@ -1,7 +1,24 @@
-import { Tooltip, ComponentWithAs, TooltipProps } from '@chakra-ui/react'
+import { Tooltip } from 'radix-ui'
+import { FC } from 'react'
+import { ReactNode } from 'react'
 
-const DarkTooltip: ComponentWithAs<'div', TooltipProps> = props => (
-  <Tooltip bg='elevated' color='whiteText' borderRadius='3px' {...props} />
+interface Props {
+  label: string
+  children: ReactNode
+}
+
+const DarkTooltip: FC<Props> = ({ label, children }) => (
+  <Tooltip.Provider>
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content>
+          {label}
+          <Tooltip.Arrow />
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  </Tooltip.Provider>
 )
 
 export default DarkTooltip

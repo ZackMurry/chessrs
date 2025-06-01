@@ -26,7 +26,7 @@ const AccountManager: FC = () => {
           }
         }
       `
-      const data = await request('/api/v1/graphql', query)
+      const data = (await request('/api/v1/graphql', query)) as any
       if (!data.account) {
         console.log(data)
         toast({
@@ -43,6 +43,7 @@ const AccountManager: FC = () => {
       }
       dispatch(setAccount(data.account))
     } catch (e: any) {
+      console.error(e)
       if (e.response) {
         toast({
           duration: TOAST_DURATION,
@@ -56,7 +57,7 @@ const AccountManager: FC = () => {
         })
       } else {
         // Sign in with lichess
-        window.location.href = '/api/v1/oauth2/code/lichess'
+        // window.location.href = '/api/v1/oauth2/code/lichess'
       }
     }
   }, [dispatch, toast])

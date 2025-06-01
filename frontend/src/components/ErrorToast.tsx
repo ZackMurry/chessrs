@@ -1,5 +1,5 @@
-import { WarningIcon } from '@chakra-ui/icons'
 import { Box, Text, Flex, CloseButton } from '@chakra-ui/react'
+import { TriangleAlert } from 'lucide-react'
 import { FC } from 'react'
 
 interface Props {
@@ -11,7 +11,7 @@ const ErrorToast: FC<Props> = ({ description, onClose }) => (
   <Box bg='error' borderRadius='5px' p='10px'>
     <Flex justifyContent='space-between' alignItems='center'>
       <Flex alignItems='center'>
-        <WarningIcon color='whiteText' fontSize='30px' pr='10px' />
+        <TriangleAlert className='text-offwhite text-lg pr-5' />
         <Text color='whiteText' fontSize='14px'>
           {description}
         </Text>

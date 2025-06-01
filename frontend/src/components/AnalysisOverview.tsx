@@ -63,7 +63,7 @@ const AnalysisOverview = () => {
       }
     `
     try {
-      const data = await request('/api/v1/graphql', query, { fen })
+      const data = (await request('/api/v1/graphql', query, { fen })) as any
       console.log('updating eval')
       if (
         (data.engineAnalysis?.eval !== undefined ||
@@ -169,12 +169,7 @@ const AnalysisOverview = () => {
       </div>
       <h6 className='text-md text-offwhite mb-1 flex justify-start items-center'>
         <div className='min-w-[80px]'>Depth: {analysis?.depth ?? 0}</div>
-        <DarkTooltip
-          key={depthText}
-          label={depthText}
-          openDelay={1000}
-          closeOnClick={true}
-        >
+        <DarkTooltip key={depthText} label={depthText}>
           <div>
             {analysis?.engine === 'BROWSER' && (
               <IconButton

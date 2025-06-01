@@ -1,5 +1,6 @@
 import { CheckIcon } from '@chakra-ui/icons'
 import { Box, Text, Flex, CloseButton } from '@chakra-ui/react'
+import { Check } from 'lucide-react'
 import { FC } from 'react'
 
 interface Props {
@@ -11,7 +12,7 @@ const SuccessToast: FC<Props> = ({ description, onClose }) => (
   <Box bg='success' borderRadius='5px' p='10px'>
     <Flex justifyContent='space-between' alignItems='center'>
       <Flex alignItems='center'>
-        <CheckIcon color='whiteText' fontSize='30px' pr='10px' />
+        <Check className='text-offwhite text-lg pr-5' />
         <Text color='whiteText' fontSize='14px'>
           {description}
         </Text>

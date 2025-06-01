@@ -12,15 +12,31 @@ const isMoveMatching = (move: Move, position: string, origin: string) => {
   }
   // Check using startsWith() because it could be O-O-O# or something
   if (move.san.startsWith('O-O-O')) {
-    if (move.color === 'w' && (position === 'c1' || position === 'a1') && origin === 'e1') {
+    if (
+      move.color === 'w' &&
+      (position === 'c1' || position === 'a1') &&
+      origin === 'e1'
+    ) {
       return true
-    } else if (move.color === 'b' && (position === 'c8' || position === 'a8') && origin === 'e8') {
+    } else if (
+      move.color === 'b' &&
+      (position === 'c8' || position === 'a8') &&
+      origin === 'e8'
+    ) {
       return true
     }
   } else if (move.san.startsWith('O-O')) {
-    if (move.color === 'w' && (position === 'g1' || position === 'h1') && origin === 'e1') {
+    if (
+      move.color === 'w' &&
+      (position === 'g1' || position === 'h1') &&
+      origin === 'e1'
+    ) {
       return true
-    } else if (move.color === 'b' && (position === 'g8' || position === 'h8') && origin === 'e8') {
+    } else if (
+      move.color === 'b' &&
+      (position === 'g8' || position === 'h8') &&
+      origin === 'e8'
+    ) {
       return true
     }
   }
@@ -48,11 +64,16 @@ const MIN_SQUARE_LENGTH = 20
 const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
   const dispatch = useAppDispatch()
   const squarePosition = useMemo(() => squareIndexToCoordinates(x, y), [x, y])
-  const { selectedPiece, lastMoveUCI, boardEnabled } = useAppSelector(state => ({
-    selectedPiece: state.board.selectedPiece,
-    lastMoveUCI: state.board.halfMoveCount > 0 ? state.board.moveHistory[state.board.halfMoveCount - 1].uci : '',
-    boardEnabled: state.board.enabled
-  }))
+  const { selectedPiece, lastMoveUCI, boardEnabled } = useAppSelector(
+    (state) => ({
+      selectedPiece: state.board.selectedPiece,
+      lastMoveUCI:
+        state.board.halfMoveCount > 0
+          ? state.board.moveHistory[state.board.halfMoveCount - 1].uci
+          : '',
+      boardEnabled: state.board.enabled,
+    }),
+  )
   const [canSelectedPieceMove, setCanSelectedPieceMove] = useState(false)
 
   const [{ canDrop }, drop] = useDrop(
@@ -60,26 +81,30 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
       accept: ['k', 'q', 'r', 'n', 'b', 'p', 'K', 'Q', 'R', 'N', 'B', 'P'],
       canDrop: (item: PlacedPiece) => {
         return (
-          game.moves({ verbose: true }).filter(move => isMoveMatching(move, squarePosition, item.position)).length !== 0 &&
-          boardEnabled
+          game
+            .moves({ verbose: true })
+            .filter((move) =>
+              isMoveMatching(move, squarePosition, item.position),
+            ).length !== 0 && boardEnabled
         )
       },
       drop: (item: PlacedPiece) => {
         const strMove = `${item.position}${squarePosition}`
         dispatch(makeMove(strMove))
       },
-      collect: monitor => ({
-        canDrop: monitor.canDrop()
-      })
+      collect: (monitor) => ({
+        canDrop: monitor.canDrop(),
+      }),
     }),
-    [game]
+    [game],
   )
   let squareColor: string
   if ((x + y) % 2 === 1) {
     // Light square
     if (
       lastMoveUCI.length &&
-      (lastMoveUCI.substring(0, 2) === squarePosition || lastMoveUCI.substring(2, 4) === squarePosition)
+      (lastMoveUCI.substring(0, 2) === squarePosition ||
+        lastMoveUCI.substring(2, 4) === squarePosition)
     ) {
       // Highlighted
       squareColor = '#ced26b'
@@ -90,7 +115,8 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
     // Dark square
     if (
       lastMoveUCI.length &&
-      (lastMoveUCI.substring(0, 2) === squarePosition || lastMoveUCI.substring(2, 4) === squarePosition)
+      (lastMoveUCI.substring(0, 2) === squarePosition ||
+        lastMoveUCI.substring(2, 4) === squarePosition)
     ) {
       // Highlighted
       squareColor = '#aba23a'
@@ -123,8 +149,11 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
         }
       }
       if (
-        game.moves({ verbose: true }).filter(move => isMoveMatching(move, squarePosition, selectedPiece.position)).length !==
-        0
+        game
+          .moves({ verbose: true })
+          .filter((move) =>
+            isMoveMatching(move, squarePosition, selectedPiece.position),
+          ).length !== 0
       ) {
         dispatch(makeMove(move))
         dispatch(unselectPiece())
@@ -142,8 +171,11 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
   useEffect(() => {
     if (selectedPiece !== null) {
       setCanSelectedPieceMove(
-        game.moves({ verbose: true }).filter(move => isMoveMatching(move, squarePosition, selectedPiece.position)).length !==
-          0
+        game
+          .moves({ verbose: true })
+          .filter((move) =>
+            isMoveMatching(move, squarePosition, selectedPiece.position),
+          ).length !== 0,
       )
     } else {
       setCanSelectedPieceMove(false)
@@ -157,8 +189,9 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
       style={{
         backgroundColor: squareColor,
         width: `${size}vw`,
-        height: `${size}vw`
+        height: `${size}vw`,
       }}
+      // @ts-ignore next-line
       ref={drop}
       onClick={handleClick}
       draggable={false}
@@ -178,12 +211,14 @@ const BoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
             left: 0,
             top: 0,
             // transform: 'translate(-50%, -50%)',
-            zIndex: 0
+            zIndex: 0,
           }}
         />
       )}
       {piece && pieceColor && (
-        <div style={{ marginTop: showValidMoveIndicator ? '-100%' : undefined }}>
+        <div
+          style={{ marginTop: showValidMoveIndicator ? '-100%' : undefined }}
+        >
           <ChessPiece
             type={piece}
             color={pieceColor}

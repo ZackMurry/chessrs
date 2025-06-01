@@ -1,5 +1,5 @@
 import { ChessInstance, PieceType } from 'chess.js'
-import { FC, useMemo } from 'react'
+import React, { FC, useMemo } from 'react'
 import { useDrag } from 'react-dnd'
 import { useAppSelector } from 'utils/hooks'
 import getImageByPiece from './getImageByPiece'
@@ -43,6 +43,7 @@ const ChessPiece: FC<Props> = ({
 
   return (
     <div
+      // @ts-ignore next-line
       ref={drag}
       style={{
         cursor: 'pointer',

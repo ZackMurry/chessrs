@@ -1,12 +1,11 @@
 import { IconButton } from '@chakra-ui/button'
 import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ExternalLinkIcon,
-  RepeatIcon,
-} from '@chakra-ui/icons'
+  ChevronLeft,
+  ChevronsLeft,
+  ChevronRight,
+  ChevronsRight,
+  FlipVertical,
+} from 'lucide-react'
 import { Box, Flex, Text } from '@chakra-ui/layout'
 import { FC, useEffect, useMemo, useState } from 'react'
 import ChessJS from 'chess.js'
@@ -190,7 +189,7 @@ const PositionPanel: FC = () => {
             <Box mr='20px'>
               <DarkTooltip label='Start (s)'>
                 <IconButton
-                  icon={<ArrowLeftIcon />}
+                  icon={<ChevronsLeft />}
                   aria-label='Start'
                   onClick={() => dispatch(traverseToStart())}
                   disabled={halfMoveCount <= 0}
@@ -198,7 +197,7 @@ const PositionPanel: FC = () => {
               </DarkTooltip>
               <DarkTooltip label='Back (←)'>
                 <IconButton
-                  icon={<ChevronLeftIcon />}
+                  icon={<ChevronLeft />}
                   aria-label='Back'
                   onClick={() => dispatch(traverseBackwards())}
                   disabled={halfMoveCount <= 0}
@@ -207,7 +206,7 @@ const PositionPanel: FC = () => {
               </DarkTooltip>
               <DarkTooltip label='Forward (→)'>
                 <IconButton
-                  icon={<ChevronRightIcon />}
+                  icon={<ChevronRight />}
                   aria-label='Forward'
                   onClick={() => dispatch(traverseForwards())}
                   disabled={halfMoveCount >= moveHistory.length}
@@ -216,7 +215,7 @@ const PositionPanel: FC = () => {
               </DarkTooltip>
               <DarkTooltip label='End (e)'>
                 <IconButton
-                  icon={<ArrowRightIcon />}
+                  icon={<ChevronsRight />}
                   aria-label='End'
                   onClick={() => dispatch(traverseToEnd())}
                   disabled={halfMoveCount >= moveHistory.length}
@@ -226,7 +225,7 @@ const PositionPanel: FC = () => {
           )}
           <DarkTooltip label='Flip board (f)'>
             <IconButton
-              icon={<RepeatIcon />}
+              icon={<FlipVertical />}
               aria-label='Flip board'
               onClick={() => dispatch(flipBoard())}
             />

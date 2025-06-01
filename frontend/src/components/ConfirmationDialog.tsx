@@ -5,7 +5,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogOverlay,
-  Button
+  Button,
 } from '@chakra-ui/react'
 import { FC, useRef } from 'react'
 
@@ -18,10 +18,21 @@ interface Props {
   isLoading: boolean
 }
 
-const ConfirmationDialog: FC<Props> = ({ open, body, title, onCancel, onConfirm, isLoading }) => {
-  const cancelRef = useRef()
+const ConfirmationDialog: FC<Props> = ({
+  open,
+  body,
+  title,
+  onCancel,
+  onConfirm,
+  isLoading,
+}) => {
+  const cancelRef = useRef(null)
   return (
-    <AlertDialog isOpen={open} onClose={onCancel} leastDestructiveRef={cancelRef}>
+    <AlertDialog
+      isOpen={open}
+      onClose={onCancel}
+      leastDestructiveRef={cancelRef}
+    >
       <AlertDialogOverlay>
         <AlertDialogContent bgColor='surface'>
           <AlertDialogHeader fontSize='lg' fontWeight='bold'>

@@ -47,7 +47,7 @@ const PracticeMainPanel: FC = () => {
       }
     `
     try {
-      const data = await request('/api/v1/graphql', query)
+      const data = (await request('/api/v1/graphql', query)) as any
       setMovesInQueue(data.randomMoves)
       if (!data.randomMoves?.length) {
         console.log('no moves')

@@ -1,14 +1,24 @@
-import { ArrowLeftIcon, ArrowRightIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons'
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from '@chakra-ui/icons'
 import { Flex, IconButton } from '@chakra-ui/react'
 import { FC } from 'react'
-import { traverseBackwards, traverseForwards, traverseToEnd, traverseToStart } from 'store/boardSlice'
+import {
+  traverseBackwards,
+  traverseForwards,
+  traverseToEnd,
+  traverseToStart,
+} from 'store/boardSlice'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
 
 const MobileTraverseBar: FC = () => {
   const dispatch = useAppDispatch()
-  const { halfMoveCount, historySize } = useAppSelector(state => ({
+  const { halfMoveCount, historySize } = useAppSelector((state) => ({
     halfMoveCount: state.board.halfMoveCount,
-    historySize: state.board.moveHistory.length
+    historySize: state.board.moveHistory.length,
   }))
 
   const onBack = () => dispatch(traverseBackwards())

@@ -218,7 +218,7 @@ const ImportGameFromLichess: FC = () => {
           {isWhite === (game.winner === 'white') ? 'Win' : 'Loss'})
         </p>
         <div className='flex justify-start items-center mt-1'>
-          <DarkTooltip label='Previous game' openDelay={1000}>
+          <DarkTooltip label='Previous game'>
             <IconButton
               icon={<ArrowLeft />}
               aria-label='Previous game'
@@ -234,7 +234,7 @@ const ImportGameFromLichess: FC = () => {
               onClick={previousGame}
             />
           </DarkTooltip>
-          <DarkTooltip label='Reload game' openDelay={1000}>
+          <DarkTooltip label='Reload game'>
             <IconButton
               icon={<RefreshCcw size='18' />}
               aria-label='Reload game'
@@ -250,7 +250,7 @@ const ImportGameFromLichess: FC = () => {
               onClick={reloadGame}
             />
           </DarkTooltip>
-          <DarkTooltip label='Exit Lichess analysis' openDelay={1000}>
+          <DarkTooltip label='Exit Lichess analysis'>
             <IconButton
               icon={<X />}
               aria-label='Exit Lichess analysis'
@@ -266,7 +266,7 @@ const ImportGameFromLichess: FC = () => {
               onClick={exitLichessAnalysis}
             />
           </DarkTooltip>
-          <DarkTooltip label='Next game' openDelay={1000}>
+          <DarkTooltip label='Next game'>
             <IconButton
               icon={<ArrowRight />}
               aria-label='Next game'

@@ -54,7 +54,7 @@ const StudyMainPanel: FC = () => {
       }
     `
     try {
-      const data = await request('/api/v1/graphql', query)
+      const data = (await request('/api/v1/graphql', query)) as any
       setMovesInQueue(data.dueMoves)
       setReviewsLeft(data.numberOfDueMoves)
       if (!data.dueMoves?.length) {

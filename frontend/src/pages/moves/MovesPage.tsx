@@ -12,7 +12,7 @@ import {
   Th,
   Thead,
   Tr,
-  useToast
+  useToast,
 } from '@chakra-ui/react'
 import DarkTooltip from 'components/DarkTooltip'
 import ErrorToast from 'components/ErrorToast'
@@ -25,7 +25,14 @@ import { MoveEntity } from 'types'
 
 const MovesPage: FC = () => {
   const [moves, setMoves] = useState<
-    { id: string; fenBefore: string; san: string; opening: string; isWhite: boolean; numReviews: number }[]
+    {
+      id: string
+      fenBefore: string
+      san: string
+      opening: string
+      isWhite: boolean
+      numReviews: number
+    }[]
   >([])
   const [numberOfMoves, setNumberOfMoves] = useState(0)
   const toast = useToast()
@@ -47,7 +54,7 @@ const MovesPage: FC = () => {
             numberOfMoves
           }
         `
-        const data = await request('/api/v1/graphql', query)
+        const data = (await request('/api/v1/graphql', query)) as any
         setMoves(data.moves)
         setNumberOfMoves(data.numberOfMoves)
         setPagesLoaded(1)
@@ -55,9 +62,12 @@ const MovesPage: FC = () => {
         toast({
           duration: TOAST_DURATION,
           isClosable: true,
-          render: options => (
-            <ErrorToast description={`Error fetching moves: ${e.response.errors[0].message}`} onClose={options.onClose} />
-          )
+          render: (options) => (
+            <ErrorToast
+              description={`Error fetching moves: ${e.response.errors[0].message}`}
+              onClose={options.onClose}
+            />
+          ),
         })
       }
     }
@@ -78,16 +88,21 @@ const MovesPage: FC = () => {
           }
         }
       `
-      const data = await request('/api/v1/graphql', query, { page: pagesLoaded })
+      const data = (await request('/api/v1/graphql', query, {
+        page: pagesLoaded,
+      })) as any
       setMoves([...moves, ...data.moves])
       setPagesLoaded(pagesLoaded + 1)
     } catch (e) {
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
-        render: options => (
-          <ErrorToast description={`Error fetching moves: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
-        )
+        render: (options) => (
+          <ErrorToast
+            description={`Error fetching moves: ${e.response?.errors[0]?.message}`}
+            onClose={options.onClose}
+          />
+        ),
       })
     }
   }
@@ -111,25 +126,32 @@ const MovesPage: FC = () => {
           }
         }
       `
-      const data = await request('/api/v1/graphql', query)
+      const data = (await request('/api/v1/graphql', query)) as any
       allMoves = data.moves
     } catch (e) {
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
-        render: options => (
-          <ErrorToast description={`Error fetching moves: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
-        )
+        render: (options) => (
+          <ErrorToast
+            description={`Error fetching moves: ${e.response?.errors[0]?.message}`}
+            onClose={options.onClose}
+          />
+        ),
       })
     }
 
-    allMoves.forEach(move => {
+    allMoves.forEach((move) => {
       move.lastReviewed = Number(move.lastReviewed)
       move.timeCreated = Number(move.timeCreated)
     })
 
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(allMoves, null, 2).concat('\n')], { type: 'text/plain' }))
+    a.href = URL.createObjectURL(
+      new Blob([JSON.stringify(allMoves, null, 2).concat('\n')], {
+        type: 'text/plain',
+      }),
+    )
     a.setAttribute('download', 'chessrs_moves.json')
     document.body.appendChild(a)
     a.click()
@@ -145,7 +167,11 @@ const MovesPage: FC = () => {
           {numberOfMoves} moves
         </Text>
         <DarkTooltip label='Export moves'>
-          <IconButton onClick={onExportMoves} aria-label='Export moves' icon={<DownloadIcon />} />
+          <IconButton
+            onClick={onExportMoves}
+            aria-label='Export moves'
+            icon={<DownloadIcon />}
+          />
         </DarkTooltip>
       </Flex>
       <Table variant='striped' colorScheme='chessrs'>
@@ -161,14 +187,19 @@ const MovesPage: FC = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {moves.map(m => (
+          {moves.map((m) => (
             <Tr key={m.id}>
               <Td>{m.opening}</Td>
               <Td>{m.san}</Td>
               <Td>{m.isWhite ? 'White' : 'Black'}</Td>
               <Td isNumeric>{m.numReviews}</Td>
               <Td>
-                <ChakraLink isExternal href={`https://lichess.org/analysis?fen=${encodeURIComponent(m.fenBefore)}`}>
+                <ChakraLink
+                  isExternal
+                  href={`https://lichess.org/analysis?fen=${encodeURIComponent(
+                    m.fenBefore,
+                  )}`}
+                >
                   {m.fenBefore} <ExternalLinkIcon ml='4px' mt='-2px' />
                 </ChakraLink>
               </Td>
@@ -178,7 +209,12 @@ const MovesPage: FC = () => {
       </Table>
       <Flex justifyContent='center' my='25px'>
         {moves.length < numberOfMoves && (
-          <Button variant='outline' bg='btnBg' borderColor='btnBorder' onClick={onLoadMore}>
+          <Button
+            variant='outline'
+            bg='btnBg'
+            borderColor='btnBorder'
+            onClick={onLoadMore}
+          >
             Load more
           </Button>
         )}

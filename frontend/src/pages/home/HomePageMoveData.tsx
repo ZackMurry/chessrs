@@ -21,16 +21,19 @@ const DashboardMoveData: FC = () => {
             numberOfMoves
           }
         `
-        const data = await request('/api/v1/graphql', query)
+        const data = (await request('/api/v1/graphql', query)) as any
         setNumberOfDueMoves(data.numberOfDueMoves)
         setNumberOfMoves(data.numberOfMoves)
       } catch (e) {
         toast({
           duration: TOAST_DURATION,
           isClosable: true,
-          render: options => (
-            <ErrorToast description={`Error fetching data: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
-          )
+          render: (options) => (
+            <ErrorToast
+              description={`Error fetching data: ${e.response?.errors[0]?.message}`}
+              onClose={options.onClose}
+            />
+          ),
         })
       }
     }
@@ -38,7 +41,15 @@ const DashboardMoveData: FC = () => {
   }, [setNumberOfDueMoves, setNumberOfMoves, toast])
 
   return (
-    <Box borderRadius='3px' bg='surface' borderWidth='2px' borderStyle='solid' borderColor='surfaceBorder' h='100%' p='5%'>
+    <Box
+      borderRadius='3px'
+      bg='surface'
+      borderWidth='2px'
+      borderStyle='solid'
+      borderColor='surfaceBorder'
+      h='100%'
+      p='5%'
+    >
       <Heading as='h6' fontSize='2xl'>
         {numberOfMoves} Move{numberOfMoves !== 1 ? 's' : ''} Learned
       </Heading>
