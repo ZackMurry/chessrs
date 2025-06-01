@@ -10,12 +10,12 @@ import { CirclePlus, Cloud, Eye } from 'lucide-react'
 import ChessJS from 'chess.js'
 import DarkTooltip from './DarkTooltip'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
+import { makeMove } from 'store/boardSlice'
 import {
   clearCloudAnalysis,
-  makeMove,
   setCloudAnalysisLoading,
   updateCloudAnalysis,
-} from 'store/boardSlice'
+} from 'store/analysisSlice'
 import { TOAST_DURATION } from 'theme'
 import ErrorToast from './ErrorToast'
 import request, { gql } from 'graphql-request'
@@ -26,14 +26,17 @@ const AnalysisOverview = () => {
   const { fen, analysis, loading } = useAppSelector((state) => ({
     fen: state.board.fen,
     analysis:
-      state.board.cloudAnalysis !== null &&
-      state.board.cloudAnalysis.fen === state.board.fen
-        ? state.board.cloudAnalysis
-        : state.board.localAnalysis &&
-          state.board.localAnalysis.fen === state.board.fen
-        ? state.board.localAnalysis
+      state.analysis.cloudAnalysis !== null &&
+      state.analysis.cloudAnalysis.fen === state.board.fen
+        ? state.analysis.cloudAnalysis
+        : state.analysis.localAnalysis &&
+          state.analysis.localAnalysis.fen === state.board.fen
+        ? state.analysis.localAnalysis
         : null,
-    loading: state.board.loadingAnalysis,
+    loading: {
+      cloud: state.analysis.cloudLoading,
+      local: state.analysis.localLoading,
+    },
   }))
   const dispatch = useAppDispatch()
   const toast = useToast()

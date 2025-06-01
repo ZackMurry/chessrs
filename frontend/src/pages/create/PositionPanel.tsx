@@ -12,16 +12,11 @@ import { FC, useEffect, useMemo, useState } from 'react'
 import ChessJS from 'chess.js'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import {
-  clearLocalAnalysis,
   flipBoard,
-  setCloudAnalysisLoading,
-  setLocalAnalysisLoading,
   traverseBackwards,
   traverseForwards,
   traverseToEnd,
   traverseToStart,
-  updateLocalAnalysis,
-  updateLocalBestMove,
 } from 'store/boardSlice'
 import Stockfish, { SF_DEPTH } from 'utils/analysis/Stockfish'
 import DarkTooltip from 'components/DarkTooltip'
@@ -29,6 +24,12 @@ import ImportGameFromLichess from 'components/ImportGameFromLichess'
 import { useBreakpointValue } from '@chakra-ui/react'
 import PGNDisplay from 'components/PGNDisplay'
 import AnalysisOverview from 'components/AnalysisOverview'
+import {
+  updateLocalBestMove,
+  updateLocalAnalysis,
+  setLocalAnalysisLoading,
+  setCloudAnalysisLoading,
+} from 'store/analysisSlice'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
@@ -41,6 +42,8 @@ const PositionPanel: FC = () => {
   }))
   const isTraverseBarShowing = useBreakpointValue({ base: true, lg: false })
   const dispatch = useAppDispatch()
+
+  const localEvalMultiplier = halfMoveCount % 2 === 0 ? 1 : -1
 
   const uciMoves = useMemo(
     () =>
@@ -99,11 +102,14 @@ const PositionPanel: FC = () => {
         },
         depth: d,
         fen: sfFen,
-        eval: cp / 100,
+        eval: (cp / 100) * localEvalMultiplier,
         mate,
         engine: 'BROWSER',
       }),
     )
+    if (d >= 20) {
+      dispatch(setLocalAnalysisLoading(false))
+    }
   }
   const [stockfish] = useState(
     () => new Stockfish(onAnalysis, onReady, onEvaluation),

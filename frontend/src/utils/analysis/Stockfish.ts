@@ -19,7 +19,7 @@ export interface InfoObject {
   mate?: number
 }
 
-export const SF_DEPTH = 20
+export const SF_DEPTH = 25
 
 export default class Stockfish {
   worker: Worker
