@@ -6,6 +6,8 @@ import com.zackmurry.chessrs.security.OAuth2AuthenticationSuccessHandler
 import com.zackmurry.chessrs.service.OAuth2UserService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -35,6 +37,7 @@ class SecurityConfiguration(
             authorizeHttpRequests {
                 authorize("/", permitAll)
                 authorize("/home", permitAll)
+                authorize("/api/v1/auth/demo", permitAll)
                 authorize(anyRequest, authenticated)
             }
 
@@ -78,7 +81,15 @@ class SecurityConfiguration(
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val source = UrlBasedCorsConfigurationSource()
-        source.registerCorsConfiguration("/**", CorsConfiguration().applyPermitDefaultValues())
+        val config = CorsConfiguration().applyPermitDefaultValues()
+//        config.allowCredentials = true
+        config.allowedOrigins = listOf("http://localhost")
+
+        source.registerCorsConfiguration("/**", config)
         return source
     }
+
+    @Bean
+    fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager =
+        config.authenticationManager
 }

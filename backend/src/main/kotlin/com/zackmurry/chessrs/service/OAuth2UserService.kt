@@ -21,6 +21,7 @@ class OAuth2UserService(private val userService: UserService) : DefaultOAuth2Use
     override fun loadUser(userRequest: OAuth2UserRequest?): OAuth2User {
         val oAuth2User = super.loadUser(userRequest)
         logger.debug("Loading user...")
+        println("LOADING OAUTH USER")
         try {
             return processOAuth2User(userRequest, oAuth2User)
         } catch (e: Exception) {

@@ -152,5 +152,8 @@ class UserPrincipalResponse(
 ) {
     val id = uuid.toString()
     val authorities = authoritiesMap.map { AuthorityResponse(it.authority) }
-    val attributes = LichessAttributes.fromMap(attributesMap)
+    val isDemo = authoritiesMap.any {
+        it.authority.toString() == "ROLE_DEMO"
+    }
+    val attributes = if (!isDemo) LichessAttributes.fromMap(attributesMap) else null
 }

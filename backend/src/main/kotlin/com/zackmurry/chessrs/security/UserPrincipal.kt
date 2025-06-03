@@ -35,6 +35,18 @@ class UserPrincipal(
             )
         }
 
+        fun create(username: String, id: UUID, easeFactor: Float, scalingFactor: Float, role: String): UserPrincipal {
+            val grantedAuthorities = Collections.singletonList(SimpleGrantedAuthority(role))
+            return UserPrincipal(
+                username,
+                id,
+                grantedAuthorities,
+                HashMap(),
+                easeFactor,
+                scalingFactor
+            )
+        }
+
         fun create(user: ChessrsUser, attributes: MutableMap<String, Any>): UserPrincipal {
             val userPrincipal = create(user)
             userPrincipal.attributes = attributes

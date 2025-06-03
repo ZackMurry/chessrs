@@ -13,7 +13,9 @@ class AccountQueryResolver {
     @QueryMapping
     fun account(): UserPrincipalResponse {
         println(SecurityContextHolder.getContext().authentication.principal)
-        return (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).toResponse()
+        val temp = SecurityContextHolder.getContext().authentication.principal
+        val resp = (SecurityContextHolder.getContext().authentication.principal as UserPrincipal).toResponse()
+        return resp
     }
 
 }

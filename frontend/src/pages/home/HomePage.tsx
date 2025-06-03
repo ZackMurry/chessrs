@@ -3,7 +3,6 @@ import {
   Flex,
   Grid,
   GridItem,
-  Heading,
   Link as ChakraLink,
   Text,
 } from '@chakra-ui/react'
@@ -15,10 +14,13 @@ const DashboardPage: FC = () => {
   const { name } = useAppSelector((state) => ({
     name: state.user?.account?.username,
   }))
+
   return (
     <>
       <Box mt='10px' p='5vw' pt='2vw'>
-        <Heading mb='2vw'>Welcome back, {name}</Heading>
+        <h1 className='mb-4 text-offwhite text-3xl font-bold'>
+          Welcome back, {name}
+        </h1>
         <Grid
           templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(2, 1fr)' }}
           minH='65vh'
