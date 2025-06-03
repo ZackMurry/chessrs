@@ -161,7 +161,7 @@ const MovesPage: FC = () => {
   // todo: searching and filtering
   // todo: deleting moves from this page
   return (
-    <Box p='15px 1vw'>
+    <Box p='15px 1vw' className='text-offwhite'>
       <Flex justifyContent='space-between' mb='15px' mx='20px'>
         <Text fontSize='18px' fontWeight='bold'>
           {numberOfMoves} moves
@@ -169,8 +169,12 @@ const MovesPage: FC = () => {
         <DarkTooltip label='Export moves'>
           <IconButton
             onClick={onExportMoves}
+            variant='ghost'
             aria-label='Export moves'
             icon={<DownloadIcon />}
+            _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+            // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+            _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
           />
         </DarkTooltip>
       </Flex>

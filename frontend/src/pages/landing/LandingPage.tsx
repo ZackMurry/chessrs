@@ -52,12 +52,14 @@ const LandingPage: FC = () => {
             <div className='w-full flex justify-center my-7'>
               <div>
                 <LichessSignInButton />
-                <button
-                  onClick={demoLogin}
-                  className='text-gray-400 text-center mt-2 text-sm underline cursor-pointer mx-auto'
-                >
-                  Or use a temporary account
-                </button>
+                <div className='w-full flex justify-center'>
+                  <button
+                    onClick={demoLogin}
+                    className='text-gray-400 text-center mt-2 text-sm underline cursor-pointer'
+                  >
+                    Or use a temporary account
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -8,19 +8,20 @@ import {
 } from '@chakra-ui/react'
 import { FC } from 'react'
 import { useAppSelector } from 'utils/hooks'
+import DemoInfoPanel from './DemoInfoPanel'
 import DashboardMoveData from './HomePageMoveData'
+import TimeBasedGreeting from './TimeGreeting'
 
 const DashboardPage: FC = () => {
-  const { name } = useAppSelector((state) => ({
+  const { name, isDemo } = useAppSelector((state) => ({
     name: state.user?.account?.username,
+    isDemo: state.user?.account?.isDemo,
   }))
 
   return (
     <>
       <Box mt='10px' p='5vw' pt='2vw'>
-        <h1 className='mb-4 text-offwhite text-3xl font-bold'>
-          Welcome back, {name}
-        </h1>
+        <TimeBasedGreeting userName={name} />
         <Grid
           templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(2, 1fr)' }}
           minH='65vh'
@@ -29,7 +30,7 @@ const DashboardPage: FC = () => {
           <GridItem>
             <DashboardMoveData />
           </GridItem>
-          <GridItem />
+          <GridItem>{isDemo && <DemoInfoPanel />}</GridItem>
           <GridItem />
           <GridItem />
         </Grid>
@@ -37,7 +38,11 @@ const DashboardPage: FC = () => {
       <footer>
         <Flex w='100%' justifyContent='center' pb='25px'>
           <Text color='whiteText'>
-            Created by Zack Murry |{' '}
+            Created by{' '}
+            <ChakraLink isExternal href='https://zackmurry.com'>
+              Zack Murry
+            </ChakraLink>
+            {' | '}
             <ChakraLink isExternal href='https://github.com/ZackMurry/chessrs'>
               GitHub
             </ChakraLink>

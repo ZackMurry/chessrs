@@ -83,6 +83,7 @@ export interface UserData {
   accountNonExpired: boolean
   credentialsNonExpired: boolean
   name: string
+  isDemo: boolean
 }
 
 interface LichessPlayerUser {

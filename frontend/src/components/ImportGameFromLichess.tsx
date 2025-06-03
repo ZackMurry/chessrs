@@ -16,8 +16,9 @@ import DarkTooltip from 'components/DarkTooltip'
 const GAMES_LOADED_PER_FETCH = 10
 
 const ImportGameFromLichess: FC = () => {
-  const { username } = useAppSelector((state) => ({
+  const { username, isDemo } = useAppSelector((state) => ({
     username: state.user.account?.username,
+    isDemo: state.user.account?.isDemo,
   }))
   const [isDescriptionVisible, { on: showDescription, off: hideDescription }] =
     useBoolean(false)
@@ -33,8 +34,9 @@ const ImportGameFromLichess: FC = () => {
         return
       }
       startLoading()
+      const lichessUsername = isDemo ? 'ZackHkk' : username
       const response = await fetch(
-        `https://lichess.org/api/games/user/${username}?max=${GAMES_LOADED_PER_FETCH}&pgnInJson=true&tags=false&opening=true&perfType=ultraBullet,bullet,blitz,rapid,classical,correspondence`,
+        `https://lichess.org/api/games/user/${lichessUsername}?max=${GAMES_LOADED_PER_FETCH}&pgnInJson=true&tags=false&opening=true&perfType=ultraBullet,bullet,blitz,rapid,classical,correspondence`,
         {
           headers: { Accept: 'application/x-ndjson' },
         },

@@ -6,6 +6,7 @@ import { TOAST_DURATION } from 'theme'
 import { useAppDispatch } from 'utils/hooks'
 import ErrorToast from './ErrorToast'
 import { useLocation } from 'react-router-dom'
+import { UserData } from 'types'
 
 const AccountManager: FC = () => {
   const dispatch = useAppDispatch()
@@ -23,6 +24,9 @@ const AccountManager: FC = () => {
             name
             easeFactor
             scalingFactor
+            authorities {
+              authority
+            }
           }
         }
       `
@@ -41,7 +45,15 @@ const AccountManager: FC = () => {
         })
         return
       }
-      dispatch(setAccount(data.account))
+      const act = data.account as UserData
+      dispatch(
+        setAccount({
+          ...act,
+          isDemo: act.authorities.some(
+            (authority) => authority.authority === 'ROLE_DEMO',
+          ),
+        }),
+      )
     } catch (e: any) {
       console.error(e)
       if (e.response) {

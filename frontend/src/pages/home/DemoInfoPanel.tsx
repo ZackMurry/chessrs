@@ -7,7 +7,7 @@ import { gql, request } from 'graphql-request'
 import { TOAST_DURATION } from 'theme'
 import ErrorToast from 'components/ErrorToast'
 
-const DashboardMoveData: FC = () => {
+const DemoInfoPanel: FC = () => {
   const toast = useToast()
   const [numberOfMoves, setNumberOfMoves] = useState(0)
   const [numberOfDueMoves, setNumberOfDueMoves] = useState(0)
@@ -51,19 +51,22 @@ const DashboardMoveData: FC = () => {
       p='5%'
       className='text-offwhite'
     >
-      <Heading as='h6' fontSize='2xl'>
-        {numberOfMoves} Move{numberOfMoves !== 1 ? 's' : ''} Learned
-      </Heading>
-      <Text fontSize='18px' mt='10px'>
-        {numberOfDueMoves} move{numberOfDueMoves !== 1 ? 's' : ''} need review
-      </Text>
-      <Link to='/moves'>
-        <Text fontSize='18px' mt='10px' textDecor='underline'>
-          View moves
-        </Text>
-      </Link>
+      <h1 className='text-2xl font-bold'>You are using a demo account</h1>
+      <ul className='list-disc ml-8 mt-2 text-md'>
+        <li className='mt-1'>Your account is for one-time use</li>
+        <li className='mt-1'>
+          All of your account data will be lost when you sign out
+        </li>
+        <li className='mt-1'>
+          You may use the "Import Games from Lichess" button to view sample
+          games from the developer's Lichess account
+        </li>
+        <li className='mt-1'>
+          To create a full account, log out and sign in with Lichess
+        </li>
+      </ul>
     </Box>
   )
 }
 
-export default DashboardMoveData
+export default DemoInfoPanel

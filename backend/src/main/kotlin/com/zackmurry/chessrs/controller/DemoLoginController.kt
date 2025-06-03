@@ -35,22 +35,12 @@ class DemoLoginController(
         val token = DemoAuthenticationToken(username)
 
         val authResult = authenticationManager.authenticate(token)
-//        SecurityContextHolder.getContext().authentication = authResult
-//        val principal = UserPrincipal(
-//            username,
-//            userId,
-//            emptyList(),
-//            emptyMap(),
-//            1.0,
-//            1.0
-//        )
         val principal = UserPrincipal.create(username, userId, 1f, 1f, "ROLE_DEMO")
         val auth = UsernamePasswordAuthenticationToken(principal, null, principal.authorities)
         SecurityContextHolder.getContext().authentication = auth
 
         userService.createUser(ChessrsUser(username, userId, AuthProvider.DEMO.toString(), 1f, 1f))
 
-//        request.session // Ensures a session is created
         val session = request.getSession(true)
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext())
 
@@ -60,8 +50,6 @@ class DemoLoginController(
     @GetMapping("/me")
     fun getCurrentUser(): UserPrincipal {
         val auth = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
-
-//        println(auth)
         return auth
     }
 }
