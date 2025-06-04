@@ -1,6 +1,8 @@
 import LichessSignInButton from 'components/landing/LichessSignInButton'
 import { FC } from 'react'
 import { useHistory } from 'react-router-dom'
+import { Timeline } from '@primer/react'
+import { Microscope, PackagePlus, Save } from 'lucide-react'
 
 const LandingPage: FC = () => {
   const history = useHistory()
@@ -64,12 +66,51 @@ const LandingPage: FC = () => {
             </div>
           </div>
         </section>
+        {/* todo: demo video here (after UI is polished) */}
+        <img
+          src='/create-page.png'
+          alt='Create page screenshot'
+          className='scale-[0.8] mt-[50px]'
+        />
+
+        <section className='md:px-20'>
+          <h2 className=''>Practice chess openings like flashcards</h2>
+          <Timeline className='text-offwhite'>
+            <Timeline.Item>
+              <Timeline.Badge className='!bg-[#1f2224] !w-[48px] !h-[48px] !-ml-[24px]'>
+                <PackagePlus
+                  aria-label='Commit'
+                  className='bg-[#1f2224] rounded-[50%]'
+                  size='32'
+                />
+              </Timeline.Badge>
+              <Timeline.Body>Import a game from Lichess</Timeline.Body>
+            </Timeline.Item>
+            <Timeline.Item>
+              <Timeline.Badge className='!bg-[#1f2224] !w-[48px] !h-[48px] !-ml-[24px]'>
+                <Microscope
+                  aria-label='Commit'
+                  className='bg-[#1f2224] rounded-[50%]'
+                  size='32'
+                />
+              </Timeline.Badge>
+              <Timeline.Body>Study using the Chessrs analyzer</Timeline.Body>
+            </Timeline.Item>
+            <Timeline.Item>
+              <Timeline.Badge className='!bg-[#1f2224] !w-[48px] !h-[48px] !-ml-[24px]'>
+                <Save
+                  aria-label='Commit'
+                  className='bg-[#1f2224] rounded-[50%]'
+                  size='32'
+                />
+              </Timeline.Badge>
+              <Timeline.Body>
+                Pick opening variations to commit to memory
+              </Timeline.Body>
+            </Timeline.Item>
+          </Timeline>
+        </section>
       </div>
-      <img
-        src='/create-page.png'
-        alt='Create page screenshot'
-        className='scale-[0.6]'
-      />
     </div>
   )
 }

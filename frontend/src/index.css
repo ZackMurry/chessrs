@@ -16,3 +16,7 @@ code {
   font-family: Arial, Helvetica, sans-serif;
   --cursor-button: pointer;
 }
+
+.Timeline-Item {
+  border-left-width: 1px !important;
+}
