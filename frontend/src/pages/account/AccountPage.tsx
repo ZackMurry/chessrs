@@ -1,26 +1,15 @@
-import {
-  Box,
-  Button,
-  Heading,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  SlideFade,
-  Text,
-  useBoolean,
-  useToast,
-} from '@chakra-ui/react'
+import { Box, useBoolean, useToast } from '@chakra-ui/react'
 import ErrorToast from 'components/ErrorToast'
 import { FC, FormEvent, useState } from 'react'
 import { request, gql } from 'graphql-request'
+import { Button, TextField } from '@radix-ui/themes'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import { setAccount } from 'store/userSlice'
 import { TOAST_DURATION } from 'theme'
 import { useEffect } from 'react'
 import ConfirmationDialog from 'components/ConfirmationDialog'
 import SuccessToast from 'components/SuccessToast'
+import { BrainCog, Dumbbell } from 'lucide-react'
 
 const DEFAULT_EASE_FACTOR = 3
 const DEFAULT_SCALING_FACTOR = 2
@@ -170,75 +159,58 @@ const AccountPage: FC = () => {
       m='40px auto'
       w={{ base: '100%', md: '75%' }}
     >
-      <Heading color='whiteText'>{account.name}</Heading>
-      <form onSubmit={onSubmitEaseFactor}>
-        <Heading as='h6' fontSize='2xl' color='whiteText' mt='25px'>
-          Ease Factor
-        </Heading>
-        <Text color='whiteText' fontSize='lg' mt='5px'>
-          Your ease factor controls how often moves need to be reviewed. The
-          higher your ease factor, the fewer times you will need to review every
-          move.
-        </Text>
-        <Text color='whiteText' fontSize='lg'>
-          Specifically, your ease factor is the time between the first review
-          and the second review, in minutes.
-        </Text>
-        <NumberInput
-          w='sm'
-          min={0.1}
-          max={1000}
-          precision={2}
-          step={0.25}
-          value={easeFactor}
-          onChange={setEaseFactor}
-          mt='5px'
-        >
-          <NumberInputField _focus={{ borderColor: '#757575' }} />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-        {/* @ts-ignore next-line */}
-        <SlideFade in={Number(easeFactor) !== account.easeFactor}>
-          <Button type='submit' size='sm' isLoading={isLoading} mt='10px'>
-            Save
-          </Button>
-        </SlideFade>
+      <h1 className='text-offwhite text-3xl font-bold mb-4'>
+        Account Settings: {account.name}
+      </h1>
+      <form onSubmit={onSubmitEaseFactor} className='my-8'>
+        <div>
+          <h3 className='text-offwhite text-xl font-semibold'>Ease Factor</h3>
+          <p className='text-offwhite text-md mb-2'>
+            Your ease factor controls how often moves need to be reviewed. The
+            higher your ease factor, the fewer times you will need to review
+            every move.
+            <br />
+            Specifically, your ease factor is the time between the first review
+            and the second review, in minutes.
+          </p>
+          <TextField.Root
+            placeholder='Ease factor...'
+            type='number'
+            className='max-w-[300px]'
+            value={easeFactor}
+            onChange={(e) => setEaseFactor(e.target.value)}
+          >
+            <TextField.Slot>
+              <BrainCog height='16' width='16' />
+            </TextField.Slot>
+          </TextField.Root>
+        </div>
+        <div className='my-5'>
+          <h3 className='text-offwhite text-xl font-semibold'>
+            Scaling Factor
+          </h3>
+          <p className='text-offwhite text-md mb-2'>
+            Your scaling factor controls how fast the interval between reviews
+            grows. For example, with a scaling factor of 2, the time between
+            reviews will double after each review.
+          </p>
+          <TextField.Root
+            placeholder='Scaling factor...'
+            type='number'
+            className='max-w-[300px]'
+            value={scalingFactor}
+            onChange={(e) => setScalingFactor(e.target.value)}
+          >
+            <TextField.Slot>
+              <Dumbbell height='16' width='16' />
+            </TextField.Slot>
+          </TextField.Root>
+        </div>
+        <Button type='submit'>Save Changes</Button>
       </form>
-      <form onSubmit={onSubmitScalingFactor}>
-        <Heading as='h6' fontSize='2xl' color='whiteText' mt='25px'>
-          Scaling Factor
-        </Heading>
-        <Text color='whiteText' fontSize='lg' mt='5px'>
-          Your scaling factor controls how fast the interval between reviews
-          grows. For example, with a scaling factor of 2, the time between
-          reviews will double after each review.
-        </Text>
-        <NumberInput
-          w='sm'
-          min={0.1}
-          max={1000}
-          precision={2}
-          step={0.25}
-          value={scalingFactor}
-          onChange={setScalingFactor}
-          mt='5px'
-        >
-          <NumberInputField _focus={{ borderColor: '#757575' }} />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-        <SlideFade in={Number(scalingFactor) !== account.scalingFactor}>
-          <Button type='submit' size='sm' isLoading={isLoading} mt='10px'>
-            Save
-          </Button>
-        </SlideFade>
-      </form>
-      <Button onClick={openDeleteAccountDialog}>Delete account</Button>
+      <Button onClick={openDeleteAccountDialog} color='red'>
+        Delete account
+      </Button>
       <ConfirmationDialog
         open={isDeleteAccountDialogOpen}
         onConfirm={onDeleteAccount}

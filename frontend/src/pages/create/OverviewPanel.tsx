@@ -1,10 +1,5 @@
-import {
-  Box,
-  Button,
-  IconButton,
-  useBreakpointValue,
-  useToast,
-} from '@chakra-ui/react'
+import { Box, IconButton, useBreakpointValue, useToast } from '@chakra-ui/react'
+import { Button } from '@radix-ui/themes'
 import DarkTooltip from 'components/DarkTooltip'
 import ErrorToast from 'components/ErrorToast'
 import { gql, request } from 'graphql-request'
@@ -285,9 +280,10 @@ const OverviewPanel: FC = () => {
     >
       <GlobalHotKeys keyMap={keyMap} handlers={handlers}>
         <Button
-          isDisabled={Boolean(previousMove) || !Boolean(lastMove)}
-          isLoading={isAddLoading}
-          isFullWidth
+          disabled={Boolean(previousMove) || !Boolean(lastMove)}
+          loading={isAddLoading}
+          color='gray'
+          className='!w-full !text-black !bg-gray-200 border-none hover:!bg-gray-100 disabled:!bg-gray-500 !py-[1.1rem]'
           onClick={onAddMove}
         >
           Add {lastMove?.san || 'Move'}
@@ -348,6 +344,7 @@ const OverviewPanel: FC = () => {
                 borderRadius='5px'
                 onClick={onDeleteMove}
                 isLoading={isDeleteLoading}
+                className='text-black'
               >
                 <Trash2 />
               </IconButton>

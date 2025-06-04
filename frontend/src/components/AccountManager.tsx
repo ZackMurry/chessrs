@@ -62,14 +62,16 @@ const AccountManager: FC = () => {
           isClosable: true,
           render: (options) => (
             <ErrorToast
-              description={`Error getting account data from server: ${e.response.errors[0].message}`}
+              description={`Error getting account data from server: ${
+                e.response.errors ? e.response.errors[0].message : e
+              }`}
               onClose={options.onClose}
             />
           ),
         })
       } else {
         // Sign in with lichess
-        // window.location.href = '/api/v1/oauth2/code/lichess'
+        window.location.href = '/api/v1/oauth2/code/lichess'
       }
     }
   }, [dispatch, toast])

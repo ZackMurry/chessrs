@@ -193,6 +193,7 @@ const PositionPanel: FC = () => {
                   aria-label='Start'
                   onClick={() => dispatch(traverseToStart())}
                   disabled={halfMoveCount <= 0}
+                  className='text-black'
                 />
               </DarkTooltip>
               <DarkTooltip label='Back (←)'>
@@ -202,6 +203,7 @@ const PositionPanel: FC = () => {
                   onClick={() => dispatch(traverseBackwards())}
                   disabled={halfMoveCount <= 0}
                   fontSize='4xl'
+                  className='text-black'
                 />
               </DarkTooltip>
               <DarkTooltip label='Forward (→)'>
@@ -211,6 +213,7 @@ const PositionPanel: FC = () => {
                   onClick={() => dispatch(traverseForwards())}
                   disabled={halfMoveCount >= moveHistory.length}
                   fontSize='4xl'
+                  className='text-black'
                 />
               </DarkTooltip>
               <DarkTooltip label='End (e)'>
@@ -219,6 +222,7 @@ const PositionPanel: FC = () => {
                   aria-label='End'
                   onClick={() => dispatch(traverseToEnd())}
                   disabled={halfMoveCount >= moveHistory.length}
+                  className='text-black'
                 />
               </DarkTooltip>
             </Box>
@@ -228,6 +232,7 @@ const PositionPanel: FC = () => {
               icon={<FlipVertical />}
               aria-label='Flip board'
               onClick={() => dispatch(flipBoard())}
+              className='text-black'
             />
           </DarkTooltip>
         </Flex>
