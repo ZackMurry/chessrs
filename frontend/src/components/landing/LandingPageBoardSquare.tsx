@@ -35,6 +35,7 @@ interface Props {
   pieceColor?: 'w' | 'b'
   game: ChessInstance
   size: number
+  lastMove: string
 }
 
 interface PlacedPiece {
@@ -46,18 +47,14 @@ interface PlacedPiece {
 // const squareLength = 5
 const MIN_SQUARE_LENGTH = 20
 
-const LandingPageBoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size }) => {
+const LandingPageBoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size, lastMove }) => {
   const dispatch = useAppDispatch()
   const squarePosition = useMemo(() => squareIndexToCoordinates(x, y), [x, y])
-  const lastMoveUCI = 'e2e4'
 
   let squareColor: string
   if ((x + y) % 2 === 1) {
     // Light square
-    if (
-      lastMoveUCI.length &&
-      (lastMoveUCI.substring(0, 2) === squarePosition || lastMoveUCI.substring(2, 4) === squarePosition)
-    ) {
+    if (lastMove.length && (lastMove.substring(0, 2) === squarePosition || lastMove.substring(2, 4) === squarePosition)) {
       // Highlighted
       squareColor = '#ced26b'
     } else {
@@ -65,10 +62,7 @@ const LandingPageBoardSquare: FC<Props> = ({ x, y, piece, pieceColor, game, size
     }
   } else {
     // Dark square
-    if (
-      lastMoveUCI.length &&
-      (lastMoveUCI.substring(0, 2) === squarePosition || lastMoveUCI.substring(2, 4) === squarePosition)
-    ) {
+    if (lastMove.length && (lastMove.substring(0, 2) === squarePosition || lastMove.substring(2, 4) === squarePosition)) {
       // Highlighted
       squareColor = '#aba23a'
     } else {
