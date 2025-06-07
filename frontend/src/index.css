@@ -19,4 +19,5 @@ code {
 
 .Timeline-Item {
   border-left-width: 1px !important;
+  border-left-color: white !important;
 }

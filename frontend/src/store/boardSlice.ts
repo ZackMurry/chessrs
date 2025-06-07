@@ -54,7 +54,7 @@ interface PositionLoad {
   perspective: 'white' | 'black'
 }
 
-const STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+export const STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 const initialState = {
   fen: STARTING_FEN,
@@ -69,11 +69,11 @@ const initialState = {
       white: 3309965389,
       draws: 261081391,
       black: 3079018680,
-      moves: [],
-    },
+      moves: []
+    }
   },
   perspective: 'white',
-  enabled: true,
+  enabled: true
 } as BoardState
 
 export const boardSlice = createSlice({
@@ -119,52 +119,52 @@ export const boardSlice = createSlice({
         pgn: newPgn,
         halfMoveCount: state.halfMoveCount + 1,
         history: [...newHistory, fen],
-        moveHistory: newMoveHistory,
+        moveHistory: newMoveHistory
       }
     },
     selectPiece: (state, action: PayloadAction<SelectedPiece>) => {
       return {
         ...state,
-        selectedPiece: action.payload,
+        selectedPiece: action.payload
       }
     },
-    unselectPiece: (state) => ({
+    unselectPiece: state => ({
       ...state,
-      selectedPiece: null,
+      selectedPiece: null
     }),
-    traverseBackwards: (state) => {
+    traverseBackwards: state => {
       if (state.halfMoveCount === 0) {
         return state
       }
       return {
         ...state,
         halfMoveCount: state.halfMoveCount - 1,
-        fen: state.history[state.halfMoveCount - 1],
+        fen: state.history[state.halfMoveCount - 1]
       }
     },
-    traverseForwards: (state) => {
+    traverseForwards: state => {
       if (state.halfMoveCount >= state.moveHistory.length) {
         return state
       }
       return {
         ...state,
         halfMoveCount: state.halfMoveCount + 1,
-        fen: state.history[state.halfMoveCount + 1],
+        fen: state.history[state.halfMoveCount + 1]
       }
     },
-    traverseToStart: (state) => ({
+    traverseToStart: state => ({
       ...state,
       fen: state.history[0],
-      halfMoveCount: 0,
+      halfMoveCount: 0
     }),
-    traverseToEnd: (state) => {
+    traverseToEnd: state => {
       if (state.halfMoveCount >= state.moveHistory.length) {
         return state
       }
       return {
         ...state,
         halfMoveCount: state.moveHistory.length,
-        fen: state.history[state.history.length - 1],
+        fen: state.history[state.history.length - 1]
       }
     },
     traverseToMove: (state, action: PayloadAction<number>) => {
@@ -174,7 +174,7 @@ export const boardSlice = createSlice({
       return {
         ...state,
         halfMoveCount: action.payload + 1,
-        fen: state.history[action.payload + 1],
+        fen: state.history[action.payload + 1]
       }
     },
     updateLichessGames: (state, action: PayloadAction<LichessGames>) => {
@@ -182,8 +182,8 @@ export const boardSlice = createSlice({
         ...state,
         games: {
           ...state.games,
-          lichess: action.payload,
-        },
+          lichess: action.payload
+        }
       }
     },
     updateOpening: (state, action: PayloadAction<Opening>) => {
@@ -192,13 +192,13 @@ export const boardSlice = createSlice({
       }
       return {
         ...state,
-        opening: action.payload,
+        opening: action.payload
       }
     },
-    flipBoard: (state) => {
+    flipBoard: state => {
       return {
         ...state,
-        perspective: state.perspective === 'white' ? 'black' : 'white',
+        perspective: state.perspective === 'white' ? 'black' : 'white'
       }
     },
     loadPosition: (state, action: PayloadAction<PositionLoad>) => {
@@ -211,15 +211,15 @@ export const boardSlice = createSlice({
             white: 0,
             black: 0,
             draws: 0,
-            moves: [],
-          },
+            moves: []
+          }
         },
         history: [action.payload.fen],
         moveHistory: [],
         pgn: '',
         opening: undefined,
         halfMoveCount: 0,
-        selectedPiece: null,
+        selectedPiece: null
       }
     },
     resetBoard: () => {
@@ -236,41 +236,41 @@ export const boardSlice = createSlice({
         moveHistory: [],
         pgn: '',
         opening: undefined,
-        selectedPiece: null,
+        selectedPiece: null
       }
     },
-    wrongMoveReset: (state) => {
+    wrongMoveReset: state => {
       return {
         ...state,
         enabled: true,
-        halfMoveCount: 0,
+        halfMoveCount: 0
       }
     },
-    resetHalfMoveCount: (state) => {
+    resetHalfMoveCount: state => {
       return {
         ...state,
-        halfMoveCount: 0,
+        halfMoveCount: 0
       }
     },
-    disableBoard: (state) => {
+    disableBoard: state => {
       return {
         ...state,
-        enabled: false,
+        enabled: false
       }
     },
-    clearMetaData: (state) => {
+    clearMetaData: state => {
       return {
         ...initialState,
         fen: state.fen,
-        perspective: state.perspective,
+        perspective: state.perspective
       }
     },
-    clearLichessGames: (state) => {
+    clearLichessGames: state => {
       return {
         ...state,
         games: {
-          lichess: initialState.games.lichess,
-        },
+          lichess: initialState.games.lichess
+        }
       }
     },
     loadMoves: (state, action: PayloadAction<string>) => {
@@ -294,10 +294,10 @@ export const boardSlice = createSlice({
         fen: history[0],
         history,
         moveHistory,
-        pgn: game.pgn(),
+        pgn: game.pgn()
       }
-    },
-  },
+    }
+  }
 })
 
 export const {
@@ -320,7 +320,7 @@ export const {
   resetHalfMoveCount,
   disableBoard,
   clearMetaData,
-  clearLichessGames,
+  clearLichessGames
 } = boardSlice.actions
 
 export default boardSlice.reducer

@@ -56,7 +56,7 @@ const AccountManager: FC = () => {
       )
     } catch (e: any) {
       console.error(e)
-      if (e.response) {
+      if (e.response.errors) {
         toast({
           duration: TOAST_DURATION,
           isClosable: true,
