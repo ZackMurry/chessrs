@@ -1,12 +1,17 @@
 import LichessSignInButton from 'components/landing/LichessSignInButton'
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Timeline } from '@primer/react'
 import { BrainCircuit, Microscope, PackagePlus, Save } from 'lucide-react'
-import LandingPageChessboard from 'components/landing/LandingPageChessboard'
+import LandingPageChessboard, { DemoEval } from 'components/landing/LandingPageChessboard'
 
 const LandingPage: FC = () => {
   const history = useHistory()
+  const [demoEval, setDemoEval] = useState<DemoEval>({
+    eval: 0.19,
+    move: 'c4',
+    depth: 65
+  })
 
   const demoLogin = () =>
     fetch('/api/v1/auth/demo', { method: 'POST', credentials: 'include' }).then(() => history.push('/home'))
@@ -82,6 +87,10 @@ const LandingPage: FC = () => {
               <div className='py-32'>
                 <h2 className='font-redhat font-bold mb-5 text-gray-400'>Learn from Stockfish</h2>
                 <h1 className='font-redhat text-6xl font-bold'>Analyze positions using browser and cloud engines</h1>
+                <p className='font-redhat text-lg text-gray-300'>
+                  {/* todo: change this to like a card over the corner of the board similar to the real analysis overview */}
+                  Eval: {demoEval.eval} at depth {demoEval.depth}; best move: {demoEval.move}
+                </p>
               </div>
               <div className='py-32'>
                 <h2 className='font-redhat font-bold mb-5 text-gray-400'>Choose moves to learn</h2>
@@ -92,9 +101,9 @@ const LandingPage: FC = () => {
                 <h1 className='font-redhat text-6xl font-bold'>Study your repertoire using flashcard techniques</h1>
               </div>
             </div>
-            <div className='flex-[3] sticky top-[10vh] py-[100px]'>
+            <div className='flex-[3] sticky top-[10vh] pt-[100px]'>
               {/* <img src='/create-page.png' alt='Create page screenshot' className='scale-[0.8] mt-[50px]' /> */}
-              <LandingPageChessboard />
+              <LandingPageChessboard onDemoEval={setDemoEval} />
             </div>
           </div>
         </section>

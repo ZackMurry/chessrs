@@ -7,27 +7,6 @@ import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import { makeMove, selectPiece, unselectPiece } from 'store/boardSlice'
 import LandingPageChessPiece from './LandingPageChessPiece'
 
-const isMoveMatching = (move: Move, position: string, origin: string) => {
-  if (move.from === origin && move.to === position) {
-    return true
-  }
-  // Check using startsWith() because it could be O-O-O# or something
-  if (move.san.startsWith('O-O-O')) {
-    if (move.color === 'w' && (position === 'c1' || position === 'a1') && origin === 'e1') {
-      return true
-    } else if (move.color === 'b' && (position === 'c8' || position === 'a8') && origin === 'e8') {
-      return true
-    }
-  } else if (move.san.startsWith('O-O')) {
-    if (move.color === 'w' && (position === 'g1' || position === 'h1') && origin === 'e1') {
-      return true
-    } else if (move.color === 'b' && (position === 'g8' || position === 'h8') && origin === 'e8') {
-      return true
-    }
-  }
-  return false
-}
-
 interface Props {
   x: number
   y: number
@@ -36,12 +15,6 @@ interface Props {
   game: ChessInstance
   size: number
   lastMove: string
-}
-
-interface PlacedPiece {
-  position: string
-  type: PieceType
-  color: 'w' | 'b'
 }
 
 // const squareLength = 5
