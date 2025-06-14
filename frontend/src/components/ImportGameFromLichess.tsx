@@ -3,28 +3,23 @@ import ndjson from 'fetch-ndjson'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import { LichessGame } from 'types'
 import { Box, Button, IconButton, useBoolean } from '@chakra-ui/react'
-import {
-  flipBoard,
-  loadMoves,
-  Opening,
-  resetBoard,
-  updateOpening,
-} from 'store/boardSlice'
-import { ArrowLeft, ArrowRight, RefreshCcw, X } from 'lucide-react'
+import { flipBoard, loadMoves, Opening, resetBoard, updateOpening } from 'store/boardSlice'
+import { ArrowLeft, ArrowRight, GraduationCap, RefreshCcw, X } from 'lucide-react'
 import DarkTooltip from 'components/DarkTooltip'
+import LichessStudyPanel from './LichessStudyPanel'
 
 const GAMES_LOADED_PER_FETCH = 10
 
 const ImportGameFromLichess: FC = () => {
-  const { username, isDemo } = useAppSelector((state) => ({
+  const { username, isDemo } = useAppSelector(state => ({
     username: state.user.account?.username,
-    isDemo: state.user.account?.isDemo,
+    isDemo: state.user.account?.isDemo
   }))
-  const [isDescriptionVisible, { on: showDescription, off: hideDescription }] =
-    useBoolean(false)
+  const [isDescriptionVisible, { on: showDescription, off: hideDescription }] = useBoolean(false)
   const [isLoading, { on: startLoading, off: stopLoading }] = useBoolean(false)
   const [games, setGames] = useState<LichessGame[]>([])
   const [gameIdx, setGameIdx] = useState(0)
+  const [mode, setMode] = useState<'games' | 'studies'>('games')
   const dispatch = useAppDispatch()
 
   // is this running before the user even clicks the button?
@@ -38,8 +33,8 @@ const ImportGameFromLichess: FC = () => {
       const response = await fetch(
         `https://lichess.org/api/games/user/${lichessUsername}?max=${GAMES_LOADED_PER_FETCH}&pgnInJson=true&tags=false&opening=true&perfType=ultraBullet,bullet,blitz,rapid,classical,correspondence`,
         {
-          headers: { Accept: 'application/x-ndjson' },
-        },
+          headers: { Accept: 'application/x-ndjson' }
+        }
       )
       const reader = response.body.getReader()
       const gen = ndjson(reader)
@@ -71,8 +66,8 @@ const ImportGameFromLichess: FC = () => {
         games[games.length - 1].createdAt
       }`,
       {
-        headers: { Accept: 'application/x-ndjson' },
-      },
+        headers: { Accept: 'application/x-ndjson' }
+      }
     )
     const reader = response.body.getReader()
     const gen = ndjson(reader)
@@ -108,7 +103,7 @@ const ImportGameFromLichess: FC = () => {
     importGame(
       g.moves,
       g.players.black.user.name !== username,
-      g.opening ? { name: g.opening.name, eco: g.opening.eco } : null,
+      g.opening ? { name: g.opening.name, eco: g.opening.eco } : null
     )
   }
 
@@ -121,9 +116,7 @@ const ImportGameFromLichess: FC = () => {
     importGame(
       firstGame.moves,
       firstGame.players.black.user.name !== username,
-      firstGame.opening
-        ? { name: firstGame.opening.name, eco: firstGame.opening.eco }
-        : null,
+      firstGame.opening ? { name: firstGame.opening.name, eco: firstGame.opening.eco } : null
     )
     showDescription()
   }
@@ -136,7 +129,7 @@ const ImportGameFromLichess: FC = () => {
     }
     const prevGame = games[gameIdx - 1]
     loadGame(prevGame)
-    setGameIdx((gidx) => gidx - 1)
+    setGameIdx(gidx => gidx - 1)
   }
 
   const nextGame = async () => {
@@ -149,7 +142,7 @@ const ImportGameFromLichess: FC = () => {
       }
     }
     loadGame(nextGame)
-    setGameIdx((gidx) => gidx + 1)
+    setGameIdx(gidx => gidx + 1)
   }
 
   const reloadGame = () => {
@@ -181,6 +174,15 @@ const ImportGameFromLichess: FC = () => {
     )
   }
 
+  const exitStudies = () => {
+    setMode('games')
+    loadGame(games[gameIdx])
+  }
+
+  if (mode === 'studies') {
+    return <LichessStudyPanel onExit={exitLichessAnalysis} onModeChange={exitStudies} />
+  }
+
   const game = games[gameIdx]
   const gameTime = new Date(game.lastMoveAt)
   const isWhite = game.players.black.user.name !== username
@@ -191,12 +193,10 @@ const ImportGameFromLichess: FC = () => {
     <Box py='10px'>
       <div className='text-offwhite'>
         <h3 className='text-lg font-bold'>
-          Lichess Game on {gameTime.getMonth() + 1}/{gameTime.getDate()}/
-          {gameTime.getFullYear()}
+          Lichess Game on {gameTime.getMonth() + 1}/{gameTime.getDate()}/{gameTime.getFullYear()}
         </h3>
         <p className='text-md'>
-          {game.speed.charAt(0).toUpperCase() + game.speed.substr(1)}:{' '}
-          {game.opening?.name ?? ''}
+          {game.speed.charAt(0).toUpperCase() + game.speed.substr(1)}: {game.opening?.name ?? ''}
         </p>
         {opponent && (
           <p className='text-md'>
@@ -216,14 +216,79 @@ const ImportGameFromLichess: FC = () => {
 
         <p className='text-md'>
           {/* todo: draws */}
-          Result: {game.winner === 'white' ? '1-0' : '0-1'} (
-          {isWhite === (game.winner === 'white') ? 'Win' : 'Loss'})
+          Result: {game.winner === 'white' ? '1-0' : '0-1'} ({isWhite === (game.winner === 'white') ? 'Win' : 'Loss'})
         </p>
-        <div className='flex justify-start items-center mt-1'>
-          <DarkTooltip label='Previous game'>
+        <div className='flex justify-between items-center mt-1'>
+          <div className='flex justify-start items-center'>
+            <DarkTooltip label='Previous game'>
+              <IconButton
+                icon={<ArrowLeft />}
+                aria-label='Previous game'
+                className='!ring-none !shadow-none ml-1'
+                variant='ghost'
+                borderRadius='xl'
+                padding='0'
+                size='xs'
+                // className='hover:!bg-none'
+                _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                onClick={previousGame}
+              />
+            </DarkTooltip>
+            <DarkTooltip label='Reload game'>
+              <IconButton
+                icon={<RefreshCcw size='18' />}
+                aria-label='Reload game'
+                className='!ring-none !shadow-none ml-1'
+                variant='ghost'
+                borderRadius='xl'
+                padding='0'
+                size='xs'
+                // className='hover:!bg-none'
+                _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                onClick={reloadGame}
+              />
+            </DarkTooltip>
+            <DarkTooltip label='Exit Lichess analysis'>
+              <IconButton
+                icon={<X />}
+                aria-label='Exit Lichess analysis'
+                className='!ring-none !shadow-none ml-1'
+                variant='ghost'
+                borderRadius='xl'
+                padding='0'
+                size='xs'
+                // className='hover:!bg-none'
+                _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                onClick={exitLichessAnalysis}
+              />
+            </DarkTooltip>
+            <DarkTooltip label='Next game'>
+              <IconButton
+                icon={<ArrowRight />}
+                aria-label='Next game'
+                className='!ring-none !shadow-none ml-1'
+                variant='ghost'
+                borderRadius='xl'
+                padding='0'
+                size='xs'
+                // className='hover:!bg-none'
+                _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                onClick={nextGame}
+              />
+            </DarkTooltip>
+          </div>
+          <DarkTooltip label='Import study'>
             <IconButton
-              icon={<ArrowLeft />}
-              aria-label='Previous game'
+              icon={<GraduationCap />}
+              aria-label='Import study'
               className='!ring-none !shadow-none ml-1'
               variant='ghost'
               borderRadius='xl'
@@ -233,55 +298,7 @@ const ImportGameFromLichess: FC = () => {
               _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
               // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
               _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-              onClick={previousGame}
-            />
-          </DarkTooltip>
-          <DarkTooltip label='Reload game'>
-            <IconButton
-              icon={<RefreshCcw size='18' />}
-              aria-label='Reload game'
-              className='!ring-none !shadow-none ml-1'
-              variant='ghost'
-              borderRadius='xl'
-              padding='0'
-              size='xs'
-              // className='hover:!bg-none'
-              _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-              // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-              _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-              onClick={reloadGame}
-            />
-          </DarkTooltip>
-          <DarkTooltip label='Exit Lichess analysis'>
-            <IconButton
-              icon={<X />}
-              aria-label='Exit Lichess analysis'
-              className='!ring-none !shadow-none ml-1'
-              variant='ghost'
-              borderRadius='xl'
-              padding='0'
-              size='xs'
-              // className='hover:!bg-none'
-              _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-              // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-              _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-              onClick={exitLichessAnalysis}
-            />
-          </DarkTooltip>
-          <DarkTooltip label='Next game'>
-            <IconButton
-              icon={<ArrowRight />}
-              aria-label='Next game'
-              className='!ring-none !shadow-none ml-1'
-              variant='ghost'
-              borderRadius='xl'
-              padding='0'
-              size='xs'
-              // className='hover:!bg-none'
-              _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-              // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-              _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-              onClick={nextGame}
+              onClick={() => setMode('studies')}
             />
           </DarkTooltip>
         </div>

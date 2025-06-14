@@ -12,7 +12,7 @@ const DarkTooltip: FC<Props> = ({ label, children }) => (
     <Tooltip.Root>
       <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
       <Tooltip.Portal>
-        <Tooltip.Content>
+        <Tooltip.Content className='bg-surface text-offwhite p-1 border-[2px] border-solid border-surfaceBorder text-sm'>
           {label}
           <Tooltip.Arrow />
         </Tooltip.Content>

@@ -180,7 +180,7 @@ const LandingPageChessboard: FC = () => {
     const handleScroll = () => {
       let moveCount = Math.floor((window.scrollY - 1000) / 210)
       const shouldAnalysisBeVisible = window.scrollY > 1950
-      const shouldOpeningBeVisible = window.scrollY > 2850
+      const shouldOpeningBeVisible = window.scrollY > 2900
       if (shouldAnalysisBeVisible && analysisState.current !== 'visible') {
         analysisControls.start({
           opacity: 1,
@@ -285,7 +285,7 @@ const LandingPageChessboard: FC = () => {
           ))}
         </Flex>
       ))}
-      <Flex className='justify-center items-center w-full pl-[180px] mt-10'>
+      <Flex className='justify-center items-center w-full pl-[150px] mt-10'>
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={openingControls}

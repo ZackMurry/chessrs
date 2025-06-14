@@ -296,6 +296,46 @@ export const boardSlice = createSlice({
         moveHistory,
         pgn: game.pgn()
       }
+    },
+    loadStudyChapter: (state, action: PayloadAction<string>) => {
+      const extractFen = (pgnStr: string) => {
+        const match = pgnStr.match(/\[FEN\s+"([^"]+)"\]/)
+        return match ? match[1] : null
+      }
+      const parsedGame = new Chess()
+      const startFen = extractFen(action.payload.trim())
+      const success = parsedGame.load_pgn(action.payload.trim())
+      if (!success) {
+        console.error('Failed to load chapter', action.payload)
+        return state
+      }
+      const moveHistory: Move[] = []
+      const game = new Chess()
+      if (startFen) {
+        console.log('loading fen', startFen)
+        game.load(startFen)
+      }
+      const history: string[] = [game.fen()]
+      const moves = parsedGame.history()
+      for (const move of moves) {
+        const m = game.move(move, { sloppy: true })
+
+        if (m === null) {
+          console.warn('Invalid move')
+          break
+        }
+        const { san, from, to, promotion } = m
+        moveHistory.push({ san: san, uci: `${from}${to}${promotion ?? ''}` })
+        history.push(game.fen())
+      }
+      return {
+        ...state,
+        perspective: 'white',
+        fen: history[0],
+        history,
+        moveHistory,
+        pgn: game.pgn()
+      }
     }
   }
 })
@@ -314,6 +354,7 @@ export const {
   flipBoard,
   loadMoves,
   loadPosition,
+  loadStudyChapter,
   resetBoard,
   wrongMove,
   wrongMoveReset,

@@ -118,3 +118,10 @@ export interface LichessGame {
     ply: number
   }
 }
+
+export interface LichessStudy {
+  id: string
+  name: string
+  createdAt: string
+  updatedAt: string
+}
