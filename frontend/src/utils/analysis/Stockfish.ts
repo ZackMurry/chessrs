@@ -34,18 +34,12 @@ export default class Stockfish {
   constructor(
     public onAnalysis: (bestMove: string, sfFen) => void,
     public onReady: () => void,
-    public onEvaluation: (
-      cp: number,
-      mate: number,
-      bestMove: string,
-      depth: number,
-      sfFen: string,
-    ) => void,
+    public onEvaluation: (cp: number, mate: number, bestMove: string, depth: number, sfFen: string) => void
   ) {
     console.warn('running stockfish')
     this.worker = new Worker('/stockfish.js')
     this.worker.postMessage('isready')
-    this.worker.onmessage = (event) => {
+    this.worker.onmessage = event => {
       const { data } = event
       if (!data) {
         console.error('data is null')
@@ -58,7 +52,7 @@ export default class Stockfish {
         if (hasBound) return
         const { depth, cp, mate, pv } = parseUCIStringToObject(
           msg.substring('info '.length),
-          18 + (hasBound ? 1 : 0),
+          18 + (hasBound ? 1 : 0)
         ) as InfoObject
         if (this.onEvaluation && this.lastDepth + 1 === depth) {
           // console.warn(
@@ -100,7 +94,7 @@ export default class Stockfish {
     this.worker.postMessage('ucinewgame')
   }
 
-  analyzePosition(moves: string, depth: number, fen: string): void {
+  analyzePosition(moves: string, depth: number, fen: string, startpos: string | null): void {
     // Depth > 20 takes too long to finish, so moves aren't analyzed immediately. Lichess also caps at 22
     if (depth > SF_DEPTH) {
       return
@@ -122,8 +116,12 @@ export default class Stockfish {
     // console.error('ANALYZING POSITION')
     this.lastDepth = 0
     this.depth = depth
-    console.log(`analyzing ${moves} at depth ${depth}`)
-    this.worker.postMessage(`position startpos moves ${moves}`)
+    console.log(`analyzing ${moves} at depth ${depth} at startpos ${startpos}`)
+    if (startpos) {
+      this.worker.postMessage(`position fen ${startpos} moves ${moves}`)
+    } else {
+      this.worker.postMessage(`position startpos moves ${moves}`)
+    }
     this.worker.postMessage(`go depth ${depth}`)
   }
 

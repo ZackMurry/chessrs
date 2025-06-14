@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import ChessJS, { PieceType } from 'chess.js'
+import getPlyIndexFromFEN from 'utils/getPlyIndexFromFEN'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
@@ -38,6 +39,7 @@ interface BoardState {
   fen: string
   pgn: string
   halfMoveCount: number
+  startHalfMoveCount: number
   history: string[]
   moveHistory: Move[]
   selectedPiece: SelectedPiece | null
@@ -60,6 +62,7 @@ const initialState = {
   fen: STARTING_FEN,
   pgn: '',
   halfMoveCount: 0,
+  startHalfMoveCount: 0,
   history: [STARTING_FEN], // History of FENs
   selectedPiece: null,
   moveHistory: [],
@@ -219,6 +222,7 @@ export const boardSlice = createSlice({
         pgn: '',
         opening: undefined,
         halfMoveCount: 0,
+        startHalfMoveCount: 0,
         selectedPiece: null
       }
     },
@@ -230,6 +234,7 @@ export const boardSlice = createSlice({
         ...state,
         enabled: false,
         halfMoveCount: 0,
+        startHalfMoveCount: 0,
         perspective: action.payload.perspective,
         fen: action.payload.fen,
         history: [action.payload.fen],
@@ -304,6 +309,7 @@ export const boardSlice = createSlice({
       }
       const parsedGame = new Chess()
       const startFen = extractFen(action.payload.trim())
+      const startCount = startFen ? getPlyIndexFromFEN(startFen) : 0
       const success = parsedGame.load_pgn(action.payload.trim())
       if (!success) {
         console.error('Failed to load chapter', action.payload)
@@ -334,7 +340,9 @@ export const boardSlice = createSlice({
         fen: history[0],
         history,
         moveHistory,
-        pgn: game.pgn()
+        pgn: game.pgn(),
+        halfMoveCount: 0,
+        startHalfMoveCount: startCount
       }
     }
   }

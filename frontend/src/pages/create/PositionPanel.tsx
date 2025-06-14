@@ -1,22 +1,10 @@
 import { IconButton } from '@chakra-ui/button'
-import {
-  ChevronLeft,
-  ChevronsLeft,
-  ChevronRight,
-  ChevronsRight,
-  FlipVertical,
-} from 'lucide-react'
+import { ChevronLeft, ChevronsLeft, ChevronRight, ChevronsRight, FlipVertical } from 'lucide-react'
 import { Box, Flex, Text } from '@chakra-ui/layout'
 import { FC, useEffect, useMemo, useState } from 'react'
 import ChessJS from 'chess.js'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
-import {
-  flipBoard,
-  traverseBackwards,
-  traverseForwards,
-  traverseToEnd,
-  traverseToStart,
-} from 'store/boardSlice'
+import { flipBoard, traverseBackwards, traverseForwards, traverseToEnd, traverseToStart } from 'store/boardSlice'
 import Stockfish, { SF_DEPTH } from 'utils/analysis/Stockfish'
 import DarkTooltip from 'components/DarkTooltip'
 import ImportGameFromLichess from 'components/ImportGameFromLichess'
@@ -27,17 +15,18 @@ import {
   updateLocalBestMove,
   updateLocalAnalysis,
   setLocalAnalysisLoading,
-  setCloudAnalysisLoading,
+  setCloudAnalysisLoading
 } from 'store/analysisSlice'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 const PositionPanel: FC = () => {
-  const { halfMoveCount, moveHistory, fen } = useAppSelector((state) => ({
+  const { halfMoveCount, moveHistory, fen, history } = useAppSelector(state => ({
     pgn: state.board.pgn,
     halfMoveCount: state.board.halfMoveCount,
     moveHistory: state.board.moveHistory,
     fen: state.board.fen,
+    history: state.board.history
   }))
   const isTraverseBarShowing = useBreakpointValue({ base: true, lg: false })
   const dispatch = useAppDispatch()
@@ -48,16 +37,14 @@ const PositionPanel: FC = () => {
     () =>
       moveHistory
         .slice(0, halfMoveCount)
-        .map((m) => m.uci)
+        .map(m => m.uci)
         .join(' '),
-    [moveHistory, halfMoveCount],
+    [moveHistory, halfMoveCount]
   )
   const onAnalysis = (bestMove: string, sfFen: string) => {
     const from = bestMove.substr(0, 2)
     const to = bestMove.substr(2, 2)
-    const matchingMoves = new Chess(sfFen)
-      .moves({ verbose: true })
-      .filter((m) => m.from === from && m.to === to)
+    const matchingMoves = new Chess(sfFen).moves({ verbose: true }).filter(m => m.from === from && m.to === to)
     if (!matchingMoves.length) {
       // Invalid move (likely from a previous run)
       console.error("Move doesn't match fen!")
@@ -66,28 +53,20 @@ const PositionPanel: FC = () => {
     dispatch(
       updateLocalBestMove({
         san: matchingMoves[0].san,
-        uci: bestMove,
-      }),
+        uci: bestMove
+      })
     )
     dispatch(setLocalAnalysisLoading(false))
   }
   const onReady = () => {
     console.log('onReady')
     stockfish.createNewGame()
-    stockfish.analyzePosition(uciMoves, SF_DEPTH, fen)
+    stockfish.analyzePosition(uciMoves, SF_DEPTH, fen, history[0])
   }
-  const onEvaluation = (
-    cp: number,
-    mate: number,
-    bestMove: string,
-    d: number,
-    sfFen: string,
-  ) => {
+  const onEvaluation = (cp: number, mate: number, bestMove: string, d: number, sfFen: string) => {
     const from = bestMove.substr(0, 2)
     const to = bestMove.substr(2, 2)
-    const matchingMoves = new Chess(sfFen)
-      .moves({ verbose: true })
-      .filter((m) => m.from === from && m.to === to)
+    const matchingMoves = new Chess(sfFen).moves({ verbose: true }).filter(m => m.from === from && m.to === to)
     if (!matchingMoves.length) {
       console.error('Moves dont match', sfFen, bestMove)
       // Invalid move (likely from a previous run)
@@ -97,22 +76,20 @@ const PositionPanel: FC = () => {
       updateLocalAnalysis({
         bestMove: {
           uci: bestMove,
-          san: matchingMoves[0].san,
+          san: matchingMoves[0].san
         },
         depth: d,
         fen: sfFen,
         eval: (cp / 100) * localEvalMultiplier,
         mate,
-        engine: 'BROWSER',
-      }),
+        engine: 'BROWSER'
+      })
     )
     if (d >= 20) {
       dispatch(setLocalAnalysisLoading(false))
     }
   }
-  const [stockfish] = useState(
-    () => new Stockfish(onAnalysis, onReady, onEvaluation),
-  )
+  const [stockfish] = useState(() => new Stockfish(onAnalysis, onReady, onEvaluation))
   stockfish.onAnalysis = onAnalysis
 
   useEffect(
@@ -122,7 +99,7 @@ const PositionPanel: FC = () => {
       stockfish.onReady = null
       stockfish.terminate()
     },
-    [stockfish],
+    [stockfish]
   )
 
   useEffect(() => {
@@ -131,7 +108,7 @@ const PositionPanel: FC = () => {
     const runStockfish = () => {
       stockfish.onEvaluation = onEvaluation
       // stockfish.createNewGame()
-      stockfish.analyzePosition(uciMoves, SF_DEPTH, fen)
+      stockfish.analyzePosition(uciMoves, SF_DEPTH, fen, history[0])
     }
     console.log('Rerunning stockfish in useeffect (onReady)')
     if (new Chess(fen).in_checkmate()) {
@@ -142,8 +119,8 @@ const PositionPanel: FC = () => {
           engine: 'BROWSER',
           eval: null,
           mate: 0,
-          fen,
-        }),
+          fen
+        })
       )
       dispatch(setLocalAnalysisLoading(false))
       return
