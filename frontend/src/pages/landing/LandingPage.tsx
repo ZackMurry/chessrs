@@ -1,9 +1,9 @@
 import LichessSignInButton from 'components/landing/LichessSignInButton'
 import { FC, useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import { Timeline } from '@primer/react'
-import { BrainCircuit, Microscope, PackagePlus, Save } from 'lucide-react'
 import LandingPageChessboard, { DemoEval } from 'components/landing/LandingPageChessboard'
+import { Button } from '@radix-ui/themes'
+import { Activity, Blocks, BookPlus, BrainCircuit, Cable, ChevronRight, GraduationCap, Plug } from 'lucide-react'
 
 const LandingPage: FC = () => {
   const history = useHistory()
@@ -12,7 +12,7 @@ const LandingPage: FC = () => {
     fetch('/api/v1/auth/demo', { method: 'POST', credentials: 'include' }).then(() => history.push('/home'))
 
   return (
-    <div className='bg-[#1f2224] pb-[2000px]'>
+    <div className='bg-[#1f2224]'>
       <div className='flex justify-between align-center py-3 sm:px-12 md:px-[20%]'>
         <a href='/'>
           <div className='flex justify-start align-center'>
@@ -70,81 +70,138 @@ const LandingPage: FC = () => {
           </div>
         </div> */}
 
-        <section className='md:px-[10%] my-20'>
+        <section className='md:px-[10%] mt-20 pb-10'>
           <div className='flex justify-between items-start w-full'>
-            <div className='flex-[2]'>
+            <div className='flex-[3]'>
               <div className='py-64'>
                 <h2 className='font-redhat font-bold mb-5 text-gray-400'>Integrated with Lichess</h2>
-                <h1 className='font-redhat text-6xl font-bold'>
-                  Explore openings on the fly or import recent games from Lichess
+                <h1
+                  className='font-redhat text-6xl font-bold'
+                  style={{
+                    textShadow: '0 0 2px rgba(255, 255, 255, 0.8)'
+                  }}
+                >
+                  Explore openings on the fly or import your games from Lichess
                 </h1>
+                <h4 className='text-gray-300 text-lg mt-5'>
+                  Chessrs helps you improve using real opening lines from your own games and deepen your understanding with
+                  over 100,000 user-created{' '}
+                  <a href='https://lichess.org/study' rel='noopener noreferrer' target='_blank' className='underline'>
+                    Lichess studies
+                  </a>{' '}
+                  packed with practical positions and expert insights.
+                </h4>
+                <div className='mt-8 ml-2'>
+                  <a href='/api/v1/oauth2/code/lichess'>
+                    <Button className='!cursor-pointer' variant='soft' color='iris'>
+                      Connect a Lichess account
+                      <Plug width='20' />
+                    </Button>
+                  </a>
+                </div>
               </div>
               <div className='py-64'>
-                <h2 className='font-redhat font-bold mb-5 text-gray-400'>Learn from Stockfish</h2>
-                <h1 className='font-redhat text-6xl font-bold'>Analyze positions using powerful cloud engines</h1>
+                <h2 className='font-redhat font-bold mb-5 text-gray-400'>Learn from the best</h2>
+                <h1
+                  className='font-redhat text-6xl font-bold'
+                  style={{
+                    textShadow: '0 0 2px rgba(255, 255, 255, 0.8)'
+                  }}
+                >
+                  Analyze positions using powerful cloud engines
+                </h1>
+                <h4 className='text-gray-300 text-lg mt-5'>
+                  Evaluate positions in real-time with the{' '}
+                  <a href='https://stockfishchess.org' rel='noopener noreferrer' target='_blank' className='underline'>
+                    Stockfish
+                  </a>{' '}
+                  engine running in your browser. For deeper insights, leverage powerful cloud engines and explore over 15
+                  million pre-analyzed positions from Lichess's cloud database.
+                </h4>
+                <div className='mt-8 ml-2'>
+                  <a href='/api/v1/oauth2/code/lichess'>
+                    <Button className='!cursor-pointer' variant='soft' color='iris'>
+                      Study positions
+                      <GraduationCap width='20' />
+                    </Button>
+                  </a>
+                </div>
               </div>
               <div className='py-64'>
                 <h2 className='font-redhat font-bold mb-5 text-gray-400'>Choose moves to learn</h2>
-                <h1 className='font-redhat text-6xl font-bold'>Add opening variations to your repertoire</h1>
+                <h1
+                  className='font-redhat text-6xl font-bold'
+                  style={{
+                    textShadow: '0 0 2px rgba(255, 255, 255, 0.8)'
+                  }}
+                >
+                  Add opening variations to your repertoire
+                </h1>
+                <h4 className='text-gray-300 text-lg mt-5'>
+                  Easily add new lines as you study every response to your favorite openings. Organize them into a personal
+                  repertoire (set of openings) for future study.
+                </h4>
+                <div className='mt-8 ml-2'>
+                  <a href='/api/v1/oauth2/code/lichess'>
+                    <Button className='!cursor-pointer' variant='soft' color='iris'>
+                      Create a repertoire
+                      <Blocks className='mb-[2px]' width='20' />
+                    </Button>
+                  </a>
+                </div>
               </div>
-              <div className='py-64'>
+              <div className='pt-64 pb-[220px]'>
                 <h2 className='font-redhat font-bold mb-5 text-gray-400'>Leverage a Spaced Repetition System (SRS)</h2>
-                <h1 className='font-redhat text-6xl font-bold'>Study your repertoire using flashcard techniques</h1>
+                <h1
+                  className='font-redhat text-6xl font-bold'
+                  style={{
+                    textShadow: '0 0 2px rgba(255, 255, 255, 0.8)'
+                  }}
+                >
+                  Study your repertoire using flashcard techniques
+                </h1>
+                <h4 className='text-gray-300 text-lg mt-5'>
+                  Leverage the same techniques used by{' '}
+                  <a href='https://apps.ankiweb.net/' rel='noopener noreferrer' target='_blank' className='underline'>
+                    Anki
+                  </a>
+                  ,{' '}
+                  <a href='https://quizlet.com' rel='noopener noreferrer' target='_blank' className='underline'>
+                    Quizlet
+                  </a>
+                  , and more to learn in an effective and reliable learning system{' '}
+                  <a
+                    href='https://www.pnas.org/doi/10.1073/pnas.1815156116'
+                    rel='noopener noreferrer'
+                    target='_blank'
+                    className='underline'
+                  >
+                    backed by science
+                  </a>
+                  .
+                </h4>
+                <div className='mt-8 ml-2'>
+                  <a href='/api/v1/oauth2/code/lichess'>
+                    <Button className='!cursor-pointer' color='iris'>
+                      Start learning <ChevronRight />
+                    </Button>
+                  </a>
+                </div>
               </div>
             </div>
-            <div className='flex-[3] sticky top-[10vh] mt-[120px] pt-[100px]'>
+            <div className='flex-[4] sticky top-[10vh] mt-[140px] pt-[100px]'>
               {/* <img src='/create-page.png' alt='Create page screenshot' className='scale-[0.8] mt-[50px]' /> */}
               <LandingPageChessboard />
             </div>
           </div>
         </section>
-
-        {/* <section className='md:px-[20%] my-20'>
-          <h2 className='text-4xl font-bold mb-4'>Learn chess theory using flashcards</h2>
-          <Timeline className='text-offwhite'>
-            <Timeline.Item className='items-center'>
-              <Timeline.Badge className='!bg-[#1f2224] !w-[48px] !h-[48px] !-ml-[24px]'>
-                <PackagePlus
-                  aria-label='Commit'
-                  className='bg-[#1f2224] rounded-[50%]'
-                  size='32'
-                />
-              </Timeline.Badge>
-              <Timeline.Body><h4 className='text-xl pb-1'>Import a game from Lichess</h4></Timeline.Body>
-            </Timeline.Item>
-            <Timeline.Item className='items-center'>
-              <Timeline.Badge className='!bg-[#1f2224] !w-[48px] !h-[48px] !-ml-[24px]'>
-                <Microscope
-                  aria-label='Commit'
-                  className='bg-[#1f2224] rounded-[50%]'
-                  size='32'
-                />
-              </Timeline.Badge>
-              <Timeline.Body><h4 className='text-xl pb-1'>Analyze the opening using Chessrs</h4></Timeline.Body>
-            </Timeline.Item>
-            <Timeline.Item className='items-center'>
-              <Timeline.Badge className='!bg-[#1f2224] !w-[48px] !h-[48px] !-ml-[24px]'>
-                <Save
-                  aria-label='Commit'
-                  className='bg-[#1f2224] rounded-[50%]'
-                  size='32'
-                />
-              </Timeline.Badge>
-              <Timeline.Body><h4 className='text-xl pb-1'>Pick opening variations to add to your repertoire</h4></Timeline.Body>
-            </Timeline.Item>
-            <Timeline.Item className='items-center'>
-              <Timeline.Badge className='!bg-[#1f2224] !w-[48px] !h-[48px] !-ml-[24px]'>
-                <BrainCircuit
-                  aria-label='Commit'
-                  className='bg-[#1f2224] rounded-[50%]'
-                  size='32'
-                />
-              </Timeline.Badge>
-              <Timeline.Body><h4 className='text-xl pb-1'>Study your repertoire using a Spaced Repetition System (SRS)</h4></Timeline.Body>
-            </Timeline.Item>
-          </Timeline>
-        </section> */}
       </div>
+      <footer className='text-center w-full pb-8 text-offwhite'>
+        Created by{' '}
+        <a href='https://zackmurry.com' className='underline' rel='noopener noreferrer' target='_blank'>
+          Zack Murry
+        </a>
+      </footer>
     </div>
   )
 }

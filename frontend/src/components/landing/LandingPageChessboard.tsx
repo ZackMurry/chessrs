@@ -178,9 +178,9 @@ const LandingPageChessboard: FC = () => {
   useEffect(() => {
     setChess(new Chess(STARTING_FEN))
     const handleScroll = () => {
-      let moveCount = Math.floor((window.scrollY - 1000) / 180)
-      const shouldAnalysisBeVisible = window.scrollY > 1700 // && window.scrollY < 2500
-      const shouldOpeningBeVisible = window.scrollY > 2550 // && window.scrollY < 2500
+      let moveCount = Math.floor((window.scrollY - 1000) / 210)
+      const shouldAnalysisBeVisible = window.scrollY > 1950
+      const shouldOpeningBeVisible = window.scrollY > 2850
       if (shouldAnalysisBeVisible && analysisState.current !== 'visible') {
         analysisControls.start({
           opacity: 1,
