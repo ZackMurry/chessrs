@@ -21,17 +21,21 @@ import {
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 const PositionPanel: FC = () => {
-  const { halfMoveCount, moveHistory, fen, history } = useAppSelector(state => ({
+  const { halfMoveCount, moveHistory, fen, history, startCount } = useAppSelector(state => ({
     pgn: state.board.pgn,
     halfMoveCount: state.board.halfMoveCount,
     moveHistory: state.board.moveHistory,
     fen: state.board.fen,
-    history: state.board.history
+    history: state.board.history,
+    startCount: state.board.startHalfMoveCount
   }))
   const isTraverseBarShowing = useBreakpointValue({ base: true, lg: false })
   const dispatch = useAppDispatch()
 
-  const localEvalMultiplier = halfMoveCount % 2 === 0 ? 1 : -1
+  let localEvalMultiplier = halfMoveCount % 2 === 0 ? 1 : -1
+  if (startCount > 0 && startCount % 2 === 0) {
+    localEvalMultiplier *= -1
+  }
 
   const uciMoves = useMemo(
     () =>

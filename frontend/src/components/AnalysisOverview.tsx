@@ -110,7 +110,7 @@ const AnalysisOverview = () => {
     <Box>
       <h3 className='text-xl font-bold text-offwhite mb-1'>Analysis</h3>
       <h6 className='text-md text-offwhite mb-1'>
-        Evaluation: {analysis ? (analysis.mate !== null ? `#${analysis.mate}` : analysis.eval) : 0}
+        Evaluation: {analysis ? (analysis.mate !== null ? `#${analysis.mate}` : analysis.eval.toFixed(2)) : 0}
         {analysis?.engine === 'BROWSER' && loading.local && '...'}
         {/* {isLoading ? '...' : ''} */}
       </h6>

@@ -74,7 +74,7 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
       const games = pgn.replaceAll('*', '').split(/\n\n\n+/)
 
       setChapters(games)
-      loadChapter(games[0])
+      loadChapter(games[chapterIdx])
     }
     fetchStudyFile()
   }, [studyIdx, studies])
@@ -97,6 +97,10 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
   const prevChapter = () => {
     loadChapter(chapters[chapterIdx - 1])
     setChapterIdx(idx => idx - 1)
+  }
+
+  const reloadChapter = () => {
+    loadChapter(chapters[chapterIdx])
   }
 
   if (isLoading) {
@@ -167,10 +171,10 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
                 disabled={studyIdx <= 0}
               />
             </DarkTooltip>
-            <DarkTooltip label='Reload game'>
+            <DarkTooltip label='Reload chapter'>
               <IconButton
                 icon={<RefreshCcw size='18' />}
-                aria-label='Reload game'
+                aria-label='Reload chapter'
                 className='!ring-none !shadow-none ml-1'
                 variant='ghost'
                 borderRadius='xl'
@@ -180,6 +184,7 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
                 _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
                 // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
                 _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                onClick={reloadChapter}
               />
             </DarkTooltip>
             <DarkTooltip label='Exit Lichess analysis'>
