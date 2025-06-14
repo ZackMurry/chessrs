@@ -33,93 +33,128 @@ export interface DemoEval {
   eval: number
   move: string
   depth: number
+  name?: string
+  moves?: string[]
 }
 
 const demoEvals = [
   {
     eval: 0.19,
     move: 'c4',
-    depth: 65
+    depth: 65,
+    name: 'Starting position',
+    moves: ['e4', 'd4', 'Nf3', 'c4', 'e3', 'g3']
   },
   {
     eval: 0.18,
     move: 'e5',
-    depth: 70
+    depth: 70,
+    name: "King's Pawn Game",
+    moves: ['e5', 'c5', 'd5', 'e6', 'c6', 'd6']
   },
   {
     eval: 0.22,
     move: 'Nf3',
-    depth: 65
+    depth: 65,
+    moves: ['Nf3', 'Bc4', 'Nc3', 'd4', 'f4', 'd3']
   },
   {
     eval: 0.13,
     move: 'Nc6',
-    depth: 63
+    depth: 63,
+    name: "King's Knight Opening",
+    moves: ['Nc6', 'd6', 'Nf6', 'Bc5', 'Qf6', 'd5']
   },
   {
     eval: 0.21,
     move: 'Bb5',
-    depth: 65
+    depth: 65,
+    name: "King's Knight Opening: Normal Variation",
+    moves: ['Bc4', 'Bb5', 'd4', 'Nc3', 'c3', 'd3']
   },
   {
     eval: 0.15,
     move: 'Nf6',
-    depth: 65
+    depth: 65,
+    name: 'Ruy Lopez',
+    moves: ['a6', 'd6', 'Nf6', 'Bc5', 'Nd4', 'Nge7']
   },
   {
     eval: 0.64,
     move: 'O-O',
-    depth: 55
+    depth: 55,
+    name: 'Ruy Lopez: Berlin Defense',
+    moves: ['O-O', 'Bxc6', 'd3', 'Nc3', 'd4', 'c3']
   },
   {
     eval: 0.06,
     move: 'Nxe4',
-    depth: 60
+    depth: 60,
+    name: 'Ruy Lopez: Berlin Defense',
+    moves: ['Nxe4', 'Bc5', 'd6', 'a6', 'Be7', 'Bd6']
   },
   {
     eval: 0.14,
     move: 'Re1',
-    depth: 60
+    depth: 60,
+    name: 'Ruy Lopez: Berlin Defense, Rio Gambit Accepted',
+    moves: ['Re1', 'd4', 'Bxc6', 'd3', 'Qe2', 'Nxe5']
   },
   {
     eval: 0.14,
     move: 'Nd6',
-    depth: 52
+    depth: 52,
+    name: 'Ruy Lopez: Berlin Defense, Rio Gambit Accepted',
+    moves: ['Nd6', 'exd4', 'Nxd4', 'Be7', 'd5', 'a6']
   },
   {
     eval: 0.04,
     move: 'Bxc6',
-    depth: 54
+    depth: 54,
+    name: "Ruy Lopez: Berlin Defense, l'Hermet Variation",
+    moves: ['Bxc6', 'dxe5', 'Ba4', 'Re1', 'Bg5', 'd5']
   },
   {
     eval: 0.07,
     move: 'dxc6',
-    depth: 50
+    depth: 50,
+    name: "Ruy Lopez: Berlin Defense, l'Hermet Variation",
+    moves: ['dxc6', 'bxc6', 'e4', 'exd4', 'Nb5', 'b6']
   },
   {
     eval: 0.17,
     move: 'dxe5',
-    depth: 44
+    depth: 44,
+    name: "Ruy Lopez: Berlin Defense, l'Hermet Variation",
+    moves: ['dxe5', 'Nxe5', 'Re1', 'd5', 'Bg5', 'Qe2']
   },
   {
     eval: 0.05,
     move: 'Nf5',
-    depth: 55
+    depth: 55,
+    name: "Ruy Lopez: Berlin Defense, l'Hermet Variation",
+    moves: ['Nf5', 'Nc4', 'Nb5', 'Ne4', 'Bg4', 'Be7']
   },
   {
     eval: 0.11,
     move: 'Qxd8+',
-    depth: 38
+    depth: 38,
+    name: "Ruy Lopez: Berlin Defense, l'Hermet Variation",
+    moves: ['Qxd8+', 'Qe2', 'Nc3', 'Bg5', 'Re1', 'Nbd2']
   },
   {
     eval: 0.04,
     move: 'Kxd8',
-    depth: 39
+    depth: 39,
+    name: "Ruy Lopez: Berlin Defense, l'Hermet Variation",
+    moves: ['Kxd8']
   },
   {
     eval: 0.14,
     move: 'h3',
-    depth: 57
+    depth: 57,
+    name: "Ruy Lopez: Berlin Defense, l'Hermet Variation, Berlin Wall Defense",
+    moves: ['Nc3', 'Rd1+', 'Bg5+', 'h3', 'b3', 'Bf4']
   }
 ] as DemoEval[]
 
@@ -134,30 +169,47 @@ const LandingPageChessboard: FC = () => {
   const [chess, setChess] = useState(() => new Chess())
   const [lastMove, setLastMove] = useState('')
   const [engineEval, setEngineEval] = useState<DemoEval>(demoEvals[0])
-  const currentState = useRef<'hidden' | 'visible'>('hidden')
+  const analysisState = useRef<'hidden' | 'visible'>('hidden')
+  const openingState = useRef<'hidden' | 'visible'>('hidden')
   const squareLength = 3
-  const controls = useAnimation()
+  const analysisControls = useAnimation()
+  const openingControls = useAnimation()
 
   useEffect(() => {
     setChess(new Chess(STARTING_FEN))
     const handleScroll = () => {
       let moveCount = Math.floor((window.scrollY - 1000) / 180)
-      const shouldBeVisible = window.scrollY > 1700 // && window.scrollY < 2500
-      if (shouldBeVisible && currentState.current !== 'visible') {
-        controls.start({
+      const shouldAnalysisBeVisible = window.scrollY > 1700 // && window.scrollY < 2500
+      const shouldOpeningBeVisible = window.scrollY > 2550 // && window.scrollY < 2500
+      if (shouldAnalysisBeVisible && analysisState.current !== 'visible') {
+        analysisControls.start({
           opacity: 1,
           y: 0,
           transition: { duration: 0.6, ease: 'easeOut' }
         })
-        currentState.current = 'visible'
-      } else if (!shouldBeVisible && currentState.current !== 'hidden') {
-        console.log('hiding')
-        controls.start({
+        analysisState.current = 'visible'
+      } else if (!shouldAnalysisBeVisible && analysisState.current !== 'hidden') {
+        analysisControls.start({
           opacity: 0,
           y: -50,
           transition: { duration: 0.4, ease: 'easeIn' }
         })
-        currentState.current = 'hidden'
+        analysisState.current = 'hidden'
+      }
+      if (shouldOpeningBeVisible && openingState.current !== 'visible') {
+        openingControls.start({
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.6, ease: 'easeOut' }
+        })
+        openingState.current = 'visible'
+      } else if (!shouldOpeningBeVisible && openingState.current !== 'hidden') {
+        openingControls.start({
+          opacity: 0,
+          y: 50,
+          transition: { duration: 0.4, ease: 'easeIn' }
+        })
+        openingState.current = 'hidden'
       }
       const pos = new Chess(STARTING_FEN)
       if (moveCount < 0) {
@@ -195,8 +247,8 @@ const LandingPageChessboard: FC = () => {
     <Flex w='100%' h='100%' justifyContent='center' alignItems='end' flexDir={'column'}>
       <motion.div
         initial={{ opacity: 0, y: -50 }}
-        animate={controls}
-        className='w-full p-4 bg-surface border-[2px] border-solid border-surfaceBorder rounded-[3px] max-w-[300px] absolute top-20 -right-[200px] z-10 bg'
+        animate={analysisControls}
+        className='w-full p-4 bg-surface border-[2px] border-solid border-surfaceBorder rounded-[3px] max-w-[300px] absolute top-20 -right-[200px] z-10'
       >
         <h3 className='text-xl font-bold text-offwhite mb-1'>Analysis</h3>
         <h6 className='text-md text-offwhite mb-1'>Evaluation: {engineEval.eval}</h6>
@@ -233,6 +285,19 @@ const LandingPageChessboard: FC = () => {
           ))}
         </Flex>
       ))}
+      <Flex className='justify-center items-center w-full pl-[180px] mt-10'>
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={openingControls}
+          className='p-4 bg-surface border-[2px] border-solid border-surfaceBorder rounded-[3px] w-full'
+        >
+          <h3 className='text-xl font-bold text-offwhite mb-1'>{engineEval.name}</h3>
+          <h5 className='text-offwhite'>
+            <span className='font-bold'>Common moves: </span>
+            {engineEval.moves && engineEval.moves.join(', ')}
+          </h5>
+        </motion.div>
+      </Flex>
     </Flex>
   )
 }

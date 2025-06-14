@@ -92,7 +92,7 @@ const LandingPage: FC = () => {
                 <h1 className='font-redhat text-6xl font-bold'>Study your repertoire using flashcard techniques</h1>
               </div>
             </div>
-            <div className='flex-[3] sticky top-[10vh] my-[120px] pt-[100px]'>
+            <div className='flex-[3] sticky top-[10vh] mt-[120px] pt-[100px]'>
               {/* <img src='/create-page.png' alt='Create page screenshot' className='scale-[0.8] mt-[50px]' /> */}
               <LandingPageChessboard />
             </div>
