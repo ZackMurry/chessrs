@@ -1,10 +1,11 @@
 import { Box, IconButton } from '@chakra-ui/react'
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, RefreshCcw, Sword, Swords, X } from 'lucide-react'
-import { FC, useEffect, useState } from 'react'
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Plus, RefreshCcw, Search, Sword, Swords, X } from 'lucide-react'
+import { FC, FormEvent, useEffect, useState } from 'react'
 import { LichessStudy } from 'types'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import DarkTooltip from './DarkTooltip'
 import { flipBoard, loadMoves, loadStudyChapter, resetBoard, updateOpening } from 'store/boardSlice'
+import { TextField } from '@radix-ui/themes'
 
 interface Props {
   onExit: () => void
@@ -29,6 +30,9 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
   const [chapterIdx, setChapterIdx] = useState(0)
   const [chapters, setChapters] = useState([])
   const [chapterName, setChapterName] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState('')
+  const [searchError, setSearchError] = useState(false)
 
   useEffect(() => {
     const fetchStudies = async () => {
@@ -101,6 +105,26 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
 
   const reloadChapter = () => {
     loadChapter(chapters[chapterIdx])
+  }
+
+  const openCustomStudy = () => {
+    setSearchOpen(true)
+  }
+
+  const handleSearch = async (e: FormEvent) => {
+    e.preventDefault()
+    const res = await fetch(`https://lichess.org/api/study/${searchValue}.pgn`)
+    if (!res.ok) {
+      setSearchError(true)
+      return
+    }
+    const pgn = await res.text()
+    // console.log(pgn)
+    const games = pgn.replaceAll('*', '').split(/\n\n\n+/)
+
+    setChapters(games)
+    loadChapter(games[chapterIdx])
+    setSearchOpen(false)
   }
 
   if (isLoading) {
@@ -220,6 +244,53 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
                 disabled={studyIdx + 1 >= studies.length}
               />
             </DarkTooltip>
+            {searchOpen ? (
+              <form onSubmit={handleSearch}>
+                <TextField.Root
+                  placeholder='Lichess study ID'
+                  size='1'
+                  // todo: display search error (red outline)
+                  className='mx-2'
+                  value={searchValue}
+                  onChange={e => setSearchValue(e.target.value)}
+                >
+                  <TextField.Slot side='right'>
+                    <IconButton
+                      icon={<X size='16' />}
+                      aria-label='Close study search'
+                      className='!ring-none !shadow-none ml-1'
+                      variant='ghost'
+                      borderRadius='xl'
+                      padding='0'
+                      size='xs'
+                      // className='hover:!bg-none'
+                      _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                      // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                      _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                      onClick={() => setSearchOpen(false)}
+                      onSubmit={() => console.error('submitted!')}
+                    />
+                  </TextField.Slot>
+                </TextField.Root>
+              </form>
+            ) : (
+              <DarkTooltip label='View study by ID'>
+                <IconButton
+                  icon={<Search size='22' />}
+                  aria-label='View study by ID'
+                  className='!ring-none !shadow-none ml-1'
+                  variant='ghost'
+                  borderRadius='xl'
+                  padding='0'
+                  size='xs'
+                  // className='hover:!bg-none'
+                  _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                  _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                  onClick={openCustomStudy}
+                />
+              </DarkTooltip>
+            )}
           </div>
           <DarkTooltip label='Import game'>
             <IconButton
