@@ -4,14 +4,17 @@ import { FC, useEffect, useState } from 'react'
 import { LichessStudy } from 'types'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import DarkTooltip from './DarkTooltip'
-import ChessJS from 'chess.js'
 import { flipBoard, loadMoves, loadStudyChapter, resetBoard, updateOpening } from 'store/boardSlice'
-
-const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
 interface Props {
   onExit: () => void
   onModeChange: () => void
+}
+
+const getTagFromPGN = (pgn: string, tagName: string) => {
+  const regex = new RegExp(`\\[${tagName}\\s+"([^"]+)"\\]`)
+  const match = pgn.match(regex)
+  return match ? match[1] : null
 }
 
 const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
@@ -25,6 +28,7 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
   const [isLoading, setLoading] = useState(true)
   const [chapterIdx, setChapterIdx] = useState(0)
   const [chapters, setChapters] = useState([])
+  const [chapterName, setChapterName] = useState('')
 
   useEffect(() => {
     const fetchStudies = async () => {
@@ -47,6 +51,11 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
     console.log('loading', ch)
     dispatch(resetBoard())
     dispatch(loadStudyChapter(ch))
+    let chName = getTagFromPGN(ch, 'Event')
+    if (chName.includes(studies[studyIdx].name)) {
+      chName = chName.substring(studies[studyIdx].name.length + 1)
+    }
+    setChapterName(chName)
   }
 
   useEffect(() => {
@@ -54,6 +63,12 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
       const stud = studies[studyIdx]
       if (!stud) return
       const res = await fetch(`https://lichess.org/api/study/${stud.id}.pgn`)
+      if (!res.ok) {
+        if (studyIdx + 1 < studies.length) {
+          setStudyIdx(idx => idx + 1)
+        }
+        return
+      }
       const pgn = await res.text()
       // console.log(pgn)
       const games = pgn.replaceAll('*', '').split(/\n\n\n+/)
@@ -132,10 +147,7 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
           </DarkTooltip>
         </div>
 
-        <p className='text-md'>
-          {/* todo: draws */}
-          Result: Study
-        </p>
+        <p className='text-md'>{chapterName}</p>
         <div className='flex justify-between items-center mt-1'>
           <div className='flex justify-start items-center'>
             <DarkTooltip label='Previous study'>

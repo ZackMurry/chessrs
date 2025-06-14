@@ -14,7 +14,7 @@ import {
   traverseToEnd,
   traverseToStart,
   updateLichessGames,
-  updateOpening,
+  updateOpening
 } from 'store/boardSlice'
 import { TOAST_DURATION } from 'theme'
 import { useAppSelector } from 'utils/hooks'
@@ -22,28 +22,15 @@ import { useAppSelector } from 'utils/hooks'
 configure({ ignoreKeymapAndHandlerChangesByDefault: false })
 
 const OverviewPanel: FC = () => {
-  const {
-    lastMove,
-    lichessGamesInPosition,
-    commonMoves,
-    fen,
-    opening,
-    history,
-    halfMoveCount,
-  } = useAppSelector((state) => ({
-    lastMove:
-      state.board.moveHistory.length > 0
-        ? state.board.moveHistory[state.board.halfMoveCount - 1]
-        : null,
+  const { lastMove, lichessGamesInPosition, commonMoves, fen, opening, history, halfMoveCount } = useAppSelector(state => ({
+    lastMove: state.board.moveHistory.length > 0 ? state.board.moveHistory[state.board.halfMoveCount - 1] : null,
     lichessGamesInPosition:
-      state.board.games.lichess.white +
-      state.board.games.lichess.draws +
-      state.board.games.lichess.black,
-    commonMoves: state.board.games.lichess.moves.map((m) => m.san),
+      state.board.games.lichess.white + state.board.games.lichess.draws + state.board.games.lichess.black,
+    commonMoves: state.board.games.lichess.moves.map(m => m.san),
     fen: state.board.fen,
     opening: state.board.opening,
     history: state.board.history,
-    halfMoveCount: state.board.halfMoveCount,
+    halfMoveCount: state.board.halfMoveCount
   }))
 
   const dispatch = useDispatch()
@@ -101,12 +88,12 @@ const OverviewPanel: FC = () => {
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
-        render: (options) => (
+        render: options => (
           <ErrorToast
             description={`Error getting current move for position: ${e.response?.errors[0]?.message}`}
             onClose={options.onClose}
           />
-        ),
+        )
       })
     }
     // Adding currentMove as a dependency would make useEffect be called in a loop
@@ -142,12 +129,12 @@ const OverviewPanel: FC = () => {
         toast({
           duration: TOAST_DURATION,
           isClosable: true,
-          render: (options) => (
+          render: options => (
             <ErrorToast
               description={`Error getting position information: ${e.response?.errors[0]?.message}`}
               onClose={options.onClose}
             />
-          ),
+          )
         })
       }
     }
@@ -164,18 +151,8 @@ const OverviewPanel: FC = () => {
     setCurrentMove(null)
     console.log('adding move')
     const query = gql`
-      mutation CreateMove(
-        $fenBefore: String!
-        $san: String!
-        $uci: String!
-        $opening: String!
-      ) {
-        createMove(
-          fenBefore: $fenBefore
-          san: $san
-          uci: $uci
-          opening: $opening
-        ) {
+      mutation CreateMove($fenBefore: String!, $san: String!, $uci: String!, $opening: String!) {
+        createMove(fenBefore: $fenBefore, san: $san, uci: $uci, opening: $opening) {
           san
           id
         }
@@ -188,7 +165,7 @@ const OverviewPanel: FC = () => {
         fenBefore: history[halfMoveCount - 1],
         san: lastMove.san,
         uci: lastMove.uci,
-        opening: opening?.name ?? 'Unknown',
+        opening: opening?.name ?? 'Unknown'
       })) as any
       console.log('created move')
       console.log(data)
@@ -197,12 +174,9 @@ const OverviewPanel: FC = () => {
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
-        render: (options) => (
-          <ErrorToast
-            description={`Error creating move: ${e.response?.errors[0]?.message}`}
-            onClose={options.onClose}
-          />
-        ),
+        render: options => (
+          <ErrorToast description={`Error creating move: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
+        )
       })
     }
     setAddLoading(false)
@@ -217,7 +191,7 @@ const OverviewPanel: FC = () => {
     toast,
     currentMove,
     halfMoveCount,
-    lastMove,
+    lastMove
   ])
 
   const onDeleteMove = async () => {
@@ -237,12 +211,9 @@ const OverviewPanel: FC = () => {
       toast({
         duration: TOAST_DURATION,
         isClosable: true,
-        render: (options) => (
-          <ErrorToast
-            description={`Error deleting move: ${e.response?.errors[0]?.message}`}
-            onClose={options.onClose}
-          />
-        ),
+        render: options => (
+          <ErrorToast description={`Error deleting move: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
+        )
       })
     }
     setDeleteLoading(false)
@@ -254,7 +225,7 @@ const OverviewPanel: FC = () => {
     TRAVERSE_START: handleTraverseStart,
     TRAVERSE_END: handleTraverseEnd,
     FLIP_BOARD: handleFlipBoard,
-    ADD_MOVE: onAddMove,
+    ADD_MOVE: onAddMove
   }
 
   // todo: a hotkey for traverseToStart and traverseToEnd
@@ -264,7 +235,7 @@ const OverviewPanel: FC = () => {
     TRAVERSE_START: ['s'],
     TRAVERSE_END: ['e'],
     FLIP_BOARD: ['f'],
-    ADD_MOVE: 'space',
+    ADD_MOVE: 'space'
   }
 
   return (
@@ -292,8 +263,7 @@ const OverviewPanel: FC = () => {
         <h1 className='text-xl font-bold mt-[20px] text-offwhite'>
           {opening ? (
             <>
-              {opening.name}{' '}
-              <span style={{ fontWeight: 'normal' }}>{opening.eco}</span>
+              {opening.name} <span style={{ fontWeight: 'normal' }}>{opening.eco}</span>
             </>
           ) : halfMoveCount === 0 ? (
             'Starting position'
@@ -301,25 +271,20 @@ const OverviewPanel: FC = () => {
             'Unknown opening'
           )}
         </h1>
-        <p className='text-offwhite text-lg mt-3'>
-          Lichess games: {lichessGamesInPosition.toLocaleString()}
-        </p>
+        <p className='text-offwhite text-lg mt-3'>Lichess games: {lichessGamesInPosition.toLocaleString()}</p>
         {commonMoves.length > 0 ? (
           <>
             {/* todo: show some stats about the moves */}
             {isMobile ? (
               <h3 className='text-lg mb-[1px] mt-[0.7em] text-offwhite'>
-                <span style={{ fontWeight: 'bold' }}>Most Common Moves</span>{' '}
-                {commonMoves && commonMoves.join(', ')}
+                <span style={{ fontWeight: 'bold' }}>Most Common Moves</span> {commonMoves && commonMoves.join(', ')}
               </h3>
             ) : (
               <>
-                <h3 className='text-xl font-bold mb-1 mt-4 text-offwhite'>
-                  Most Common Moves
-                </h3>
+                <h3 className='text-xl font-bold mb-1 mt-4 text-offwhite'>Most Common Moves</h3>
                 {/* todo: show a bit more data (like number of times of name of opening) */}
                 {commonMoves &&
-                  commonMoves.map((m) => (
+                  commonMoves.map(m => (
                     <h6 className='text-lg mb-1 text-offwhite' key={m}>
                       {m}
                     </h6>
@@ -328,15 +293,11 @@ const OverviewPanel: FC = () => {
             )}
           </>
         ) : (
-          <h3 className='text-xl font-bold mb-1 mt-4 text-offwhite'>
-            There are no moves found in this position
-          </h3>
+          <h3 className='text-xl font-bold mb-1 mt-4 text-offwhite'>There are no moves found in this position</h3>
         )}
         {currentMove?.san ? (
           <div className='flex justify-between items-center mb-1 mt-4'>
-            <h3 className='text-xl font-bold text-offwhite'>
-              Current move: {currentMove.san}
-            </h3>
+            <h3 className='text-xl font-bold text-offwhite'>Current move: {currentMove.san}</h3>
             <DarkTooltip label='Delete current move'>
               <IconButton
                 aria-label='Delete current move'
@@ -351,9 +312,7 @@ const OverviewPanel: FC = () => {
             </DarkTooltip>
           </div>
         ) : (
-          <h3 className='text-xl font-bold text-offwhite'>
-            This position does not have a move
-          </h3>
+          <h3 className='text-xl font-bold text-offwhite mt-4'>This position does not have a move</h3>
         )}
       </GlobalHotKeys>
     </Box>

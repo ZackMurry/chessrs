@@ -178,7 +178,7 @@ const AnalysisOverview = () => {
       <h6 className='text-md text-offwhite mb-1'>
         FEN:
         <ChakraLink ml='2px' isExternal href={`https://lichess.org/analysis?fen=${encodeURIComponent(fen)}`}>
-          {fen} <ExternalLinkIcon ml='4px' mt='-2px' />
+          {fen}
         </ChakraLink>
       </h6>
     </Box>

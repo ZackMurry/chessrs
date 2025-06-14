@@ -7,9 +7,9 @@ const store = configureStore({
   reducer: {
     board: boardReducer,
     user: userReducer,
-    analysis: analysisReducer,
+    analysis: analysisReducer
   },
-  devTools: true,
+  devTools: true
 })
 
 export type RootState = ReturnType<typeof store.getState>
