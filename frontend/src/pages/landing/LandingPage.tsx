@@ -7,11 +7,6 @@ import LandingPageChessboard, { DemoEval } from 'components/landing/LandingPageC
 
 const LandingPage: FC = () => {
   const history = useHistory()
-  const [demoEval, setDemoEval] = useState<DemoEval>({
-    eval: 0.19,
-    move: 'c4',
-    depth: 65
-  })
 
   const demoLogin = () =>
     fetch('/api/v1/auth/demo', { method: 'POST', credentials: 'include' }).then(() => history.push('/home'))
@@ -78,32 +73,28 @@ const LandingPage: FC = () => {
         <section className='md:px-[10%] my-20'>
           <div className='flex justify-between items-start w-full'>
             <div className='flex-[2]'>
-              <div className='py-32'>
+              <div className='py-64'>
                 <h2 className='font-redhat font-bold mb-5 text-gray-400'>Integrated with Lichess</h2>
                 <h1 className='font-redhat text-6xl font-bold'>
                   Explore openings on the fly or import recent games from Lichess
                 </h1>
               </div>
-              <div className='py-32'>
+              <div className='py-64'>
                 <h2 className='font-redhat font-bold mb-5 text-gray-400'>Learn from Stockfish</h2>
-                <h1 className='font-redhat text-6xl font-bold'>Analyze positions using browser and cloud engines</h1>
-                <p className='font-redhat text-lg text-gray-300'>
-                  {/* todo: change this to like a card over the corner of the board similar to the real analysis overview */}
-                  Eval: {demoEval.eval} at depth {demoEval.depth}; best move: {demoEval.move}
-                </p>
+                <h1 className='font-redhat text-6xl font-bold'>Analyze positions using powerful cloud engines</h1>
               </div>
-              <div className='py-32'>
+              <div className='py-64'>
                 <h2 className='font-redhat font-bold mb-5 text-gray-400'>Choose moves to learn</h2>
                 <h1 className='font-redhat text-6xl font-bold'>Add opening variations to your repertoire</h1>
               </div>
-              <div className='py-32'>
+              <div className='py-64'>
                 <h2 className='font-redhat font-bold mb-5 text-gray-400'>Leverage a Spaced Repetition System (SRS)</h2>
                 <h1 className='font-redhat text-6xl font-bold'>Study your repertoire using flashcard techniques</h1>
               </div>
             </div>
-            <div className='flex-[3] sticky top-[10vh] pt-[100px]'>
+            <div className='flex-[3] sticky top-[10vh] my-[120px] pt-[100px]'>
               {/* <img src='/create-page.png' alt='Create page screenshot' className='scale-[0.8] mt-[50px]' /> */}
-              <LandingPageChessboard onDemoEval={setDemoEval} />
+              <LandingPageChessboard />
             </div>
           </div>
         </section>
