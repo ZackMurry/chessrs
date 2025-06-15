@@ -55,10 +55,7 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
     console.log('loading', ch)
     dispatch(resetBoard())
     dispatch(loadStudyChapter(ch))
-    let chName = getTagFromPGN(ch, 'Event')
-    if (chName.includes(studies[studyIdx].name)) {
-      chName = chName.substring(studies[studyIdx].name.length + 1)
-    }
+    const chName = getTagFromPGN(ch, 'ChapterName')
     setChapterName(chName)
   }
 
@@ -121,9 +118,21 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
     const pgn = await res.text()
     // console.log(pgn)
     const games = pgn.replaceAll('*', '').split(/\n\n\n+/)
+    const studyName = getTagFromPGN(games[0], 'StudyName')
 
     setChapters(games)
-    loadChapter(games[chapterIdx])
+    setChapterIdx(0)
+    loadChapter(games[0])
+    setStudyIdx(0)
+    setStudies(studs => [
+      {
+        name: studyName,
+        id: searchValue,
+        createdAt: new Date().getUTCSeconds(),
+        updatedAt: new Date().getUTCSeconds()
+      },
+      ...studs
+    ])
     setSearchOpen(false)
   }
 

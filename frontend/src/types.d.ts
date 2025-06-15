@@ -122,6 +122,6 @@ export interface LichessGame {
 export interface LichessStudy {
   id: string
   name: string
-  createdAt: string
-  updatedAt: string
+  createdAt: number
+  updatedAt: number
 }

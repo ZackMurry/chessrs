@@ -104,6 +104,7 @@ const OverviewPanel: FC = () => {
     console.log('fetching games')
     const getPositionInformation = async () => {
       // todo: when skipping to the end, the opening isn't updated to the last available value
+      if (!fen.includes('K') || !fen.includes('k')) return
       const query = gql`
         query GetPositionInformation($fen: String!) {
           positionInformation(fen: $fen) {
