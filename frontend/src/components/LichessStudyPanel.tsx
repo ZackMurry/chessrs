@@ -4,8 +4,9 @@ import { FC, FormEvent, useEffect, useState } from 'react'
 import { LichessStudy } from 'types'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import DarkTooltip from './DarkTooltip'
-import { flipBoard, loadMoves, loadStudyChapter, resetBoard, updateOpening } from 'store/boardSlice'
+import { loadStudyChapter, resetBoard } from 'store/boardSlice'
 import { TextField } from '@radix-ui/themes'
+import { parse, ParseTree } from '@mliebelt/pgn-parser'
 
 interface Props {
   onExit: () => void
@@ -21,9 +22,10 @@ const getTagFromPGN = (pgn: string, tagName: string) => {
 const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
   const [studies, setStudies] = useState<LichessStudy[]>([])
   const [studyIdx, setStudyIdx] = useState(0)
-  const { username, isDemo } = useAppSelector(state => ({
+  const { username, isDemo, moveCount } = useAppSelector(state => ({
     username: state.user.account?.username,
-    isDemo: state.user.account?.isDemo
+    isDemo: state.user.account?.isDemo,
+    moveCount: state.board.halfMoveCount
   }))
   const dispatch = useAppDispatch()
   const [isLoading, setLoading] = useState(true)
@@ -33,6 +35,7 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchValue, setSearchValue] = useState('')
   const [searchError, setSearchError] = useState(false)
+  const [comments, setComments] = useState<ParseTree | null>(null)
 
   useEffect(() => {
     const fetchStudies = async () => {
@@ -57,6 +60,24 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
     dispatch(loadStudyChapter(ch))
     const chName = getTagFromPGN(ch, 'ChapterName')
     setChapterName(chName)
+    function hasMovesOutsideComments(pgn) {
+      // Remove metadata tags: lines like [Tag "Value"]
+      const noTags = pgn.replace(/\[.*?\]\s*/g, '')
+
+      // Remove comments: { ... }
+      const noComments = noTags.replace(/\{[^}]*\}/g, '')
+
+      // Now search for move patterns outside comments and tags
+      return /\d+\.(\.\.)?\s*[a-hRNBQKO0O\-]/.test(noComments)
+    }
+    console.log(hasMovesOutsideComments(ch))
+    let validPgn = ch
+    if (!hasMovesOutsideComments(ch)) {
+      validPgn += '*' // End with TBD sign
+    }
+    const parsed = parse(validPgn, { startRule: 'game' })
+    console.log(parsed)
+    setComments(parsed as ParseTree)
   }
 
   useEffect(() => {
@@ -140,9 +161,13 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
     return <p>Loading...</p>
   }
 
+  const currentComment =
+    comments && (moveCount > 0 ? comments.moves[moveCount]?.commentAfter : comments.gameComment?.comment)
+
   return (
     <Box py='10px'>
       <div className='text-offwhite'>
+        <div className='overflow-y-auto max-h-[20vh]'>{currentComment}</div>
         <h3 className='text-lg font-bold'>{studies[studyIdx].name}</h3>
         {/* todo: parse chapter title */}
         <div className='flex justify-start items-center'>

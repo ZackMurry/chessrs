@@ -123,31 +123,31 @@ const AnalysisOverview = () => {
               : bestMove.san
             : engineEval.bestMove} */}
         </h6>
-        {analysis?.bestMove && (
-          <DarkTooltip label='View move on board' key='view-move-tooltip'>
-            <IconButton
-              icon={<Eye color='white' size='16' />}
-              aria-label='View move on board'
-              className='!ring-none !shadow-none ml-1'
-              variant='ghost'
-              borderRadius='3xl'
-              spinner={<Spinner size='48' />}
-              padding='0'
-              size='xs'
-              // className='hover:!bg-none'
-              _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-              // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-              _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-              onClick={() => viewMoveOnBoard(analysis.bestMove.uci)}
-            />
-          </DarkTooltip>
-        )}
+        {/* {analysis?.bestMove && ( */}
+        <DarkTooltip label='View move on board' key='view-move-tooltip'>
+          <IconButton
+            icon={<Eye color='white' size='16' />}
+            aria-label='View move on board'
+            className='!ring-none !shadow-none ml-1'
+            variant='ghost'
+            borderRadius='3xl'
+            spinner={<Spinner size='48' />}
+            padding='0'
+            size='xs'
+            // className='hover:!bg-none'
+            _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+            // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+            _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+            onClick={() => viewMoveOnBoard(analysis.bestMove.uci)}
+          />
+        </DarkTooltip>
+        {/* )} */}
       </div>
-      <h6 className='text-md text-offwhite py-1 flex justify-start items-center'>
+      <h6 className='text-md text-offwhite my-1 flex justify-start items-center'>
         <div className='min-w-[80px]'>Depth: {analysis?.depth ?? 0}</div>
         <DarkTooltip key={depthText} label={depthText}>
           <div>
-            {analysis?.engine === 'BROWSER' && (
+            {(analysis?.engine === 'BROWSER' || !analysis?.engine) && (
               <IconButton
                 icon={<CirclePlus size='16' color='white' />}
                 aria-label='Increase depth'

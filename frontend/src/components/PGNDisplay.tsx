@@ -4,12 +4,13 @@ import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import { traverseToMove } from 'store/boardSlice'
 
 const PGNDisplay = () => {
-  const { pgn, halfMoveCount, startCount } = useAppSelector(state => ({
+  const { pgn, halfMoveCount, startCount, isStudy } = useAppSelector(state => ({
     pgn: state.board.pgn,
     halfMoveCount: state.board.halfMoveCount,
     moveHistory: state.board.moveHistory,
     fen: state.board.fen,
-    startCount: state.board.startHalfMoveCount
+    startCount: state.board.startHalfMoveCount,
+    isStudy: state.board.isStudy
   }))
   const dispatch = useAppDispatch()
   const moves = useMemo(
@@ -29,7 +30,7 @@ const PGNDisplay = () => {
   const delta = (startCount - 1) % 2
 
   return (
-    <Box h='40vh' overflowY='auto'>
+    <Box h={isStudy ? '20vh' : '40vh'} overflowY='auto'>
       <h3 className='text-xl font-bold text-offwhite mt-4'>
         {moves.map(({ white, black }, idx) => (
           <span key={`${white}-${black}-${idx}`}>

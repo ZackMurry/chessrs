@@ -1,7 +1,7 @@
 import { IconButton } from '@chakra-ui/button'
 import { ChevronLeft, ChevronsLeft, ChevronRight, ChevronsRight, FlipVertical } from 'lucide-react'
 import { Box, Flex, Text } from '@chakra-ui/layout'
-import { FC, useEffect, useMemo, useState } from 'react'
+import { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import ChessJS from 'chess.js'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import { flipBoard, traverseBackwards, traverseForwards, traverseToEnd, traverseToStart } from 'store/boardSlice'
@@ -19,6 +19,7 @@ import {
 } from 'store/analysisSlice'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
+const stockfish = new Stockfish()
 
 const PositionPanel: FC = () => {
   const { halfMoveCount, moveHistory, fen, history, startCount } = useAppSelector(state => ({
@@ -32,10 +33,15 @@ const PositionPanel: FC = () => {
   const isTraverseBarShowing = useBreakpointValue({ base: true, lg: false })
   const dispatch = useAppDispatch()
 
-  let localEvalMultiplier = halfMoveCount % 2 === 0 ? 1 : -1
-  if (startCount > 0 && startCount % 2 === 0) {
-    localEvalMultiplier *= -1
-  }
+  const localEvalMultiplier = useMemo(() => {
+    let mult = halfMoveCount % 2 === 0 ? 1 : -1
+    if (startCount > 0 && startCount % 2 === 0) {
+      mult *= -1
+    }
+
+    return mult
+  }, [halfMoveCount, startCount])
+  console.log(localEvalMultiplier, halfMoveCount, startCount)
 
   const uciMoves = useMemo(
     () =>
@@ -67,33 +73,35 @@ const PositionPanel: FC = () => {
     stockfish.createNewGame()
     stockfish.analyzePosition(uciMoves, SF_DEPTH, fen, history[0])
   }
-  const onEvaluation = (cp: number, mate: number, bestMove: string, d: number, sfFen: string) => {
-    const from = bestMove.substr(0, 2)
-    const to = bestMove.substr(2, 2)
-    const matchingMoves = new Chess(sfFen).moves({ verbose: true }).filter(m => m.from === from && m.to === to)
-    if (!matchingMoves.length) {
-      console.error('Moves dont match', sfFen, bestMove)
-      // Invalid move (likely from a previous run)
-      return
-    }
-    dispatch(
-      updateLocalAnalysis({
-        bestMove: {
-          uci: bestMove,
-          san: matchingMoves[0].san
-        },
-        depth: d,
-        fen: sfFen,
-        eval: (cp / 100) * localEvalMultiplier,
-        mate,
-        engine: 'BROWSER'
-      })
-    )
-    if (d >= 20) {
-      dispatch(setLocalAnalysisLoading(false))
-    }
-  }
-  const [stockfish] = useState(() => new Stockfish(onAnalysis, onReady, onEvaluation))
+  const onEvaluation = useCallback(
+    (cp: number, mate: number, bestMove: string, d: number, sfFen: string) => {
+      const from = bestMove.substr(0, 2)
+      const to = bestMove.substr(2, 2)
+      const matchingMoves = new Chess(sfFen).moves({ verbose: true }).filter(m => m.from === from && m.to === to)
+      if (!matchingMoves.length) {
+        console.error('Moves dont match', sfFen, bestMove)
+        // Invalid move (likely from a previous run)
+        return
+      }
+      dispatch(
+        updateLocalAnalysis({
+          bestMove: {
+            uci: bestMove,
+            san: matchingMoves[0].san
+          },
+          depth: d,
+          fen: sfFen,
+          eval: (cp / 100) * localEvalMultiplier,
+          mate: mate ? mate * localEvalMultiplier : mate,
+          engine: 'BROWSER'
+        })
+      )
+      if (d >= 20) {
+        dispatch(setLocalAnalysisLoading(false))
+      }
+    },
+    [localEvalMultiplier]
+  )
   stockfish.onAnalysis = onAnalysis
 
   useEffect(
@@ -103,19 +111,25 @@ const PositionPanel: FC = () => {
       stockfish.onReady = null
       stockfish.terminate()
     },
-    [stockfish]
+    []
   )
 
   useEffect(() => {
     dispatch(setCloudAnalysisLoading(false))
     dispatch(setLocalAnalysisLoading(true))
     const runStockfish = () => {
+      stockfish.onReady = onReady
       stockfish.onEvaluation = onEvaluation
-      // stockfish.createNewGame()
+      // stockfiish.createNewGame()
       stockfish.analyzePosition(uciMoves, SF_DEPTH, fen, history[0])
     }
     console.log('Rerunning stockfish in useeffect (onReady)')
-    if (new Chess(fen).in_checkmate()) {
+    const fenPos = fen.split(' ')[0]
+    if (new Chess(fen).in_checkmate() || !fenPos.includes('k') || !fenPos.includes('K')) {
+      console.error('Invalid FEN for stockfish')
+      stockfish.onReady = null
+      stockfish.onEvaluation = null
+      stockfish.stop()
       dispatch(
         updateLocalAnalysis({
           bestMove: null,

@@ -49,6 +49,7 @@ interface BoardState {
   }
   perspective: 'white' | 'black'
   enabled: boolean
+  isStudy: boolean
 }
 
 interface PositionLoad {
@@ -76,7 +77,8 @@ const initialState = {
     }
   },
   perspective: 'white',
-  enabled: true
+  enabled: true,
+  isStudy: false
 } as BoardState
 
 export const boardSlice = createSlice({
@@ -345,7 +347,8 @@ export const boardSlice = createSlice({
         moveHistory,
         pgn: game.pgn(),
         halfMoveCount: 0,
-        startHalfMoveCount: startCount
+        startHalfMoveCount: startCount,
+        isStudy: true
       }
     }
   }

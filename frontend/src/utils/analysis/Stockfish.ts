@@ -30,12 +30,13 @@ export default class Stockfish {
   lastDepth = 0
   fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
   started = false
+  running = false
+  public onAnalysis: (bestMove: string, sfFen) => void
+  public onReady: () => void
+  public onEvaluation: (cp: number, mate: number, bestMove: string, depth: number, sfFen: string) => void
 
-  constructor(
-    public onAnalysis: (bestMove: string, sfFen) => void,
-    public onReady: () => void,
-    public onEvaluation: (cp: number, mate: number, bestMove: string, depth: number, sfFen: string) => void
-  ) {
+  constructor() {
+    // public onEvaluation: (cp: number, mate: number, bestMove: string, depth: number, sfFen: string) => void // public onReady: () => void, // public onAnalysis: (bestMove: string, sfFen) => void,
     console.warn('running stockfish')
     this.worker = new Worker('/stockfish.js')
     this.worker.postMessage('isready')
@@ -46,8 +47,11 @@ export default class Stockfish {
         return
       }
       const msg = data as string
-      console.log(msg)
+      if (this.running) {
+        console.log(msg)
+      }
       if (msg.startsWith('info')) {
+        if (!this.running) return
         const hasBound = msg.includes('bound')
         if (hasBound) return
         const { depth, cp, mate, pv } = parseUCIStringToObject(
@@ -62,6 +66,7 @@ export default class Stockfish {
           this.onEvaluation(cp, mate ?? null, pv, depth, this.fen)
         }
       } else if (msg.startsWith('bestmove')) {
+        if (!this.running) return
         if (!this.onAnalysis) {
           console.warn('!onAnalysis')
           return
@@ -101,7 +106,7 @@ export default class Stockfish {
     }
     if (!this.isReady && this.started) {
       // console.log('not ready')
-      // console.error('Stopping!')
+      console.error('Stopping!')
       this.stop()
       this.createNewGame()
       this.worker.postMessage('isready')
@@ -122,12 +127,15 @@ export default class Stockfish {
     } else {
       this.worker.postMessage(`position startpos moves ${moves}`)
     }
+    console.warn('starting stockfish!!!')
     this.worker.postMessage(`go depth ${depth}`)
+    this.running = true
   }
 
   stop(): void {
-    console.warn('Interrupting Stockfish!')
+    console.warn('Interrupting Stockfish!', this.isReady, this.started)
     this.worker.postMessage('stop')
+    this.running = false
     // this.counter--
   }
 
