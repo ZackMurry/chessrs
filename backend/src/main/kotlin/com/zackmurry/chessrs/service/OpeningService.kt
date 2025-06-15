@@ -13,6 +13,7 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
+import reactor.netty.http.client.PrematureCloseException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -60,6 +61,9 @@ class OpeningService(val restTemplate: RestTemplate, val redisTemplate: RedisTem
             println("Server error with status: $statusCode")
             println("Error body: ${ex.responseBodyAsString}")
             throw ex
+        } catch (ex: PrematureCloseException) {
+            println("Prematurely closed!")
+            throw BadRequestException()
         }
         val jsonString = response.body!!
         val result = mapper.readValue(jsonString, LichessExplorerResponse::class.java)

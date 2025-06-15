@@ -41,7 +41,6 @@ const PositionPanel: FC = () => {
 
     return mult
   }, [halfMoveCount, startCount])
-  console.log(localEvalMultiplier, halfMoveCount, startCount)
 
   const uciMoves = useMemo(
     () =>

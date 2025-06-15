@@ -4,7 +4,7 @@ import { FC, FormEvent, useEffect, useState } from 'react'
 import { LichessStudy } from 'types'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import DarkTooltip from './DarkTooltip'
-import { loadStudyChapter, resetBoard } from 'store/boardSlice'
+import { loadStudyChapter, resetBoard, updateOpening } from 'store/boardSlice'
 import { TextField } from '@radix-ui/themes'
 import { parse, ParseTree } from '@mliebelt/pgn-parser'
 
@@ -70,14 +70,18 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
       // Now search for move patterns outside comments and tags
       return /\d+\.(\.\.)?\s*[a-hRNBQKO0O\-]/.test(noComments)
     }
-    console.log(hasMovesOutsideComments(ch))
     let validPgn = ch
     if (!hasMovesOutsideComments(ch)) {
       validPgn += '*' // End with TBD sign
     }
     const parsed = parse(validPgn, { startRule: 'game' })
-    console.log(parsed)
     setComments(parsed as ParseTree)
+    const opening = getTagFromPGN(ch, 'Opening')
+    const eco = getTagFromPGN(ch, 'ECO')
+    if (opening !== '?' && eco !== '?') {
+      // Todo: lock this as the opening name?
+      dispatch(updateOpening({ name: opening, eco }))
+    }
   }
 
   useEffect(() => {
@@ -162,7 +166,7 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
   }
 
   const currentComment =
-    comments && (moveCount > 0 ? comments.moves[moveCount]?.commentAfter : comments.gameComment?.comment)
+    comments && (moveCount > 0 ? comments.moves[moveCount - 1]?.commentAfter : comments.gameComment?.comment)
 
   return (
     <Box py='10px'>
