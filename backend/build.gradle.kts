@@ -35,6 +35,7 @@ dependencies {
 	compileOnly("io.jsonwebtoken:jjwt-api:0.11.2")
 	implementation("io.jsonwebtoken:jjwt-impl:0.11.2")
 	implementation("io.jsonwebtoken:jjwt-jackson:0.11.2")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
 
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	runtimeOnly("org.postgresql:postgresql")
@@ -57,23 +58,23 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 }
 
-val fatJar = tasks.register<Jar>("fatJar") {
-	archiveBaseName.set("${project.name}-fat")
-	manifest {
-		attributes(
-			"Implementation-Title" to "ChesSRS Backend",
-			"Implementation-Version" to version,
-			"Main-Class" to "com.zackmurry.chessrs.ChesSRSApplicationKt"
-		)
-	}
-	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-	with(tasks.jar.get())
-}
-
-tasks {
-	"build" {
-		dependsOn(fatJar)
-	}
-}
-
+//val fatJar = tasks.register<Jar>("fatJar") {
+//	archiveBaseName.set("${project.name}-fat")
+//	manifest {
+//		attributes(
+//			"Implementation-Title" to "ChesSRS Backend",
+//			"Implementation-Version" to version,
+//			"Main-Class" to "com.zackmurry.chessrs.ChesSRSApplicationKt"
+//		)
+//	}
+//	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//	from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+//	with(tasks.jar.get())
+//}
+//
+//tasks {
+//	"build" {
+//		dependsOn(fatJar)
+//	}
+//}
+//

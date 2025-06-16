@@ -5,3 +5,12 @@ server:
   servlet:
     context-path: /api/v1/engine
   port: 8081
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+

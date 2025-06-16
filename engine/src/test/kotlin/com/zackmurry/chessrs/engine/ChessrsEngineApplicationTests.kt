@@ -1,4 +1,4 @@
-package com.zackmurry.chessrs_engine
+package com.zackmurry.chessrs.engine
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest

@@ -4,6 +4,8 @@ app:
     username: postgres #${POSTGRES_USERNAME} # PostgreSQL username
     password: greSQLdb #${POSTGRES_PASSWORD} # PostgreSQL password
     pool-size: 30
+  engine:
+    url: http://localhost:8081/api/v1/engine/analyze
 spring:
   flyway:
     baseline-on-migrate: true
@@ -29,8 +31,20 @@ spring:
   graphql:
     http:
       path: /api/v1/graphql
+  data:
+    redis:
+      port: 6379
+      host: localhost
 logging:
   level:
     com:
       zackmurry:
         chessrs: DEBUG
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

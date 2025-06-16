@@ -7,6 +7,7 @@ import com.zackmurry.chessrs.exception.InternalServerException
 import com.zackmurry.chessrs.model.*
 import com.zackmurry.chessrs.util.FenManager
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -14,13 +15,16 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 
 const val LICHESS_CLOUD_ANALYSIS_URL = "https://lichess.org/api/cloud-eval"
-const val CHESSRS_CLOUD_ENGINE_URL = "http://localhost:8081/api/v1/engine/analyze"
 const val CHESSRS_ENGINE_DEPTH = 30
 
 private val logger = LoggerFactory.getLogger(EngineService::class.java)
 
 @Service
-class EngineService(private val restTemplate: RestTemplate, val fenManager: FenManager, val redisTemplate: RedisTemplate<String, Any>) {
+class EngineService(private val restTemplate: RestTemplate,
+                    val fenManager: FenManager,
+                    val redisTemplate: RedisTemplate<String, Any>,
+                    @Value("\${app.engine.url}")
+                    val engineUrl: String) {
 
     private val mapper = ObjectMapper().registerKotlinModule()
 
@@ -59,7 +63,7 @@ class EngineService(private val restTemplate: RestTemplate, val fenManager: FenM
             // Ignore
         }
 
-        val uriBuilder = UriComponentsBuilder.fromUriString(CHESSRS_CLOUD_ENGINE_URL)
+        val uriBuilder = UriComponentsBuilder.fromUriString(engineUrl)
             .queryParam("depth", CHESSRS_ENGINE_DEPTH.toString())
             .queryParam("fen", fen)
         val url = uriBuilder.build().toUriString()

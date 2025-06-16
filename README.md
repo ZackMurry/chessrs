@@ -28,3 +28,18 @@ To run on your own machine:
 
 - Import studies from Lichess
 
+## Docker + k8s setup
+```bash
+# for each service
+./gradlew clean build
+sudo docker build -t chessrs-service:latest .
+sudo docker tag chessrs-service:latest username/chessrs-service:latest
+sudo docker push username/chessrs-service:latest
+
+cd k8s
+kubectl apply -f redis
+kubectl apply -f db
+kubectl apply -f engine
+kubectl apply -f backend
+```
+

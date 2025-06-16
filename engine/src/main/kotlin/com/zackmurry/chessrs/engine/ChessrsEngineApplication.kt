@@ -7,5 +7,6 @@ import org.springframework.boot.runApplication
 class ChessrsEngineApplication
 
 fun main(args: Array<String>) {
+	println("Engine Service!!!!")
 	runApplication<ChessrsEngineApplication>(*args)
 }

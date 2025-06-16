@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: engine-service
+  labels:
+    app: engine-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: engine-service
+  template:
+    metadata:
+      labels:
+        app: engine-service
+    spec:
+      containers:
+        - name: engine-service
+          image: zackmurry/engine-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          livenessProbe:
+            httpGet:
+              path: /api/v1/engine/actuator/health
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /api/v1/engine/actuator/health
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 60
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
