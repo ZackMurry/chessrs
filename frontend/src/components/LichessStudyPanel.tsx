@@ -39,7 +39,7 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
 
   useEffect(() => {
     const fetchStudies = async () => {
-      const lichessUsername = 'Thinodya'
+      const lichessUsername = isDemo ? 'Thinodya' : username
       const res = await fetch(`https://lichess.org/api/study/by/${lichessUsername}`)
       const text = await res.text()
       console.log(text.split('\n'))
