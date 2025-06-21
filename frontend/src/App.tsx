@@ -2,12 +2,7 @@ import './App.css'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { ChakraProvider } from '@chakra-ui/react'
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  useLocation,
-} from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route, useLocation } from 'react-router-dom'
 import theme from 'theme'
 import { Theme } from '@radix-ui/themes'
 import { Provider } from 'react-redux'
@@ -18,7 +13,7 @@ import PracticePage from 'pages/practice/PracticePage'
 import AccountManager from 'components/AccountManager'
 import Navbar from 'components/Navbar'
 import HomePage from 'pages/home/HomePage'
-import MovesPage from 'pages/moves/MovesPage'
+import RepertoirePage from 'pages/repertoire/RepertoirePage'
 import AccountPage from 'pages/account/AccountPage'
 import LandingPage from 'pages/landing/LandingPage'
 import '@radix-ui/themes/styles.css'
@@ -60,8 +55,8 @@ function App() {
                   <Route path='/practice' exact>
                     <PracticePage />
                   </Route>
-                  <Route path='/moves' exact>
-                    <MovesPage />
+                  <Route path='/repertoire' exact>
+                    <RepertoirePage />
                   </Route>
                   <Route path='/account' exact>
                     <AccountPage />

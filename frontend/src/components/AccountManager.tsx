@@ -33,41 +33,30 @@ const AccountManager: FC = () => {
       const data = (await request('/api/v1/graphql', query)) as any
       if (!data.account) {
         console.log(data)
-        toast({
-          duration: TOAST_DURATION,
-          isClosable: true,
-          render: (options) => (
-            <ErrorToast
-              description={`Error getting account data from server: ${data.errors[0].message}`}
-              onClose={options.onClose}
-            />
-          ),
-        })
+        window.location.href = '/api/v1/oauth2/code/lichess'
         return
       }
       const act = data.account as UserData
       dispatch(
         setAccount({
           ...act,
-          isDemo: act.authorities.some(
-            (authority) => authority.authority === 'ROLE_DEMO',
-          ),
-        }),
+          isDemo: act.authorities.some(authority => authority.authority === 'ROLE_DEMO')
+        })
       )
     } catch (e: any) {
       console.error(e)
-      if (e.response.errors) {
+      if (e?.response?.errors) {
         toast({
           duration: TOAST_DURATION,
           isClosable: true,
-          render: (options) => (
+          render: options => (
             <ErrorToast
               description={`Error getting account data from server: ${
-                e.response.errors ? e.response.errors[0].message : e
+                e.response.errors ? e.response.errors[0].message : 'unknown'
               }`}
               onClose={options.onClose}
             />
-          ),
+          )
         })
       } else {
         // Sign in with lichess

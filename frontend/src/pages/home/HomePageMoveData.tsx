@@ -28,17 +28,17 @@ const DashboardMoveData: FC = () => {
         toast({
           duration: TOAST_DURATION,
           isClosable: true,
-          render: (options) => (
-            <ErrorToast
-              description={`Error fetching data: ${e.response?.errors[0]?.message}`}
-              onClose={options.onClose}
-            />
-          ),
+          render: options => (
+            <ErrorToast description={`Error fetching data: ${e.response?.errors[0]?.message}`} onClose={options.onClose} />
+          )
         })
       }
     }
     fetchMoves()
   }, [setNumberOfDueMoves, setNumberOfMoves, toast])
+
+  const allMovesDue = numberOfMoves === numberOfDueMoves && numberOfMoves !== 0
+  const noDueMoves = numberOfDueMoves === 0 && numberOfMoves !== 0
 
   return (
     <Box
@@ -52,16 +52,23 @@ const DashboardMoveData: FC = () => {
       className='text-offwhite'
     >
       <Heading as='h6' fontSize='2xl'>
-        {numberOfMoves} Move{numberOfMoves !== 1 ? 's' : ''} Learned
+        Welcome to Chessrs!
       </Heading>
       <Text fontSize='18px' mt='10px'>
-        {numberOfDueMoves} move{numberOfDueMoves !== 1 ? 's' : ''} need review
+        Use the "Create" tab to study positions and add new moves to your repertoire. Then, use the "Study" tab to practice
+        your moves according to the Spaced Repetition System (SRS) schedule. You can freely practice your moves randomly
+        using the "Practice" tab.
       </Text>
-      <Link to='/moves'>
-        <Text fontSize='18px' mt='10px' textDecor='underline'>
-          View moves
+      <Link to='/repertoire'>
+        <Text fontSize='18px' mt='30px' textDecor='underline'>
+          View your repertoire
         </Text>
       </Link>
+      <Text fontSize='18px' mt='10px'>
+        Your repertoire has {numberOfMoves} move{numberOfMoves !== 1 ? 's' : ''} total and {numberOfDueMoves} due move
+        {numberOfDueMoves !== 1 ? 's' : ''}. {allMovesDue ? "You'd better get to work!" : ''}
+        {noDueMoves ? 'Well done!' : ''}
+      </Text>
     </Box>
   )
 }

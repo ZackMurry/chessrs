@@ -8,7 +8,7 @@ type Move {
     uci: String!
     isWhite: Boolean!
     lastReviewed: String!
-    timeCreated: String!
+    timeCreated: Long!
     numReviews: Int!,
     due: String!
     opening: String!
