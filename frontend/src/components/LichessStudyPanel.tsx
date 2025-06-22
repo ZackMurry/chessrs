@@ -39,6 +39,7 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
 
   useEffect(() => {
     const fetchStudies = async () => {
+      dispatch(resetBoard())
       const lichessUsername = isDemo ? 'Thinodya' : username
       const res = await fetch(`https://lichess.org/api/study/by/${lichessUsername}`)
       const text = await res.text()
@@ -161,10 +162,6 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
     setSearchOpen(false)
   }
 
-  if (isLoading) {
-    return <p>Loading...</p>
-  }
-
   const currentComment =
     comments && (moveCount > 0 ? comments.moves[moveCount - 1]?.commentAfter : comments.gameComment?.comment)
 
@@ -172,7 +169,9 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
     <Box py='10px'>
       <div className='text-offwhite'>
         <div className='overflow-y-auto max-h-[20vh]'>{currentComment}</div>
-        <h3 className='text-lg font-bold'>{studies[studyIdx].name}</h3>
+        <h3 className='text-lg font-bold'>
+          {studies?.length ? studies[studyIdx].name : isLoading ? 'Loading...' : "You don't have any studies!"}
+        </h3>
         {/* todo: parse chapter title */}
         <div className='flex justify-start items-center'>
           <p className='text-md'>Chapter {chapterIdx + 1}</p>
