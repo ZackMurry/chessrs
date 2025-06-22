@@ -162,7 +162,9 @@ interface Props {
 const MobileLandingChessboard: FC<Props> = ({ section }) => {
   const squareLength = useBreakpointValue({
     base: 10,
-    lg: 8,
+    sm: 8,
+    md: 6,
+    lg: 6,
     xl: 6,
     '2xl': 5.2
   })

@@ -1,5 +1,5 @@
 import { Box, IconButton } from '@chakra-ui/react'
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Plus, RefreshCcw, Search, Sword, Swords, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, RefreshCcw, Search, Sword, X } from 'lucide-react'
 import { FC, FormEvent, useEffect, useState } from 'react'
 import { LichessStudy } from 'types'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
@@ -61,7 +61,7 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
     dispatch(loadStudyChapter(ch))
     const chName = getTagFromPGN(ch, 'ChapterName')
     setChapterName(chName)
-    function hasMovesOutsideComments(pgn) {
+    function hasMovesOutsideComments(pgn: string) {
       // Remove metadata tags: lines like [Tag "Value"]
       const noTags = pgn.replace(/\[.*?\]\s*/g, '')
 
@@ -104,7 +104,7 @@ const LichessStudyPanel: FC<Props> = ({ onExit, onModeChange }) => {
       loadChapter(games[chapterIdx])
     }
     fetchStudyFile()
-  }, [studyIdx, studies])
+  }, [studyIdx, studies]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const nextStudy = () => {
     setStudyIdx(idx => idx + 1)

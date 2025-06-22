@@ -53,10 +53,10 @@ const LandingPage: FC = () => {
           </div>
         </section>
         {/* todo: demo video here (after UI is polished) */}
-        <img src='/create-page.png' alt='Create page screenshot' className='scale-[0.8] mt-[50px]' />
+        <img src='/create-page.png' alt='Create page screenshot' className='lg:scale-[0.8] mt-[50px]' />
 
         <section className='md:px-[10%] mt-32 lg:mt-20 pb-10'>
-          <div className='flex justify-between items-center w-full'>
+          <div className='flex justify-between items-start w-full'>
             <div className={!isMobile ? 'flex-[3]' : ''}>
               <div className='py-16 lg:py-64'>
                 <h2 className='font-redhat font-bold mb-5 text-gray-400'>Integrated with Lichess</h2>
@@ -150,7 +150,7 @@ const LandingPage: FC = () => {
                   </div>
                 )}
               </div>
-              <div className='pt-16 lg:pt-64 pb-[10px]'>
+              <div className={`pt-16 lg:pt-64 ${isMobile ? 'pb-[10px]' : 'pb-[220px]'}`}>
                 <h2 className='font-redhat font-bold mb-5 text-gray-400'>Leverage a Spaced Repetition System (SRS)</h2>
                 <h1
                   className='font-redhat text-3xl lg:text-6xl font-bold'
@@ -194,10 +194,12 @@ const LandingPage: FC = () => {
                 )}
               </div>
             </div>
-            <div className='flex-[4] sticky top-[10vh] mt-[140px] pt-[100px]'>
-              {/* <img src='/create-page.png' alt='Create page screenshot' className='scale-[0.8] mt-[50px]' /> */}
-              {!isMobile && <LandingPageChessboard />}
-            </div>
+            {!isMobile && (
+              <div className='flex-[4] sticky top-[10vh] mt-[140px] pt-[100px]'>
+                {/* <img src='/create-page.png' alt='Create page screenshot' className='scale-[0.8] mt-[50px]' /> */}
+                <LandingPageChessboard />
+              </div>
+            )}
           </div>
         </section>
       </div>

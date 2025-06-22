@@ -158,8 +158,7 @@ const demoEvals = [
 
 const LandingPageChessboard: FC = () => {
   const squareLength = useBreakpointValue({
-    base: 5,
-    md: 4,
+    base: 4,
     lg: 4,
     xl: 3
   })
@@ -245,7 +244,7 @@ const LandingPageChessboard: FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={analysisControls}
-        className='w-full p-4 bg-surface border-[2px] border-solid border-surfaceBorder rounded-[3px] max-w-[300px] absolute top-20 -right-[200px] z-10'
+        className='w-full p-4 bg-surface border-[2px] border-solid border-surfaceBorder rounded-[3px] max-w-[300px] absolute top-20 -right-[100px] xl:-right-[200px] z-10'
       >
         <h3 className='text-xl font-bold text-offwhite mb-1'>Analysis</h3>
         <h6 className='text-md text-offwhite mb-1'>Evaluation: {engineEval.eval}</h6>
