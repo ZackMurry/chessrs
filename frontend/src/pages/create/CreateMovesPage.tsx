@@ -24,7 +24,7 @@ const CreateMovesPage: FC = () => {
     mt-[10px]
     ${shouldShowTraverseBar ? 'mb-[75px]' : 'mb-0'}
     gap-0 2xl:gap-4
-    grid-rows-[repeat(10,minmax(0,1fr))] 
+    grid-rows-[repeat(3,minmax(0,1fr))] 
     md:grid-rows-[repeat(5,minmax(0,1fr))]
     lg:grid-rows-[repeat(2,minmax(0,1fr))]
     2xl:grid-rows-[repeat(1,minmax(0,1fr))]

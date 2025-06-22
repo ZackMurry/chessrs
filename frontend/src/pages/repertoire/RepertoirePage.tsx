@@ -1,5 +1,6 @@
 import { DownloadIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import { Box, Button, Flex, IconButton, Link as ChakraLink, Text, useToast } from '@chakra-ui/react'
+import humanizeDuration from 'humanize-duration'
 import DarkTooltip from 'components/DarkTooltip'
 import ErrorToast from 'components/ErrorToast'
 import { gql, request } from 'graphql-request'
@@ -9,6 +10,18 @@ import { FC } from 'react'
 import { TOAST_DURATION } from 'theme'
 import { Table } from '@radix-ui/themes'
 import { MoveEntity } from 'types'
+import { useAppSelector } from 'utils/hooks'
+
+const shortFormats = {
+  y: () => 'yr',
+  mo: () => 'mo',
+  w: () => 'wk',
+  d: () => 'd',
+  h: () => 'h',
+  m: () => 'min',
+  s: () => 's',
+  ms: () => 'ms'
+}
 
 const RepertoirePage: FC = () => {
   const [moves, setMoves] = useState<
@@ -26,6 +39,9 @@ const RepertoirePage: FC = () => {
   const [numberOfMoves, setNumberOfMoves] = useState(0)
   const toast = useToast()
   const [pagesLoaded, setPagesLoaded] = useState(0)
+  const { account } = useAppSelector(state => ({
+    account: state.user.account
+  }))
 
   useEffect(() => {
     const fetchMoves = async () => {
@@ -161,7 +177,7 @@ const RepertoirePage: FC = () => {
       borderStyle='solid'
       borderColor='surfaceBorder'
       p='2%'
-      mx='10'
+      mx={{ base: '5', xl: '10' }}
       className='text-offwhite mt-16'
     >
       <Flex justifyContent='space-between' mb='15px' mx='10px'>
@@ -186,6 +202,7 @@ const RepertoirePage: FC = () => {
             <Table.ColumnHeaderCell>UCI</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Side</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className='text-right'>Reviews</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Interval</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>FEN</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Date Added</Table.ColumnHeaderCell>
           </Table.Row>
@@ -199,6 +216,16 @@ const RepertoirePage: FC = () => {
               <Table.Cell>{m.uci}</Table.Cell>
               <Table.Cell>{m.isWhite ? 'White' : 'Black'}</Table.Cell>
               <Table.Cell className='text-right'>{m.numReviews}</Table.Cell>
+              <Table.Cell>
+                {humanizeDuration(Math.pow(account.scalingFactor, m.numReviews) * account.easeFactor * 60 * 1000, {
+                  round: true,
+                  largest: 1,
+                  language: 'short',
+                  languages: {
+                    short: shortFormats
+                  }
+                })}
+              </Table.Cell>
               <Table.Cell>
                 <a
                   href={`https://lichess.org/analysis?fen=${encodeURIComponent(m.fenBefore)}`}

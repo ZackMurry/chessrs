@@ -261,7 +261,7 @@ const OverviewPanel: FC = () => {
           Add {lastMove?.san || 'Move'}
           {!isMobile ? ' (Space)' : ''}
         </Button>
-        <h1 className='text-xl font-bold mt-[20px] text-offwhite'>
+        <h1 className={`text-xl font-bold mt-[20px] text-offwhite ${isMobile ? 'min-h-[50px]' : ''}`}>
           {opening ? (
             <>
               {opening.name} <span style={{ fontWeight: 'normal' }}>{opening.eco}</span>
@@ -272,17 +272,17 @@ const OverviewPanel: FC = () => {
             'Unknown opening'
           )}
         </h1>
-        <p className='text-offwhite text-lg mt-3'>Lichess games: {lichessGamesInPosition.toLocaleString()}</p>
+        <p className='text-offwhite text-lg mt-2'>Lichess games: {lichessGamesInPosition.toLocaleString()}</p>
         {commonMoves.length > 0 ? (
           <>
             {/* todo: show some stats about the moves */}
             {isMobile ? (
-              <h3 className='text-lg mb-[1px] mt-[0.7em] text-offwhite'>
-                <span style={{ fontWeight: 'bold' }}>Most Common Moves</span> {commonMoves && commonMoves.join(', ')}
+              <h3 className='text-lg mb-[1px] mt-[0.7em] text-offwhite min-h-[60px]'>
+                <span style={{ fontWeight: 'bold' }}>Most Common Moves:</span> {commonMoves && commonMoves.join(', ')}
               </h3>
             ) : (
               <>
-                <h3 className='text-xl font-bold mb-1 mt-4 text-offwhite'>Most Common Moves</h3>
+                <h3 className='text-xl font-bold mb-1 mt-4 text-offwhite'>Most Common Moves:</h3>
                 {/* todo: show a bit more data (like number of times of name of opening) */}
                 {commonMoves &&
                   commonMoves.map(m => (
@@ -294,27 +294,26 @@ const OverviewPanel: FC = () => {
             )}
           </>
         ) : (
-          <h3 className='text-xl font-bold mb-1 mt-4 text-offwhite'>There are no moves found in this position</h3>
+          <h3 className={`text-lg font-bold mb-1 mt-[0.7em] text-offwhite ${isMobile ? 'min-h-[60px]' : ''}`}>
+            No common moves
+          </h3>
         )}
-        {currentMove?.san ? (
-          <div className='flex justify-between items-center mb-1 mt-4'>
-            <h3 className='text-xl font-bold text-offwhite'>Current move: {currentMove.san}</h3>
-            <DarkTooltip label='Delete current move'>
-              <IconButton
-                aria-label='Delete current move'
-                size='sm'
-                borderRadius='5px'
-                onClick={onDeleteMove}
-                isLoading={isDeleteLoading}
-                className='text-black'
-              >
-                <Trash2 />
-              </IconButton>
-            </DarkTooltip>
-          </div>
-        ) : (
-          <h3 className='text-xl font-bold text-offwhite mt-4'>This position does not have a move</h3>
-        )}
+        <div className='flex justify-between items-center mb-1 mt-1 min-h-[50px]'>
+          <h3 className='text-xl font-bold text-offwhite'>Current move: {currentMove?.san ?? 'none'}</h3>
+          <DarkTooltip label='Delete current move'>
+            <IconButton
+              aria-label='Delete current move'
+              size='sm'
+              borderRadius='5px'
+              onClick={onDeleteMove}
+              isLoading={isDeleteLoading}
+              className='text-black'
+              disabled={!currentMove?.san}
+            >
+              <Trash2 />
+            </IconButton>
+          </DarkTooltip>
+        </div>
       </GlobalHotKeys>
     </Box>
   )

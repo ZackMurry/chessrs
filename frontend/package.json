@@ -21,6 +21,7 @@
     "fetch-ndjson": "^1.1.7",
     "graphql": "^15.5.1",
     "graphql-request": "^3.5.0",
+    "humanize-duration": "^3.33.0",
     "lucide-react": "^0.511.0",
     "radix-ui": "^1.4.2",
     "react": "^18.0.0",
