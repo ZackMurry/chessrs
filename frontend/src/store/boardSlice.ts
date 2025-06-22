@@ -63,7 +63,7 @@ const initialState = {
   fen: STARTING_FEN,
   pgn: '',
   halfMoveCount: 0,
-  startHalfMoveCount: 0,
+  startHalfMoveCount: 1,
   history: [STARTING_FEN], // History of FENs
   selectedPiece: null,
   moveHistory: [],
@@ -227,7 +227,7 @@ export const boardSlice = createSlice({
         pgn: '',
         opening: undefined,
         halfMoveCount: 0,
-        startHalfMoveCount: 0,
+        startHalfMoveCount: 1,
         selectedPiece: null
       }
     },

@@ -1,5 +1,4 @@
 import { Box, IconButton, Link as ChakraLink, Spinner, useToast } from '@chakra-ui/react'
-import { ExternalLinkIcon } from '@chakra-ui/icons'
 import { CirclePlus, Cloud, Eye } from 'lucide-react'
 import ChessJS from 'chess.js'
 import DarkTooltip from './DarkTooltip'
@@ -30,7 +29,9 @@ const AnalysisOverview = () => {
   const toast = useToast()
 
   const viewMoveOnBoard = (uci: string) => {
-    dispatch(makeMove(uci))
+    if (uci) {
+      dispatch(makeMove(uci))
+    }
   }
 
   const showCloudAnalysis = async () => {
@@ -138,7 +139,8 @@ const AnalysisOverview = () => {
             _hover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
             // _focus={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
             _active={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
-            onClick={() => viewMoveOnBoard(analysis.bestMove.uci)}
+            onClick={() => viewMoveOnBoard(analysis?.bestMove?.uci)}
+            disabled={!analysis?.bestMove}
           />
         </DarkTooltip>
         {/* )} */}

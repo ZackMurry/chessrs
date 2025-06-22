@@ -12,7 +12,7 @@ const TimeBasedGreeting: React.FC<Props> = ({ userName }) => {
   }
 
   return (
-    <h1 className='mb-5 text-offwhite text-3xl font-bold'>
+    <h1 className='mb-5 text-offwhite text-xl lg:text-3xl font-bold'>
       {getGreeting()}, {userName}!
     </h1>
   )

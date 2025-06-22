@@ -1,7 +1,7 @@
 import { IconButton } from '@chakra-ui/button'
 import { ChevronLeft, ChevronsLeft, ChevronRight, ChevronsRight, FlipVertical } from 'lucide-react'
-import { Box, Flex, Text } from '@chakra-ui/layout'
-import { FC, useCallback, useEffect, useMemo, useState } from 'react'
+import { Box, Flex } from '@chakra-ui/layout'
+import { FC, useCallback, useEffect, useMemo } from 'react'
 import ChessJS from 'chess.js'
 import { useAppDispatch, useAppSelector } from 'utils/hooks'
 import { flipBoard, traverseBackwards, traverseForwards, traverseToEnd, traverseToStart } from 'store/boardSlice'
@@ -67,11 +67,7 @@ const PositionPanel: FC = () => {
     )
     dispatch(setLocalAnalysisLoading(false))
   }
-  const onReady = () => {
-    console.log('onReady')
-    stockfish.createNewGame()
-    stockfish.analyzePosition(uciMoves, SF_DEPTH, fen, history[0])
-  }
+
   const onEvaluation = useCallback(
     (cp: number, mate: number, bestMove: string, d: number, sfFen: string) => {
       const from = bestMove.substr(0, 2)
@@ -99,7 +95,7 @@ const PositionPanel: FC = () => {
         dispatch(setLocalAnalysisLoading(false))
       }
     },
-    [localEvalMultiplier]
+    [localEvalMultiplier] // eslint-disable-line react-hooks/exhaustive-deps
   )
   stockfish.onAnalysis = onAnalysis
 
@@ -117,7 +113,7 @@ const PositionPanel: FC = () => {
     dispatch(setCloudAnalysisLoading(false))
     dispatch(setLocalAnalysisLoading(true))
     const runStockfish = () => {
-      stockfish.onReady = onReady
+      // stockfish.onReady = onReady
       stockfish.onEvaluation = onEvaluation
       // stockfiish.createNewGame()
       stockfish.analyzePosition(uciMoves, SF_DEPTH, fen, history[0])
@@ -142,26 +138,9 @@ const PositionPanel: FC = () => {
       dispatch(setLocalAnalysisLoading(false))
       return
     }
-    // if (!stockfish.isReady) {
-    //   console.warn('sf not ready!')
-    //   stockfish.onReady = runStockfish
-    //   return
-    // }
     stockfish.onReady = runStockfish
     runStockfish()
-  }, [stockfish, uciMoves, fen, halfMoveCount, dispatch])
-
-  // const browserEngine = !engineEval || engineEval.fen !== fen
-  // const evalScore = browserEngine
-  //   ? halfMoveCount % 2 === 0
-  //     ? evaluation
-  //     : -evaluation
-  //   : engineEval?.eval
-  // const engDepth = browserEngine ? depth : engineEval?.depth
-  // const engine = browserEngine ? 'BROWSER' : engineEval?.provider
-  // const forcedMate = engine === 'BROWSER' ? isForcedMate : engineEval.forcedMate
-
-  // const evalString = forcedMate ? evalScore : evalScore.toFixed(2)
+  }, [uciMoves, fen, halfMoveCount, dispatch]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Flex

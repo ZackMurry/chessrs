@@ -1,4 +1,4 @@
-import { Box, Heading, Text, useToast } from '@chakra-ui/react'
+import { Box, useToast } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useEffect } from 'react'
 import { FC } from 'react'
@@ -51,24 +51,20 @@ const DashboardMoveData: FC = () => {
       p='5%'
       className='text-offwhite'
     >
-      <Heading as='h6' fontSize='2xl'>
-        Welcome to Chessrs!
-      </Heading>
-      <Text fontSize='18px' mt='10px'>
+      <h1 className='font-bold text-xl lg:text-2xl'>Welcome to Chessrs!</h1>
+      <p className='mt-[10px] text-md lg:text-lg'>
         Use the "Create" tab to study positions and add new moves to your repertoire. Then, use the "Study" tab to practice
         your moves according to the Spaced Repetition System (SRS) schedule. You can freely practice your moves randomly
         using the "Practice" tab.
-      </Text>
+      </p>
       <Link to='/repertoire'>
-        <Text fontSize='18px' mt='30px' textDecor='underline'>
-          View your repertoire
-        </Text>
+        <h6 className='mt-[30px] text-lg underline'>View your repertoire</h6>
       </Link>
-      <Text fontSize='18px' mt='10px'>
+      <p className='mt-[10px] text-md lg:text-lg'>
         Your repertoire has {numberOfMoves} move{numberOfMoves !== 1 ? 's' : ''} total and {numberOfDueMoves} due move
         {numberOfDueMoves !== 1 ? 's' : ''}. {allMovesDue ? "You'd better get to work!" : ''}
         {noDueMoves ? 'Well done!' : ''}
-      </Text>
+      </p>
     </Box>
   )
 }

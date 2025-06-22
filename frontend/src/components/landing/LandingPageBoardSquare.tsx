@@ -1,10 +1,8 @@
-import { ChessInstance, Move, PieceType } from 'chess.js'
-import { FC, useEffect, useMemo, useState } from 'react'
-import { useDrop } from 'react-dnd'
-import ChessPiece from './LandingPageChessPiece'
+import { ChessInstance, PieceType } from 'chess.js'
+import { FC, useMemo } from 'react'
 import squareIndexToCoordinates from 'components/board/squareIndexToCoordinates'
-import { useAppDispatch, useAppSelector } from 'utils/hooks'
-import { makeMove, selectPiece, unselectPiece } from 'store/boardSlice'
+import { useAppDispatch } from 'utils/hooks'
+import { unselectPiece } from 'store/boardSlice'
 import LandingPageChessPiece from './LandingPageChessPiece'
 
 interface Props {

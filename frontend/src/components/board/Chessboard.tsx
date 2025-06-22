@@ -9,7 +9,6 @@ interface Props {}
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
 
-// todo indicator to show where the last move was from/to
 // todo: clicking off board should unselect the currently selected piece
 // todo: arrows would be nice
 const Chessboard: FC<Props> = () => {
@@ -18,12 +17,12 @@ const Chessboard: FC<Props> = () => {
     md: 10,
     lg: 8,
     xl: 6,
-    '2xl': 5.2,
+    '2xl': 5.2
   })
   const [chess, setChess] = useState(() => new Chess())
-  const { fen, perspective } = useAppSelector((state) => ({
+  const { fen, perspective } = useAppSelector(state => ({
     fen: state.board.fen,
-    perspective: state.board.perspective,
+    perspective: state.board.perspective
   }))
 
   useEffect(() => {
@@ -36,13 +35,10 @@ const Chessboard: FC<Props> = () => {
       h='100%'
       justifyContent='center'
       alignItems='center'
-      flexDir={perspective === 'black' ? 'column-reverse' : 'column'}
+      flexDir={perspective === 'white' ? 'column' : 'column-reverse'}
     >
       {chess.board().map((row, i) => (
-        <Flex
-          flexDir={perspective === 'white' ? 'row' : 'row-reverse'}
-          key={`board-row-${i}`}
-        >
+        <Flex flexDir={perspective === 'white' ? 'row' : 'row-reverse'} key={`board-row-${i}`}>
           {row.map((square, j) => (
             <BoardSquare
               x={j}

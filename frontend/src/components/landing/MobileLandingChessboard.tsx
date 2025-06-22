@@ -1,9 +1,8 @@
-import { FC, useEffect, useRef, useState } from 'react'
+import { FC, useMemo } from 'react'
 import ChessJS, { Square } from 'chess.js'
 import { Flex } from '@chakra-ui/layout'
 import LandingPageBoardSquare from './LandingPageBoardSquare'
 import { STARTING_FEN } from 'store/boardSlice'
-import { motion, useAnimation } from 'framer-motion'
 import { useBreakpointValue } from '@chakra-ui/react'
 
 const Chess = typeof ChessJS === 'function' ? ChessJS : ChessJS.Chess
@@ -156,96 +155,52 @@ const demoEvals = [
   }
 ] as DemoEval[]
 
-const LandingPageChessboard: FC = () => {
+interface Props {
+  section: number
+}
+
+const MobileLandingChessboard: FC<Props> = ({ section }) => {
   const squareLength = useBreakpointValue({
-    base: 5,
-    md: 4,
-    lg: 4,
-    xl: 3
+    base: 10,
+    lg: 8,
+    xl: 6,
+    '2xl': 5.2
   })
-  const [chess, setChess] = useState(() => new Chess())
-  const [lastMove, setLastMove] = useState('')
-  const [engineEval, setEngineEval] = useState<DemoEval>(demoEvals[0])
-  const analysisState = useRef<'hidden' | 'visible'>('hidden')
-  const openingState = useRef<'hidden' | 'visible'>('hidden')
-  // const squareLength = 3
-  const analysisControls = useAnimation()
-  const openingControls = useAnimation()
+  // const [chess, setChess] = useState(() => new Chess())
 
-  useEffect(() => {
-    setChess(new Chess(STARTING_FEN))
-    const handleScroll = () => {
-      let moveCount = Math.floor((window.scrollY - 1000) / 210)
-      const shouldAnalysisBeVisible = window.scrollY > 1950
-      const shouldOpeningBeVisible = window.scrollY > 2900
-      if (shouldAnalysisBeVisible && analysisState.current !== 'visible') {
-        analysisControls.start({
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.6, ease: 'easeOut' }
-        })
-        analysisState.current = 'visible'
-      } else if (!shouldAnalysisBeVisible && analysisState.current !== 'hidden') {
-        analysisControls.start({
-          opacity: 0,
-          y: -50,
-          transition: { duration: 0.4, ease: 'easeIn' }
-        })
-        analysisState.current = 'hidden'
-      }
-      if (shouldOpeningBeVisible && openingState.current !== 'visible') {
-        openingControls.start({
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.6, ease: 'easeOut' }
-        })
-        openingState.current = 'visible'
-      } else if (!shouldOpeningBeVisible && openingState.current !== 'hidden') {
-        openingControls.start({
-          opacity: 0,
-          y: 50,
-          transition: { duration: 0.4, ease: 'easeIn' }
-        })
-        openingState.current = 'hidden'
-      }
-      const pos = new Chess(STARTING_FEN)
-      if (moveCount < 0) {
-        setChess(pos)
-        setEngineEval(demoEvals[0])
-        setLastMove('')
-        return
-      }
-      let moveIdx = 0
-      while (moveCount >= 0) {
-        const move = moves[moveIdx++]
-        if (!move) {
-          moveIdx--
-          break
-        }
-        pos.move({
-          from: move.substring(0, 2) as Square,
-          to: move.substring(2, 4) as Square
-        })
-        moveCount--
-      }
-      setLastMove(moves[moveIdx - 1])
-      setEngineEval(demoEvals[moveIdx])
-      setChess(pos)
-      console.warn(pos.fen())
+  const moveIndices = [0, 5, 10, 15]
+  const moveIdx = moveIndices[section] ?? 15
+  console.log('moveIdx', moveIdx)
+  const lastMove = moves[moveIdx]
+  const engineEval = demoEvals[moveIdx + 1]
+  const chess = useMemo(() => {
+    const pos = new Chess(STARTING_FEN)
+    if (moveIdx < 0) {
+      return pos
     }
-
-    window.addEventListener('scroll', handleScroll)
-
-    // Clean up listener on unmount
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    let moveIx = 0
+    let moveCount = moveIdx
+    while (moveCount >= 0) {
+      const move = moves[moveIx++]
+      if (!move) {
+        break
+      }
+      pos.move({
+        from: move.substring(0, 2) as Square,
+        to: move.substring(2, 4) as Square
+      })
+      moveCount--
+    }
+    return pos
+  }, [moveIdx])
+  // const squareLength = 3
 
   return (
-    <Flex w='100%' h='100%' justifyContent='center' alignItems='end' flexDir={'column'}>
-      <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={analysisControls}
-        className='w-full p-4 bg-surface border-[2px] border-solid border-surfaceBorder rounded-[3px] max-w-[300px] absolute top-20 -right-[200px] z-10'
+    <Flex justifyContent='center' alignItems='center' flexDir={'column'}>
+      <div
+        className={`p-4 pr-8 bg-surface border-[2px] border-solid border-surfaceBorder rounded-[3px] max-w-[300px] relative -mt-10 top-16 -right-[80px] z-10 ${
+          section > 0 ? 'visible' : 'hidden'
+        }`}
       >
         <h3 className='text-xl font-bold text-offwhite mb-1'>Analysis</h3>
         <h6 className='text-md text-offwhite mb-1'>Evaluation: {engineEval.eval}</h6>
@@ -265,7 +220,7 @@ const LandingPageChessboard: FC = () => {
             <img src='lichess-logo-inverted.png' width={18} height={18} className='ml-2' alt='Lichess logo' />
           </div>
         </h6>
-      </motion.div>
+      </div>
       {chess.board().map((row, i) => (
         <Flex flexDir={'row'} key={`board-row-${i}`}>
           {row.map((square, j) => (
@@ -282,21 +237,21 @@ const LandingPageChessboard: FC = () => {
           ))}
         </Flex>
       ))}
-      <Flex className='justify-center items-center w-full pl-[150px] mt-10'>
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={openingControls}
-          className='p-4 bg-surface border-[2px] border-solid border-surfaceBorder rounded-[3px] w-full'
+      <Flex className='justify-center items-center w-full mt-10'>
+        <div
+          className={`p-4 bg-surface border-[2px] border-solid border-surfaceBorder rounded-[3px] w-full ${
+            section > 1 ? 'visible' : 'hidden'
+          }`}
         >
           <h3 className='text-xl font-bold text-offwhite mb-1'>{engineEval.name}</h3>
           <h5 className='text-offwhite'>
             <span className='font-bold'>Common moves: </span>
             {engineEval.moves && engineEval.moves.join(', ')}
           </h5>
-        </motion.div>
+        </div>
       </Flex>
     </Flex>
   )
 }
 
-export default LandingPageChessboard
+export default MobileLandingChessboard
