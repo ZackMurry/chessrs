@@ -83,7 +83,7 @@ class SecurityConfiguration(
         val source = UrlBasedCorsConfigurationSource()
         val config = CorsConfiguration().applyPermitDefaultValues()
 //        config.allowCredentials = true
-        config.allowedOrigins = listOf("http://localhost")
+        config.allowedOrigins = listOf("http://localhost", "https://chessrs.zackmurry.com")
 
         source.registerCorsConfiguration("/**", config)
         return source
