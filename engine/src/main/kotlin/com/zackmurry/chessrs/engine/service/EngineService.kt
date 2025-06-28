@@ -1,5 +1,6 @@
 package com.zackmurry.chessrs.engine.service
 
+import com.zackmurry.chessrs.engine.config.EngineProperties
 import com.zackmurry.chessrs.engine.model.AnalysisResponse
 import org.apache.coyote.BadRequestException
 import org.slf4j.LoggerFactory
@@ -8,7 +9,9 @@ import org.springframework.stereotype.Service
 private val logger = LoggerFactory.getLogger(EngineService::class.java)
 
 @Service
-class EngineService {
+class EngineService(
+    private val engineProperties: EngineProperties
+) {
 
     fun analyzeFen(fen: String, depth: Int): AnalysisResponse {
         if (depth <= 0 || depth > 35) {
@@ -19,7 +22,7 @@ class EngineService {
             throw BadRequestException("Bad FEN")
         }
         // : Run Stockfish and get best move
-        val stockfish = ProcessBuilder("stockfish").start()
+        val stockfish = ProcessBuilder(engineProperties.stockfishPath).start()
         val writer = stockfish.outputStream.bufferedWriter()
         var bestMove = "none"
         val reader = stockfish.inputStream.bufferedReader()

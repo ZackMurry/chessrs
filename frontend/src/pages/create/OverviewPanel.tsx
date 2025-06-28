@@ -255,7 +255,7 @@ const OverviewPanel: FC = () => {
           disabled={Boolean(previousMove) || !Boolean(lastMove)}
           loading={isAddLoading}
           color='gray'
-          className='!w-full !text-black !bg-gray-200 border-none hover:!bg-gray-100 disabled:!bg-gray-500 !py-[1.1rem]'
+          className='!w-full !text-black !bg-gray-300 border-none hover:!bg-gray-200 disabled:!bg-gray-500 !py-[1.1rem]'
           onClick={onAddMove}
         >
           Add {lastMove?.san || 'Move'}
@@ -307,8 +307,8 @@ const OverviewPanel: FC = () => {
               borderRadius='5px'
               onClick={onDeleteMove}
               isLoading={isDeleteLoading}
-              className='text-black'
               disabled={!currentMove?.san}
+              className='!text-black !bg-gray-300 border-none hover:!bg-gray-200 disabled:!bg-gray-500'
             >
               <Trash2 />
             </IconButton>

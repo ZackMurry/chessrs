@@ -166,7 +166,7 @@ const PositionPanel: FC = () => {
                   aria-label='Start'
                   onClick={() => dispatch(traverseToStart())}
                   disabled={halfMoveCount <= 0}
-                  className='text-black'
+                  className='!text-black !bg-gray-300 border-none hover:!bg-gray-200 disabled:!bg-gray-500'
                 />
               </DarkTooltip>
               <DarkTooltip label='Back (←)'>
@@ -176,7 +176,7 @@ const PositionPanel: FC = () => {
                   onClick={() => dispatch(traverseBackwards())}
                   disabled={halfMoveCount <= 0}
                   fontSize='4xl'
-                  className='text-black'
+                  className='!text-black !bg-gray-300 border-none hover:!bg-gray-200 disabled:!bg-gray-500'
                 />
               </DarkTooltip>
               <DarkTooltip label='Forward (→)'>
@@ -186,7 +186,7 @@ const PositionPanel: FC = () => {
                   onClick={() => dispatch(traverseForwards())}
                   disabled={halfMoveCount >= moveHistory.length}
                   fontSize='4xl'
-                  className='text-black'
+                  className='!text-black !bg-gray-300 border-none hover:!bg-gray-200 disabled:!bg-gray-500'
                 />
               </DarkTooltip>
               <DarkTooltip label='End (e)'>
@@ -195,7 +195,7 @@ const PositionPanel: FC = () => {
                   aria-label='End'
                   onClick={() => dispatch(traverseToEnd())}
                   disabled={halfMoveCount >= moveHistory.length}
-                  className='text-black'
+                  className='!text-black !bg-gray-300 border-none hover:!bg-gray-100 disabled:!bg-gray-500'
                 />
               </DarkTooltip>
             </Box>
@@ -205,7 +205,7 @@ const PositionPanel: FC = () => {
               icon={<FlipVertical />}
               aria-label='Flip board'
               onClick={() => dispatch(flipBoard())}
-              className='text-black'
+              className='!text-black !bg-gray-300 border-none hover:!bg-gray-200 disabled:!bg-gray-500'
             />
           </DarkTooltip>
         </Flex>

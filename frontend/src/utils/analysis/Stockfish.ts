@@ -26,14 +26,17 @@ export default class Stockfish {
   counter = 0
   interval: NodeJS.Timeout
   public isReady = false
-  depth = SF_DEPTH
+  targetDepth = SF_DEPTH
   lastDepth = 0
   fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
   started = false
   running = false
+  restarted = false
   public onAnalysis: (bestMove: string, sfFen) => void
   public onReady: () => void
   public onEvaluation: (cp: number, mate: number, bestMove: string, depth: number, sfFen: string) => void
+  moves: string = ''
+  startpos: string | null = null
 
   constructor() {
     // public onEvaluation: (cp: number, mate: number, bestMove: string, depth: number, sfFen: string) => void // public onReady: () => void, // public onAnalysis: (bestMove: string, sfFen) => void,
@@ -47,10 +50,11 @@ export default class Stockfish {
         return
       }
       const msg = data as string
-      if (this.running) {
+      if (this.running || true) {
         console.log(msg)
       }
       if (msg.startsWith('info')) {
+        this.restarted = false
         if (!this.running) return
         const hasBound = msg.includes('bound')
         if (hasBound) return
@@ -58,6 +62,7 @@ export default class Stockfish {
           msg.substring('info '.length),
           18 + (hasBound ? 1 : 0)
         ) as InfoObject
+        console.warn('lastDepth', this.lastDepth, 'depth', depth)
         if (this.onEvaluation && this.lastDepth + 1 === depth) {
           // console.warn(
           //   `calling onEvaluation(${cp}, ${mate}, ${pv}, ${depth}, ${this.fen})`,
@@ -71,10 +76,27 @@ export default class Stockfish {
           console.warn('!onAnalysis')
           return
         }
+        if (this.lastDepth < this.targetDepth) {
+          if (this.restarted) return
+          console.warn('GOING AGAIN')
+          this.restarted = true
+          this.lastDepth = 0
+          this.stop()
+          this.createNewGame()
+          if (this.startpos) {
+            this.worker.postMessage(`position fen ${this.startpos} moves ${this.moves}`)
+          } else {
+            this.worker.postMessage(`position startpos moves ${this.moves}`)
+          }
+          this.running = true
+          this.worker.postMessage(`go depth 22`)
+          return
+        }
         // console.log(msg)
-        const bestMove = msg.substring('bestmove '.length).substr(0, 4)
+        const bestMove = msg.substring('bestmove '.length).substring(0, 4)
         console.error('onAnalysis!')
         this.onAnalysis(bestMove, this.fen)
+        this.stop()
         // console.warn('creating new game')
         this.createNewGame()
         // console.warn('asking isready')
@@ -101,6 +123,7 @@ export default class Stockfish {
 
   analyzePosition(moves: string, depth: number, fen: string, startpos: string | null): void {
     // Depth > 20 takes too long to finish, so moves aren't analyzed immediately. Lichess also caps at 22
+    console.warn('DEPTH', depth)
     if (depth > SF_DEPTH) {
       return
     }
@@ -120,7 +143,10 @@ export default class Stockfish {
     // this.counter++
     // console.error('ANALYZING POSITION')
     this.lastDepth = 0
-    this.depth = depth
+    this.restarted = false
+    this.targetDepth = depth
+    this.startpos = startpos
+    this.moves = moves
     console.log(`analyzing ${moves} at depth ${depth} at startpos ${startpos}`)
     if (startpos) {
       this.worker.postMessage(`position fen ${startpos} moves ${moves}`)
@@ -128,8 +154,8 @@ export default class Stockfish {
       this.worker.postMessage(`position startpos moves ${moves}`)
     }
     console.warn('starting stockfish!!!')
-    this.worker.postMessage(`go depth ${depth}`)
     this.running = true
+    this.worker.postMessage(`go depth ${depth}`)
   }
 
   stop(): void {
@@ -140,6 +166,7 @@ export default class Stockfish {
   }
 
   quit(): void {
+    console.error('QUITTING')
     this.worker.postMessage('quit')
   }
 

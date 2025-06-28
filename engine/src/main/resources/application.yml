@@ -13,4 +13,7 @@ management:
   endpoint:
     health:
       show-details: always
+app:
+  engine:
+    stockfish-path: /usr/games/stockfish
 

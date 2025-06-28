@@ -21,6 +21,7 @@ const ImportGameFromLichess: FC = () => {
   const [gameIdx, setGameIdx] = useState(0)
   const [mode, setMode] = useState<'games' | 'studies'>('games')
   const dispatch = useAppDispatch()
+  const lichessUsername = isDemo ? 'ZackHkk' : username
 
   // is this running before the user even clicks the button?
   useEffect(() => {
@@ -29,7 +30,6 @@ const ImportGameFromLichess: FC = () => {
         return
       }
       startLoading()
-      const lichessUsername = isDemo ? 'ZackHkk' : username
       const response = await fetch(
         `https://lichess.org/api/games/user/${lichessUsername}?max=${GAMES_LOADED_PER_FETCH}&pgnInJson=true&tags=false&opening=true&perfType=ultraBullet,bullet,blitz,rapid,classical,correspondence`,
         {
@@ -57,12 +57,12 @@ const ImportGameFromLichess: FC = () => {
   const onExit = () => dispatch(resetBoard())
 
   const onLoadMore = async () => {
-    if (!username || games.length === 0) {
+    if (!lichessUsername || games.length === 0) {
       return
     }
     startLoading()
     const response = await fetch(
-      `https://lichess.org/api/games/user/${username}?max=${GAMES_LOADED_PER_FETCH}&pgnInJson=true&tags=false&opening=true&perfType=ultraBullet,bullet,blitz,rapid,classical,correspondence&until=${
+      `https://lichess.org/api/games/user/${lichessUsername}?max=${GAMES_LOADED_PER_FETCH}&pgnInJson=true&tags=false&opening=true&perfType=ultraBullet,bullet,blitz,rapid,classical,correspondence&until=${
         games[games.length - 1].createdAt
       }`,
       {
@@ -102,7 +102,7 @@ const ImportGameFromLichess: FC = () => {
     if (!g) return
     importGame(
       g.moves,
-      g.players.black.user.name !== username,
+      g.players.black.user.name !== lichessUsername,
       g.opening ? { name: g.opening.name, eco: g.opening.eco } : null
     )
   }
@@ -115,7 +115,7 @@ const ImportGameFromLichess: FC = () => {
     }
     importGame(
       firstGame.moves,
-      firstGame.players.black.user.name !== username,
+      firstGame.players.black.user.name !== lichessUsername,
       firstGame.opening ? { name: firstGame.opening.name, eco: firstGame.opening.eco } : null
     )
     showDescription()
@@ -185,7 +185,7 @@ const ImportGameFromLichess: FC = () => {
 
   const game = games[gameIdx]
   const gameTime = new Date(game.lastMoveAt)
-  const isWhite = game.players.black.user.name !== username
+  const isWhite = game.players.black.user.name !== lichessUsername
   const opponent = game.players[isWhite ? 'black' : 'white']
 
   // todo: arrows for next/previous
